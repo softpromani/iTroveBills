@@ -18,6 +18,10 @@ class Company extends Model
     public function Invoices(){
         return $this->hasMany(Invoice::class,'company_id','id');
     }
+    public function CompanyStatus()
+    {
+        return $this->belongsTo(Status::class,'status');
+    }
 
     public function ThisYearInvoice(){
         return $this->Invoices()->whereBetween('invoice_date', [Carbon::parse(Carbon::now()->year.'-04-01'),Carbon::parse(Carbon::now()->addYear()->year.'-03-31')]);

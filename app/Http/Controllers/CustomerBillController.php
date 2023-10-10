@@ -97,4 +97,23 @@ class CustomerBillController extends Controller
             return back();
         }
     }
+
+    public function invoice_list()
+    {
+        $invoices = auth()->user()->invoices;
+        $invoices->load('paymentStatus');
+        $invoices->load('Customer');
+        $invoices->load('Company');
+        return inertia('invoices/invoice_list', compact('invoices'));
+    }
+
+
+    public function template(Request $request){
+        $inv_id = $request->invoice_id;
+        $invoice = Invoice::find($inv_id);
+        $invoice->load('invoiceitems');
+        $invoice->load('Customer');
+        $invoice->load('Company');
+        return inertia('invoices/InvoiceTemplate',compact('invoice'));
+    }
 }

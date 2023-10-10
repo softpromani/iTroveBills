@@ -59,6 +59,8 @@ Route::middleware('auth')->group(function () {
     Route::get('customer-bill',[CustomerBillController::class,'index'])->name('customer.bill');
     Route::get('customer-detail-bill',[CustomerBillController::class,'index_details'])->name('customer.detail.bill');
     Route::post('customer-store-bill',[CustomerBillController::class,'store'])->name('customer.store.bill');
+    Route::get('invoice-list',[CustomerBillController::class,'invoice_list'])->name('invoice.list');
+    Route::get('view-invoice',[CustomerBillController::class,'template'])->name('view.invoice');
 });
 
 require __DIR__.'/auth.php';

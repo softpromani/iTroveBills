@@ -14,10 +14,10 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable,HasRoles,SoftDeletes;
-    public static $role_admin='Admin';
-    public static $role_customer='Customer';
-    public static $role_seller='Seller';
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes;
+    public static $role_admin = 'Admin';
+    public static $role_customer = 'Customer';
+    public static $role_seller = 'Seller';
 
     /**
      * The attributes that are mass assignable.
@@ -52,10 +52,23 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-    public function activeSubscription(){
-        return $this->hasMany(SellerSubscription::class,'seller_id','id')->whereNotNull('end_date')->whereDate('end_date','>=',Carbon::now());
+    public function activeSubscription()
+    {
+        return $this->hasMany(SellerSubscription::class, 'seller_id', 'id')->whereNotNull('end_date')->whereDate('end_date', '>=', Carbon::now());
     }
-    public function subscriptions(){
-        return $this->hasMany(SellerSubscription::class,'seller_id','id');
+    public function subscriptions()
+    {
+        return $this->hasMany(SellerSubscription::class, 'seller_id', 'id');
     }
+
+    public function companies()
+    {
+        return $this->hasMany(Company::class, 'seller_id', 'id');
+    }
+
+    public function invoices()
+    {
+        return $this->hasManyThrough(Invoice::class, Company::class, 'seller_id', 'id', 'id', 'id');
+    }
+
 }

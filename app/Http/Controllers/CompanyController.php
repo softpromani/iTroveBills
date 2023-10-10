@@ -20,6 +20,7 @@ class CompanyController extends Controller
     public function view_company()
     {
         $company_details = Company::where('seller_id',Auth::id())->paginate(2);
+        $company_details->load('CompanyStatus');
         return Inertia::render('company/view', compact('company_details'));
     }
     public function store_company(Request $request)

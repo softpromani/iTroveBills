@@ -198,6 +198,55 @@
                     </ul>
                 </div>
             </transition>
+            <a
+                class="flex items-center px-6 py-2 mt-4 text-gray-100 no-underline dropdown-toggle"
+                href="#"
+                @click="showingInvoices = !showingInvoices"
+            >
+                <svg
+                    class="w-6 h-6"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z"
+                    ></path>
+                </svg>
+                <span class="mx-3">Invoices</span>
+            </a>
+            <transition
+                enter-to-class="transition-all duration-300 ease-in-out"
+                enter-from-class="opacity-25 max-h-0"
+                leave-from-class="opacity-100 max-h-xl"
+                leave-to-class="opacity-0 max-h-0"
+            >
+                <div v-show="showingInvoices">
+                    <ul
+                        class="p-2 mx-4 mt-2 space-y-2 overflow-hidden text-sm font-medium text-white bg-gray-700 bg-opacity-50 rounded-md shadow-inner"
+                        aria-label="submenu"
+                    >
+                        <li class="px-2 py-1 transition-colors duration-150">
+                            <Link
+                                class="text-white no-underline first-letter:w-full"
+                                
+                                >Create Invoice</Link
+                            >
+                        </li>
+                        <li class="px-2 py-1 transition-colors duration-150">
+                            <Link
+                                class="text-white no-underline first-letter:w-full"
+                                :href="route('invoice.list')"
+                                >View Invoice List</Link
+                            >
+                        </li>
+                    </ul>
+                </div>
+            </transition>
         </nav>
         <nav v-else class="mt-10" x-data="{ isMultiLevelMenuOpen: false }">
             <nav-link
@@ -421,14 +470,16 @@ export default {
         let showingTwoLevelMenu = ref(false);
         let showingTwoLevelMenu2 = ref(false);
         let showingCustomerMenu = ref(false);
+        let showingInvoices = ref(false);
 
         return {
             showingTwoLevelMenu,
             showingTwoLevelMenu2,
             showingCustomerMenu,
+            showingInvoices,
         };
     },
-    
+
 };
 </script>
 

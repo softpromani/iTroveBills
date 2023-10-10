@@ -249,9 +249,10 @@
                         <td
                             class="border-b border-gray-200 bg-white px-5 py-5 text-sm"
                         >
-                            <p class="text-gray-900 whitespace-no-wrap">
-                                {{ company.status }}
-                            </p>
+                            <span
+                                class="bg-green-500 text-green-800 text-xs font-medium mr-2 px-3 py-1 rounded-full dark:bg-blue-900 dark:text-blue-300"
+                                >{{ company.company_status.status }}</span
+                            >
                         </td>
                         <td
                             class="border-b border-gray-200 bg-white px-5 py-5 text-sm"
@@ -273,7 +274,8 @@
                                             :data="{ id: company.id }"
                                             class="dropdown-item"
                                             ><i
-                                                class="fa-solid fa-pen-to-square" style="color:blueviolet"
+                                                class="fa-solid fa-pen-to-square"
+                                                style="color: blueviolet"
                                             ></i>
                                             Edit</Link
                                         >
@@ -285,7 +287,10 @@
                                             @click="
                                                 confirmUserDeletion(company.id)
                                             "
-                                            ><i class="fa-solid fa-trash" style="color:rgb(187, 25, 25)"></i>
+                                            ><i
+                                                class="fa-solid fa-trash"
+                                                style="color: rgb(187, 25, 25)"
+                                            ></i>
                                             Delete</a
                                         >
                                     </li>
@@ -294,7 +299,10 @@
                                             class="dropdown-item"
                                             style="cursor: pointer"
                                             @click="addCompanyLUT(company.id)"
-                                            ><i class="fa-solid fa-list" style="color:blueviolet"></i>
+                                            ><i
+                                                class="fa-solid fa-list"
+                                                style="color: blueviolet"
+                                            ></i>
                                             LUT</a
                                         >
                                     </li>
@@ -381,8 +389,8 @@
                 </form>
             </div>
         </Modal>
-        <Modal :show="confirmingCompanyDeletion" @close="closeModal" >
-            <div class="p-6" >
+        <Modal :show="confirmingCompanyDeletion" @close="closeModal">
+            <div class="p-6">
                 <h2 class="text-lg font-medium text-gray-900">
                     Are you sure you want to delete your Company?
                 </h2>
