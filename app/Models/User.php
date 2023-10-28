@@ -68,7 +68,7 @@ class User extends Authenticatable
 
     public function invoices()
     {
-        return $this->hasManyThrough(Invoice::class, Company::class, 'seller_id', 'id', 'id', 'id');
+        return $this->hasManyThrough(Invoice::class, Company::class, 'seller_id', 'company_id', 'id', 'id');
     }
 
 }
