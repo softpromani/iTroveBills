@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('seller_customers', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('seller_id');
-            $table->unsignedBigInteger('customer_id');
-            $table->string('customer_data');
+            $table->unsignedBigInteger('customer_company_id');
+            $table->string('customer_company_data');
             $table->softDeletes();
             $table->timestamps();
         });

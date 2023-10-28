@@ -37,8 +37,6 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'mobile' => 'required',
-            'gst' => 'required',
-            'tax_type'=>'required',
             'email' => 'required|string|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
@@ -47,8 +45,6 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'mobile' => $request->mobile,
-            'gst' => $request->gst,
-            'inv_tax_type' => $request->tax_type,
             'password' => Hash::make($request->password),
         ]);
         $user->assignRole('Customer');

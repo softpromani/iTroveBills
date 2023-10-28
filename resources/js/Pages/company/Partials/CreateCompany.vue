@@ -10,51 +10,48 @@ const props = defineProps({
     editdata: Object,
 });
 const form = useForm({
-    company_name: props.editdata.company_name??'',
-    email: props.editdata.email??'',
-    mobile: props.editdata.mobile??'',
-    logo:  props.editdata.logo??'',
-    sign: props.editdata.sign??'',
-    address: props.editdata.address??'',
-    city: props.editdata.city??'',
-    pin: props.editdata.pin??'',
-    gstin: props.editdata.gstin??'',
-    iec: props.editdata.iec??'',
-    invoice_series: props.editdata.invoice_series??'',
-    bank_name: props.editdata.bank_name??'',
-    bank_branch: props.editdata.bank_branch??'',
-    bank_ifsc: props.editdata.bank_ifsc??'',
-    bank_account_no: props.editdata.bank_account_no??'',
-    adcode: props.editdata.ad_code??'',
+    company_name: props.editdata.company_name ?? "",
+    email: props.editdata.email ?? "",
+    mobile: props.editdata.mobile ?? "",
+    logo: props.editdata.logo ?? "",
+    sign: props.editdata.sign ?? "",
+    address: props.editdata.address ?? "",
+    city: props.editdata.city ?? "",
+    pin: props.editdata.pin ?? "",
+    gstin: props.editdata.gstin ?? "",
+    iec: props.editdata.iec ?? "",
+    invoice_series: props.editdata.invoice_series ?? "",
+    bank_name: props.editdata.bank_name ?? "",
+    bank_branch: props.editdata.bank_branch ?? "",
+    bank_ifsc: props.editdata.bank_ifsc ?? "",
+    bank_account_no: props.editdata.bank_account_no ?? "",
+    adcode: props.editdata.ad_code ?? "",
 });
 function submit() {
-    if(props.editdata){
-        form.post(route("company.update",props.editdata.id), {
+    if (props.editdata) {
+        form.post(route("company.update", props.editdata.id), {
             preserveScroll: true,
             onSuccess: () => form.reset(),
         });
-    }else{
+    } else {
         form.post(route("company.store"), {
             preserveScroll: true,
             onSuccess: () => form.reset(),
         });
     }
 }
-
 </script>
 
 <template>
     <section class="container">
         <header>
-            <h2 class="text-lg font-medium text-gray-900">
-                Company Information
-            </h2>
+            <h2 class="text-lg font-medium text-gray-900">Firm Information</h2>
         </header>
 
         <form @submit.prevent="submit" class="mt-6 space-y-6">
             <div class="row">
                 <div class="mt-2 col-md-6">
-                    <InputLabel for="company_name" value="Company Name" />
+                    <InputLabel for="company_name" value="Firm Name" />
 
                     <TextInput
                         id="company_name"
@@ -273,7 +270,13 @@ function submit() {
                         @input="form.logo = $event.target.files[0]"
                     />
                     <InputError class="mt-2" :message="form.errors.logo" />
-                    <img v-if="props.editdata" :src="form.logo" alt="" sizes="" srcset="">
+                    <img
+                        v-if="props.editdata"
+                        :src="form.logo"
+                        alt=""
+                        sizes=""
+                        srcset=""
+                    />
                 </div>
                 <div class="mt-3 col-md-6">
                     <InputLabel for="sign" value="Signature" />
@@ -291,11 +294,19 @@ function submit() {
                     >
                         {{ form.progress.percentage }}%
                     </progress>
-                    <img v-if="props.editdata" :src="form.sign" alt="" sizes="" srcset="">
+                    <img
+                        v-if="props.editdata"
+                        :src="form.sign"
+                        alt=""
+                        sizes=""
+                        srcset=""
+                    />
                 </div>
             </div>
             <div class="flex items-center gap-4">
-                <PrimaryButton :disabled="form.processing">Save</PrimaryButton>
+                <PrimaryButton :disabled="form.processing">{{
+                    props.editdata.company_name ? "Update" : "Save"
+                }}</PrimaryButton>
 
                 <Transition
                     enter-active-class="transition ease-in-out"

@@ -76,7 +76,7 @@
                                         class="form-check-input"
                                         type="radio"
                                         name="inv_tax_type"
-                                        :value="item.id"
+                                        :value="item.status"
                                         v-model="form.tax_type"
                                         :id="`inlineRadio`+item.id"
                                     />

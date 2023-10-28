@@ -119,7 +119,7 @@
                         d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z"
                     ></path>
                 </svg>
-                <span class="mx-3">Companies</span>
+                <span class="mx-3">Firm</span>
             </a>
             <transition
                 enter-to-class="transition-all duration-300 ease-in-out"
@@ -136,14 +136,14 @@
                             <Link
                                 class="text-white no-underline first-letter:w-full"
                                 :href="route('company.index')"
-                                >Create Company</Link
+                                >Create Firm</Link
                             >
                         </li>
                         <li class="px-2 py-1 transition-colors duration-150">
                             <Link
                                 class="text-white no-underline first-letter:w-full"
                                 :href="route('company.view')"
-                                >View Company</Link
+                                >View Firm</Link
                             >
                         </li>
                     </ul>
@@ -233,7 +233,7 @@
                         <li class="px-2 py-1 transition-colors duration-150">
                             <Link
                                 class="text-white no-underline first-letter:w-full"
-                                
+
                                 >Create Invoice</Link
                             >
                         </li>

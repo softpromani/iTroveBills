@@ -28,23 +28,8 @@
                         :disabled="form.processing"
                         class="h-12 col-md-2"
                     >
-                        Save</PrimaryButton
+                        Search</PrimaryButton
                     >
-                    <div class="flex items-center">
-                        <Transition
-                            enter-active-class="transition ease-in-out"
-                            enter-from-class="opacity-0"
-                            leave-active-class="transition ease-in-out"
-                            leave-to-class="opacity-0"
-                        >
-                            <p
-                                v-if="form.recentlySuccessful"
-                                class="text-sm text-gray-600"
-                            >
-                                Saved.
-                            </p>
-                        </Transition>
-                    </div>
                 </div>
             </div>
         </form>

@@ -15,6 +15,6 @@ class SellerCustomers extends Model
     Protected $guarded = [];
 
     public function getCustomerDetailAttribute(){
-        return json_decode($this->customer_data,true);
+        return json_decode($this->customer_company_data,true);
     }
 }

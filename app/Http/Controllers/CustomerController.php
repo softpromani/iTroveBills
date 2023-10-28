@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
 use App\Models\SellerCustomers;
 use App\Models\Status;
 use App\Models\User;
@@ -21,7 +22,7 @@ class CustomerController extends Controller
 
     public function search_seller_customer($data)
     {
-        $searchdata = User::where('gst', $data)->first();
+        $searchdata = Company::where('gstin', $data)->first();
         $inv_tax_type = Status::where('for_module', 'inv_tex_type')->get();
         return Inertia::render('Customers/index', compact('inv_tax_type', 'searchdata'));
     }
@@ -39,23 +40,23 @@ class CustomerController extends Controller
         ]);
         if ($valid) {
             $seller_id = Auth::id();
-            $customer_id = User::firstOrCreate(['gst' => $request->gst], [
-                'name' => $request->name,
+            $customer_company_id = Company::firstOrCreate(['gstin' => $request->gst], [
+                'company_name' => $request->name,
                 'email' => $request->email,
                 'mobile' => $request->mobile,
-                'gst' => $request->gst,
+                'gstin' => $request->gst,
                 'address' => $request->address,
                 'pin' => $request->pin,
-                'inv_tax_type' => $request->tax_type,
-                'password' => Hash::make('password'),
+                'status' => Status::moduleStatusId('Company','registerd'),
+                'tax_type' => $request->tax_type,
             ])->id;
 
             // Find or create a SellerCustomers record based on seller_id and customer_id
             $seller_customer = SellerCustomers::firstOrCreate([
                 'seller_id' => $seller_id,
-                'customer_id' => $customer_id,
+                'customer_company_id' => $customer_company_id,
             ], [
-                'customer_data' => json_encode($request->all()), // Convert the array to JSON
+                'customer_company_data' => json_encode($request->all()), // Convert the array to JSON
             ]);
 
 

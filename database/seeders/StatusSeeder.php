@@ -18,6 +18,7 @@ class StatusSeeder extends Seeder
             ['status' => 'inactive', 'for_module' => 'Customer', 'icon' => '#2323232', 'text_color' => 'red','created_at'=>now(),'updated_at'=>now()],
             ['status' => 'active', 'for_module' => 'Company', 'icon' => '#2323232', 'text_color' => 'green','created_at'=>now(),'updated_at'=>now()],
             ['status' => 'inactive', 'for_module' => 'Company', 'icon' => '#2323232', 'text_color' => 'red','created_at'=>now(),'updated_at'=>now()],
+            ['status' => 'registerd', 'for_module' => 'Company', 'icon' => '#2323232', 'text_color' => 'red','created_at'=>now(),'updated_at'=>now()],
             ['status' => 'active', 'for_module' => 'Seller', 'icon' => '#2323232', 'text_color' => 'green','created_at'=>now(),'updated_at'=>now()],
             ['status' => 'inactive', 'for_module' => 'Seller', 'icon' => '#2323232', 'text_color' => 'yellow','created_at'=>now(),'updated_at'=>now()],
             ['status' => 'block', 'for_module' => 'Seller', 'icon' => '#2323232', 'text_color' => 'red','created_at'=>now(),'updated_at'=>now()],

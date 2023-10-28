@@ -21,10 +21,10 @@ return new class extends Migration
             $table->double('total_weight',10,2)->default(0.00);
             $table->string('vehicle_no');
             $table->bigInteger('no_packets')->nullable();
-            $table->unsignedBigInteger('customer_id');
+            $table->unsignedBigInteger('customer_company_id')->comment('link with the company table on basis of seller, customer_company');
             $table->unsignedBigInteger('company_id');
             $table->longText('bill_data')->nullable();
-            $table->foreign('customer_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('customer_company_id')->references('id')->on('companies')->onDelete('cascade');
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             $table->timestamps();
         });

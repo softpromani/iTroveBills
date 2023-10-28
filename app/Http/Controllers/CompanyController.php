@@ -19,7 +19,7 @@ class CompanyController extends Controller
     }
     public function view_company()
     {
-        $company_details = Company::where('seller_id',Auth::id())->paginate(2);
+        $company_details = Company::where('seller_id',Auth::id())->paginate(10);
         $company_details->load('CompanyStatus');
         return Inertia::render('company/view', compact('company_details'));
     }
@@ -29,7 +29,7 @@ class CompanyController extends Controller
         $valid = $request->validate([
             'company_name' => 'required|string|max:255',
             'email' => 'email|required|unique:companies,email',
-            'mobile' => 'required', // Example mobile validation rules
+            'mobile' => 'required',
             'address' => 'required|string',
             'city' => 'required|string',
             'pin' => 'required',
@@ -83,7 +83,6 @@ class CompanyController extends Controller
         }
         return Redirect::route('company.index')->withErrors($valid);
     }
-
 
     public function delete_company($id){
         $company = Company::find($id);

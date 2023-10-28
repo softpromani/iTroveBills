@@ -25,7 +25,7 @@ class CustomerBillController extends Controller
         });
         $customer_list = $customers->map(function ($customer) {
             return [
-                'id' => $customer->customer_id,
+                'id' => $customer->customer_company_id,
                 'name' => $customer->customer_detail['name'] . '/' . $customer->customer_detail['mobile'],
             ];
         });
@@ -50,7 +50,7 @@ class CustomerBillController extends Controller
         });
         $customer_list = $customers->map(function ($customer) {
             return [
-                'id' => $customer->customer_id,
+                'id' => $customer->customer_company_id,
                 'name' => $customer->customer_detail['name'] . '/' . $customer->customer_detail['mobile'],
             ];
         });
@@ -58,7 +58,7 @@ class CustomerBillController extends Controller
         $company = Company::where('seller_id', Auth::id())->where('id', $company_id)->first();
         $inv_count = $company->ThisYearInvoice()->count() ?? 0;
         $inv_no = $company->invoice_series . '-' . date('Y') . '-' . str_pad($inv_count + 1, 5, '0', STR_PAD_LEFT);
-        $customer_data = SellerCustomers::where('seller_id', Auth::id())->where('customer_id', $customer_id)->first();
+        $customer_data = SellerCustomers::where('seller_id', Auth::id())->where('customer_company_id', $customer_id)->first();
         return Inertia::render('Bills/index', compact('customer_list', 'company_list', 'customer_data', 'inv_no', 'company_id', 'customer_id', 'company'));
     }
 
@@ -77,7 +77,7 @@ class CustomerBillController extends Controller
                 'total_ammount' => $request->invoicedetails[0]['totalTaxableValue'],
                 'total_weight' => $request->invoicedetails[0]['totalWeight'],
                 'vehicle_no' => $request->invoicedetails[0]['vehical_no'],
-                'customer_id' => $request->invoicedetails[0]['customer'],
+                'customer_company_id' => $request->invoicedetails[0]['customer'],
                 'company_id' => $request->invoicedetails[0]['company'],
             ]);
 

@@ -29,7 +29,7 @@
                     </div>
                 </div>
                 <div class="pb-3 bg-white rounded-lg shadow-md col-md-12">
-                    <form class="mt-6 space-y-6">
+                    <form @submit.prevent="submit" method="post" class="mt-6 space-y-6">
                         <div class="row">
                             <div class="mt-2 col-md-6">
                                 <InputLabel for="name" value="Customer Name" />
@@ -98,7 +98,7 @@
                                         class="form-check-input"
                                         type="radio"
                                         name="inv_tax_type"
-                                        :value="item.id"
+                                        :value="item.status"
                                         v-model="form.tax_type"
                                         :id="`inlineRadio`+item.id"
                                     />
@@ -132,24 +132,6 @@
                                 <InputError
                                     class="mt-2"
                                     :message="form.errors.gst"
-                                />
-                            </div>
-                            <div class="hidden mt-2 col-md-6">
-                                <InputLabel for="city" value="Customer City" />
-
-                                <TextInput
-                                    id="city"
-                                    type="text"
-                                    class="block w-full mt-1"
-                                    v-model="form.city"
-                                    required
-                                    autofocus
-                                    autocomplete="city"
-                                />
-
-                                <InputError
-                                    class="mt-2"
-                                    :message="form.errors.city"
                                 />
                             </div>
                             <div class="mt-2 col-md-6">
@@ -193,7 +175,7 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-4">
-                            <PrimaryButton @click="submit" :="form.processing"
+                            <PrimaryButton
                                 >Save</PrimaryButton
                             >
 
@@ -233,19 +215,15 @@ const props = defineProps({
     inv_tax_type : Object,
 });
 const form = useForm({
-    name: props.searchdata ? props.searchdata.name : "",
+    name: props.searchdata ? props.searchdata.company_name : "",
     email: props.searchdata ? props.searchdata.email : "",
     mobile: props.searchdata ? props.searchdata.mobile : "",
-    gst: props.searchdata ? props.searchdata.gst : "",
-    iec: props.searchdata ? props.searchdata.iec : "",
-    city: props.searchdata ? props.searchdata.city : "",
+    gst: props.searchdata ? props.searchdata.gstin : "",
     pin: props.searchdata ? props.searchdata.pin : "",
     address: props.searchdata ? props.searchdata.address : "",
-    tax_type:props.searchdata?props.searchdata.inv_tax_type : ""
+    tax_type:props.searchdata?props.searchdata.tax_type : ""
 });
-const form2 = useForm({
-
-});
+const form2 = useForm({});
 const enteredValue = ref('');
 
 function submit() {

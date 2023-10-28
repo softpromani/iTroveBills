@@ -42,12 +42,12 @@
                     <tbody>
                         <tr v-for="(customer, index) in customers.data" :key="customer.id">
                             <td>{{ index+1 }}</td>
-                            <td>{{ customer.customer_detail.name }}</td>
-                            <td>{{ customer.customer_detail.email }}</td>
-                            <td>{{ customer.customer_detail.mobile }}</td>
-                            <td>{{ customer.customer_detail.gst }}</td>
-                            <td>{{ customer.customer_detail.pin }}</td>
-                            <td>{{ customer.customer_detail.address }}</td>
+                            <td>{{ customer.customer_detail.name??'' }}</td>
+                            <td>{{ customer.customer_detail.email??'' }}</td>
+                            <td>{{ customer.customer_detail.mobile??'' }}</td>
+                            <td>{{ customer.customer_detail.gst??'' }}</td>
+                            <td>{{ customer.customer_detail.pin??'' }}</td>
+                            <td>{{ customer.customer_detail.address??'' }}</td>
                             <td><div class="dropdown">
                                 <span
                                     class="p-2"
