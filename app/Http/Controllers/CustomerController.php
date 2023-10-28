@@ -56,6 +56,8 @@ class CustomerController extends Controller
                 'seller_id' => $seller_id,
                 'customer_company_id' => $customer_company_id,
             ], [
+                'seller_id' => $seller_id,
+                'customer_company_id' => $customer_company_id,
                 'customer_company_data' => json_encode($request->all()), // Convert the array to JSON
             ]);
 
