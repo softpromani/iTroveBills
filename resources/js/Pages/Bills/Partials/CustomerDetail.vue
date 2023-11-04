@@ -43,7 +43,7 @@ const form = useForm({
                 <h2
                     class="font-medium text-center text-white uppercase font-weight-bolder"
                 >
-               {{ props.company_name ?? ""}}
+               {{ props.company_name ?? "Itrove Bills"}}
                 </h2>
                 <span
                     class="text-white cursor-pointer top-2 right-2 position-absolute"

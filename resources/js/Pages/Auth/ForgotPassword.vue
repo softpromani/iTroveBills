@@ -4,11 +4,11 @@
     <GuestLayout>
         <div class="container">
             <div class="row">
-                <Link href="/" class="flex justify-center items-center mb-4">
+                <Link href="/" class="flex items-center justify-center mb-4">
                     <img
-                        src="build/images/itlogo.png"
+                        src="itimage/itlogo.png"
                         alt=""
-                        class="h-20 w-30 fill-current text-gray-500"
+                        class="h-20 text-gray-500 fill-current w-30"
                     />
                 </Link>
                 <div class="row justify-content-center">
@@ -32,7 +32,7 @@
                                 <TextInput
                                     id="email"
                                     type="email"
-                                    class="block mt-1 w-full"
+                                    class="block w-full mt-1"
                                     v-model="form.email"
                                     required
                                     autofocus
@@ -44,7 +44,7 @@
                                 />
                             </div>
 
-                            <div class="flex justify-end items-center mt-4">
+                            <div class="flex items-center justify-end mt-4">
                                 <PrimaryButton
                                     class="w-full"
                                     :class="{ 'opacity-25': form.processing }"

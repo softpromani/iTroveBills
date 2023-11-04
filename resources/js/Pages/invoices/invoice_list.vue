@@ -77,6 +77,9 @@
                                     <ul class="dropdown-menu">
                                         <li>
                                             <Link class="dropdown-item"
+                                            :href="route('customer.bill.edit')"
+                                                method="get"
+                                                :data="{ invoice_id: invoice.id }"
                                                 ><i
                                                     class="fa-solid fa-pen-to-square"
                                                     style="color: blueviolet"

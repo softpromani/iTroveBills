@@ -15,7 +15,7 @@
     >
         <div class="flex items-center justify-center mt-8">
             <div class="flex items-center">
-                <img :src="$page.props.auth.user.app_logo??'build/images/it.png'" alt="" srcset="" style="height: 70px;">
+                <img :src="$page.props.auth.user.app_logo??'itimage/it.png'" alt="" srcset="" style="height: 70px;">
 
                 <span class="mx-2 text-2xl font-semibold text-white"
                     >{{ $page.props.auth.user.app_name??'Innovation Trove' }}</span
@@ -301,7 +301,7 @@
                 </template>
                 <span class="d-flex"
                     >Users &nbsp;&nbsp;<img
-                        src="build/images/icon.png"
+                        src="itimage/icon.png"
                         style="height: 20px"
                         alt="Example Image"
                 /></span>
@@ -330,7 +330,7 @@
                 </template>
                 <span class="d-flex"
                     >Subscription &nbsp;&nbsp;<img
-                        src="build/images/icon.png"
+                        src="itimage/icon.png"
                         style="height: 20px"
                         alt="Example Image"
                 /></span>

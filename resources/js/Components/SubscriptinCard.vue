@@ -21,7 +21,7 @@
             class="mt-2 mb-2 d-flex"
         >
             <img
-                src="build/images/tic.png"
+                src="itimage/tic.png"
                 style="height: 20px"
                 alt="Example Image"
             />

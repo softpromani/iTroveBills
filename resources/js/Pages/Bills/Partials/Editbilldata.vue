@@ -85,7 +85,7 @@
             </div>
             <button
                 class="text-white btn btn-info text-bold"
-                @click="submitForm"
+                @click="updatebill"
             >
                 Submit
             </button>
@@ -94,13 +94,27 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref ,onMounted } from "vue";
 import { Link, useForm, usePage } from "@inertiajs/vue3";
 const form = useForm({});
+const props = defineProps({
+    invoiceitem: Object,
+});
 
 // Define the initial table data with one empty row
-const tableData = ref([["", "", "", "", "", ""]]);
-
+const tableData = ref([]);
+onMounted(() => {
+    if (props.invoiceitem) {
+        tableData.value = props.invoiceitem.map((item) => [
+            item.desc_product,
+            item.hsn_code,
+            item.quantity,
+            item.unit,
+            item.weight,
+            item.rate,
+        ]);
+    }
+});
 const invoicedetails = ref([]);
 const showproductCard = ref(true);
 // Function to update cell data
@@ -125,7 +139,7 @@ const updateCell = (rowIndex, cellIndex, event) => {
 
 // Function to add a new row
 const addRow = () => {
-    tableData.value.push(["", "", "", "", "", ""]);
+    tableData.value.push(["", "", "", "", "", "",]);
 };
 
 // Function to remove a row
@@ -165,20 +179,15 @@ const calculateTotalWeight = () => {
 };
 
 // Method to handle form submission
-const submitForm = () => {
+const updatebill = () => {
     const invoiceNoValue = document.getElementById("invoice_no").value;
-    const customer = document.getElementById("customer").value;
-    const company = document.getElementById("company").value;
     const vehical_no = document.getElementById("vehical_no").value;
-
     // Define the index where you want to push the data
     const indexToUpdate = 0; // Change this to the desired index
 
     // Push data to the specified index
     invoicedetails.value[indexToUpdate] = {
         invoice: invoiceNoValue,
-        customer: customer,
-        company: company,
         vehical_no: vehical_no,
         totalWeight: calculateTotalWeight(),
         totalTaxableValue: calculateTotalTaxableValue(),
@@ -189,8 +198,9 @@ const submitForm = () => {
     const updatedInvoiceDetails = invoicedetails.value;
 
     form.post(
-        route("customer.store.bill", {
+        route("customer.bill.update", {
             invoicedata: updatedData,
+            invoice_id: props.invoiceitem[0].invoice_id,
             invoicedetails: updatedInvoiceDetails,
         }),
         {

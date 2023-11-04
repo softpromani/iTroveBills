@@ -16,7 +16,7 @@ class Invoice extends Model
     }
     public function Customer()
     {
-        return $this->belongsTo(Company::class,'customer_company_id');
+        return $this->belongsTo(Company::class, 'customer_company_id');
     }
     public function invoiceitems()
     {
@@ -25,5 +25,13 @@ class Invoice extends Model
     public function paymentStatus()
     {
         return $this->belongsTo(Status::class, 'payment_status');
+    }
+
+    public static function boot()
+    {
+        parent::boot();
+        static::updating(function ($invoice) {
+            $invoice->invoiceitems()->delete();
+        });
     }
 }

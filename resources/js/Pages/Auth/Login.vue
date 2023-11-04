@@ -4,7 +4,7 @@
     <GuestLayout>
         <div class="row">
             <Link href="/" class="flex items-center justify-center">
-               <img src="build/images/itlogo.png" alt="" class="h-20 w-30 fill-current text-gray-500">
+               <img src="itimage/itlogo.png" alt="" class="h-20 text-gray-500 fill-current w-30">
             </Link>
 
             <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
@@ -14,17 +14,17 @@
             <form @submit.prevent="submit">
                 <div>
                     <InputLabel for="email" value="Email" />
-                    <TextInput id="email" type="email" class="mt-1 block w-full" v-model="form.email" required autofocus autocomplete="username" />
+                    <TextInput id="email" type="email" class="block w-full mt-1" v-model="form.email" required autofocus autocomplete="username" />
                     <InputError class="mt-2" :message="form.errors.email" />
                 </div>
 
                 <div class="mt-3">
                     <InputLabel for="password" value="Password" />
-                    <TextInput id="password" type="password" class="mt-1 block w-full" v-model="form.password" required autocomplete="current-password" />
+                    <TextInput id="password" type="password" class="block w-full mt-1" v-model="form.password" required autocomplete="current-password" />
                     <InputError class="mt-2" :message="form.errors.password" />
                 </div>
 
-                <div class="mt-4 flex justify-between">
+                <div class="flex justify-between mt-4">
                     <label class="inline-flex items-center">
                         <Checkbox name="remember" v-model:checked="form.remember" />
                         <span class="mx-2 text-sm text-gray-600">Remember me</span> </label>

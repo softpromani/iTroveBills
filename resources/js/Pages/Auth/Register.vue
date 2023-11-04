@@ -5,7 +5,7 @@
         <div class="container">
             <div class="row">
                 <Link href="/" class="flex items-center justify-center col-12">
-                <img src="build/images/itlogo.png" alt="" class="h-20 text-gray-500 fill-current w-30" />
+                <img src="itimage/itlogo.png" alt="" class="h-20 text-gray-500 fill-current w-30" />
                 </Link>
 
                 <form @submit.prevent="submit">

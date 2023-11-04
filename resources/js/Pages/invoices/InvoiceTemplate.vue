@@ -1,10 +1,10 @@
 <template>
     <Head title="Customer view" />
-    <button @click="printInvoice">Print Invoice</button>
+    <button @click="printInvoice" class="buttondata">Print Invoice</button>
     <div class="container-fluid">
         <div class="row">
             <div
-                class="col-2 border-t border-b border-l border-solid border-black"
+                class="border-t border-b border-l border-black border-solid col-2"
             >
                 <img
                     class="img"
@@ -13,7 +13,7 @@
                 />
             </div>
             <div
-                class="col-10 border-t border-b border-r border-solid border-black"
+                class="border-t border-b border-r border-black border-solid col-10"
             >
                 <h1 class="text-center text-7xl font">
                     {{ props.invoice.company.company_name ?? "" }}
@@ -24,13 +24,13 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-6 border-solid border-b border-l border-black">
+            <div class="border-b border-l border-black border-solid col-6">
                 <p class="text-center">
                     GSTIN- {{ props.invoice.company.gstin ?? "" }}
                 </p>
             </div>
             <div
-                class="col-6 border-solid border-l border-b border-r border-black"
+                class="border-b border-l border-r border-black border-solid col-6"
             >
                 <p class="text-center">
                     IEC-{{ props.invoice.company.iec ?? "" }}
@@ -39,7 +39,7 @@
         </div>
         <div class="row">
             <div
-                class="col-12 border-b border-l border-r border-black border-solid"
+                class="border-b border-l border-r border-black border-solid col-12"
             >
                 <p class="text-center">
                     MOBILE-{{
@@ -53,120 +53,120 @@
         </div>
         <div class="row">
             <div
-                class="col-3 border-b border-l font-bold border-black border-solid"
+                class="font-bold border-b border-l border-black border-solid col-3"
             >
                 Invoice No:
             </div>
-            <div class="col-3 border-b border-l border-black border-solid">
+            <div class="border-b border-l border-black border-solid col-3">
                 {{ props.invoice.invoice_number ?? "" }}
             </div>
             <div
-                class="col-3 border-b border-l font-bold border-black border-solid"
+                class="font-bold border-b border-l border-black border-solid col-3"
             >
                 DATE :
             </div>
             <div
-                class="col-3 border-b border-l border-r border-black border-solid"
+                class="border-b border-l border-r border-black border-solid col-3"
             >
                 {{ props.invoice.invoice_date ?? "" }}
             </div>
         </div>
         <div class="row">
             <div
-                class="col-12 border-b border-l border-r border-black border-solid"
+                class="border-b border-l border-r border-black border-solid col-12"
             >
                 Details of reciever(Billed to):
             </div>
         </div>
         <div class="row">
             <div
-                class="col-2 border-b border-l font-bold border-black border-solid"
+                class="font-bold border-b border-l border-black border-solid col-2"
             >
                 NAME :
             </div>
-            <div class="col-4 border-b border-l border-black border-solid">
-                {{ props.invoice.customer.name ?? "" }}
+            <div class="border-b border-l border-black border-solid col-4">
+                {{ props.invoice.customer.company_name ?? "" }}
             </div>
             <div
-                class="col-2 border-b border-l font-bold border-black border-solid"
+                class="font-bold border-b border-l border-black border-solid col-2"
             >
                 MOBILE NO. :
             </div>
             <div
-                class="col-4 border-b border-l border-r border-black border-solid"
+                class="border-b border-l border-r border-black border-solid col-4"
             >
                 {{ props.invoice.customer.mobile ?? "" }}
             </div>
         </div>
         <div class="row">
             <div
-                class="col-2 border-b border-l font-bold border-black border-solid"
+                class="font-bold border-b border-l border-black border-solid col-2"
             >
                 ADDRESS :
             </div>
 
             <div
-                class="col-10 border-b border-l border-r border-black border-solid"
+                class="border-b border-l border-r border-black border-solid col-10"
             >
                 {{ props.invoice.customer.address ?? "No address" }}
             </div>
         </div>
         <div class="row">
             <div
-                class="col-3 border-b font-bold border-l border-black border-solid"
+                class="font-bold border-b border-l border-black border-solid col-3"
             >
                 ID/TPIN/TIN NO
             </div>
-            <div class="col-3 border-b border-l border-black border-solid">
-                {{ props.invoice.customer.gst ?? "No ID/TPIN/TIN NO" }}
+            <div class="border-b border-l border-black border-solid col-3">
+                {{ props.invoice.customer.gstin ?? "No ID/TPIN/TIN NO" }}
             </div>
             <div
-                class="col-3 border-b border-l font-bold border-black border-solid"
+                class="font-bold border-b border-l border-black border-solid col-3"
             >
                 VEHICLE NO
             </div>
             <div
-                class="col-3 border-b border-l border-r border-black border-solid"
+                class="border-b border-l border-r border-black border-solid col-3"
             >
                 {{ props.invoice.vehicle_no ?? "" }}
             </div>
         </div>
         <div class="row">
             <div
-                class="col-1 border-b border-l font-bold border-black border-solid"
+                class="font-bold border-b border-l border-black border-solid col-1"
             >
                 S.No
             </div>
             <div
-                class="col-2 border-b border-l font-bold border-black border-solid"
+                class="font-bold border-b border-l border-black border-solid col-2"
             >
                 Description of Goods
             </div>
             <div
-                class="col-2 border-b border-l font-bold border-black border-solid"
+                class="font-bold border-b border-l border-black border-solid col-2"
             >
                 HSN CODE
             </div>
             <div
-                class="col-2 border-b border-l font-bold border-r border-black border-solid"
+                class="font-bold border-b border-l border-r border-black border-solid col-2"
             >
                 Quantity
             </div>
-            <div class="col-1 border-b font-bold border-black border-solid">
+            <div class="font-bold border-b border-black border-solid col-1">
                 Unit
             </div>
             <div
-                class="col-1 border-b border-l font-bold border-black border-solid"
+                class="font-bold border-b border-l border-black border-solid col-1"
             >
                 Weight
             </div>
             <div
-                class="col-1 border-b border-l font-bold border-black border-solid"
+                class="font-bold border-b border-l border-black border-solid col-1"
             >
                 Rate
             </div>
             <div
-                class="col-2 border-b border-l border-r font-bold border-black border-solid"
+                class="font-bold border-b border-l border-r border-black border-solid col-2"
             >
                 Taxable Value
             </div>
@@ -176,90 +176,90 @@
             v-for="(data, index) in props.invoice.invoiceitems"
             :key="data.id"
         >
-            <div class="col-1 border-b border-l border-black border-solid">
+            <div class="border-b border-l border-black border-solid col-1">
                 {{ index + 1 ?? "" }}
             </div>
-            <div class="col-2 border-b border-l border-black border-solid">
+            <div class="border-b border-l border-black border-solid col-2">
                 {{ data.desc_product ?? "" }}
             </div>
-            <div class="col-2 border-b border-l border-black border-solid">
+            <div class="border-b border-l border-black border-solid col-2">
                 {{ data.hsn_code ?? "" }}
             </div>
             <div
-                class="col-2 border-b border-l border-r border-black border-solid"
+                class="border-b border-l border-r border-black border-solid col-2"
             >
                 {{ data.quantity ?? "" }}
             </div>
-            <div class="col-1 border-b border-black border-solid">
+            <div class="border-b border-black border-solid col-1">
                 {{ data.unit ?? "" }}
             </div>
-            <div class="col-1 border-b border-l border-black border-solid">
+            <div class="border-b border-l border-black border-solid col-1">
                 {{ data.weight ?? "" }}
             </div>
-            <div class="col-1 border-b border-l border-black border-solid">
+            <div class="border-b border-l border-black border-solid col-1">
                 {{ data.rate ?? "" }}
             </div>
             <div
-                class="col-2 border-b border-l border-r border-black border-solid"
+                class="border-b border-l border-r border-black border-solid col-2"
             >
                 {{ data.rate * data.quantity ?? "" }}
             </div>
         </div>
         <div class="row">
             <div
-                class="col-3 border-b border-l font-bold border-black border-solid"
+                class="font-bold border-b border-l border-black border-solid col-3"
             >
                 No. OF PACKAGES
             </div>
-            <div class="col-1 border-b border-l border-black border-solid">
+            <div class="border-b border-l border-black border-solid col-1">
                 {{ props.invoice.no_packets ?? "No Packs" }}
             </div>
             <div
-                class="col-3 border-b border-l font-bold border-black border-solid"
+                class="font-bold border-b border-l border-black border-solid col-3"
             >
                 Total weight
             </div>
-            <div class="col-1 border-b border-l border-black border-solid">
+            <div class="border-b border-l border-black border-solid col-1">
                 {{ props.invoice.total_weight ?? "" }}
             </div>
             <div
-                class="col-2 border-b border-l font-bold border-black border-solid"
+                class="font-bold border-b border-l border-black border-solid col-2"
             >
                 Sub Total
             </div>
             <div
-                class="col-2 border-b border-l border-r border-black border-solid"
+                class="border-b border-l border-r border-black border-solid col-2"
             >
                 ₹ {{ props.invoice.total_ammount ?? "" }}
             </div>
         </div>
         <div class="row">
             <div
-                class="col-4 border-b border-l font-bold border-black border-solid"
+                class="font-bold border-b border-l border-black border-solid col-4"
             >
                 Amount in words
             </div>
             <div
-                class="col-8 border-b border-l border-r border-black border-solid"
+                class="border-b border-l border-r border-black border-solid col-8"
             >
                 {{ amountInWords }}
             </div>
         </div>
         <div class="row">
             <div
-                class="col-6 border-b border-l font-bold border-black border-solid"
+                class="font-bold border-b border-l border-black border-solid col-6"
             >
                 OUR BANK DETAILS
             </div>
             <div
-                class="col-6 border-b border-l font-bold border-r border-black border-solid"
+                class="font-bold border-b border-l border-r border-black border-solid col-6"
             >
                 {{ props.invoice.company.company_name ?? "" }}
             </div>
         </div>
         <div class="row">
             <div
-                class="col-6 border-b border-l font-bold border-black border-solid"
+                class="font-bold border-b border-l border-black border-solid col-6"
             >
                 <p class="pt-3">
                     Name of bank - {{ props.invoice.company.bank_name ?? "" }}
@@ -276,7 +276,7 @@
                 </p>
             </div>
             <div
-                class="col-6 border-b border-l font-bold border-r border-black border-solid"
+                class="font-bold border-b border-l border-r border-black border-solid col-6"
             >
                 <img
                     class="img"
@@ -287,34 +287,34 @@
         </div>
         <div class="row">
             <div
-                class="col border-b height border-l font-bold border-black border-solid"
+                class="font-bold border-b border-l border-black border-solid col height"
             >
-                <img class="images" src="build/images/duroflex.png" alt="" />
+                <img class="images" src="itimage/duroflex.png" alt="" />
             </div>
             <div
-                class="col-2 border-b height border-l font-bold border-r border-black border-solid"
+                class="font-bold border-b border-l border-r border-black border-solid col-2 height"
             >
-                <img class="images" src="build/images/epson.png" alt="" />
+                <img class="images" src="itimage/epson.png" alt="" />
             </div>
             <div
-                class="col-2 border-b height font-bold border-black border-solid"
+                class="font-bold border-b border-black border-solid col-2 height"
             >
-                <img class="images" src="build/images/gobbler.jpg" alt="" />
+                <img class="images" src="itimage/gobbler.jpg" alt="" />
             </div>
             <div
-                class="col-2 border-b height border-l font-bold border-r border-black border-solid"
+                class="font-bold border-b border-l border-r border-black border-solid col-2 height"
             >
-                <img class="images" src="build/images/splashjet.png" alt="" />
+                <img class="images" src="itimage/splashjet.png" alt="" />
             </div>
             <div
-                class="col-2 border-b height font-bold border-black border-solid"
+                class="font-bold border-b border-black border-solid col-2 height"
             >
-                <img class="images" src="build/images/kangro.png" alt="" />
+                <img class="images" src="itimage/kangro.png" alt="" />
             </div>
             <div
-                class="col-2 border-b height border-l font-bold border-r border-black border-solid"
+                class="font-bold border-b border-l border-r border-black border-solid col-2 height"
             >
-                <img class="images" src="build/images/compu.png" alt="" />
+                <img class="images" src="itimage/compu.png" alt="" />
             </div>
         </div>
     </div>
@@ -448,5 +448,11 @@ onMounted(() => {
 .img {
     width: 100px;
     padding: 5px;
+}
+
+@media print {
+    .buttondata {
+        visibility: hidden;
+    }
 }
 </style>

@@ -65,10 +65,13 @@ class CustomerBillController extends Controller
     public function store(Request $request)
     {
         $valid = $request->validate([
-            'invoicedata' => 'required',
-            'invoicedetails' => 'required',
+            'invoicedata.*.*' => 'required',
+            'invoicedetails.*.invoice' => 'required|string',
+            'invoicedetails.*.vehical_no' => 'required|string',
+            'invoicedetails.*.totalWeight' => 'required|numeric',
+            'invoicedetails.*.totalTaxableValue' => 'required|numeric',
+            'invoice_id' => 'required',
         ]);
-        // dd($request->invoicedata);
         if ($valid) {
             $invoice_data = Invoice::create([
                 'invoice_number' => $request->invoicedetails[0]['invoice'],
@@ -107,13 +110,56 @@ class CustomerBillController extends Controller
         return inertia('invoices/invoice_list', compact('invoices'));
     }
 
-
-    public function template(Request $request){
+    public function template(Request $request)
+    {
         $inv_id = $request->invoice_id;
         $invoice = Invoice::find($inv_id);
         $invoice->load('invoiceitems');
         $invoice->load('Customer');
         $invoice->load('Company');
-        return inertia('invoices/InvoiceTemplate',compact('invoice'));
+        return inertia('invoices/InvoiceTemplate', compact('invoice'));
+    }
+
+    public function edit(Request $request)
+    {
+        $edit_data = Invoice::find($request->invoice_id);
+        $edit_data->load('invoiceitems');
+        $edit_data->load('Customer');
+        return Inertia::render('Bills/editbill', compact('edit_data'));
+    }
+
+    public function update(Request $request)
+    {
+
+        $valid = $request->validate([
+            'invoicedata.*.*' => 'required',
+            'invoicedetails.*.invoice' => 'required|string',
+            'invoicedetails.*.vehical_no' => 'required|string',
+            'invoicedetails.*.totalWeight' => 'required|numeric',
+            'invoicedetails.*.totalTaxableValue' => 'required|numeric',
+            'invoice_id' => 'required',
+        ]);
+        if ($valid) {
+            $invoice_data = Invoice::find($request->invoice_id)->update([
+                'invoice_number' => $request->invoicedetails[0]['invoice'],
+                'total_ammount' => $request->invoicedetails[0]['totalTaxableValue'],
+                'total_weight' => $request->invoicedetails[0]['totalWeight'],
+                'vehicle_no' => $request->invoicedetails[0]['vehical_no'],
+            ]);
+            foreach ($request->invoicedata as $key => $data) {
+                InvoiceItem::create([
+                    'invoice_id' => $request->invoice_id,
+                    'desc_product' => $data[0],
+                    'hsn_code' => $data[1],
+                    'quantity' => $data[2],
+                    'unit' => $data[3],
+                    'weight' => $data[4],
+                    'rate' => $data[5],
+                ]);
+            }
+            return redirect()->route('company.customer.view')->with('success', 'Invoice Updated Successfully');
+        } else {
+            return back();
+        }
     }
 }
