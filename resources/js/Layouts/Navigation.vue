@@ -15,7 +15,7 @@
     >
         <div class="flex items-center justify-center mt-8">
             <div class="flex items-center">
-                <img :src="$page.props.auth.user.app_logo??'itimage/it.png'" alt="" srcset="" style="height: 70px;">
+                <img :src="$page.props.auth.user.app_logo??'itimages/it.png'" alt="" srcset="" style="height: 70px;">
 
                 <span class="mx-2 text-2xl font-semibold text-white"
                     >{{ $page.props.auth.user.app_name??'Innovation Trove' }}</span
@@ -301,7 +301,7 @@
                 </template>
                 <span class="d-flex"
                     >Users &nbsp;&nbsp;<img
-                        src="itimage/icon.png"
+                        src="itimages/icon.png"
                         style="height: 20px"
                         alt="Example Image"
                 /></span>
@@ -330,7 +330,7 @@
                 </template>
                 <span class="d-flex"
                     >Subscription &nbsp;&nbsp;<img
-                        src="itimage/icon.png"
+                        src="itimages/icon.png"
                         style="height: 20px"
                         alt="Example Image"
                 /></span>
@@ -355,7 +355,11 @@
                         d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z"
                     ></path>
                 </svg>
-                <span class="mx-3">Companies</span>
+                <span class="mx-3 d-flex">Companies &nbsp;&nbsp;<img
+                        src="itimages/icon.png"
+                        style="height: 20px"
+                        alt="Example Image"
+                /></span>
             </a>
             <transition
                 enter-to-class="transition-all duration-300 ease-in-out"
@@ -399,7 +403,11 @@
                         d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z"
                     ></path>
                 </svg>
-                <span class="mx-3">Companies</span>
+                <span class="mx-3 d-flex">Companies &nbsp;&nbsp;<img
+                        src="itimages/icon.png"
+                        style="height: 20px"
+                        alt="Example Image"
+                /></span>
             </a>
             <transition
                 enter-to-class="transition-all duration-300 ease-in-out"
