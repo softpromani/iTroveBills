@@ -2,11 +2,11 @@
     <Head title="Customer view" />
     <AuthenticatedLayout>
         <div
-            class="mb-4 inline-flex w-full overflow-hidden rounded-lg bg-white shadow-md"
+            class="inline-flex w-full mb-4 overflow-hidden bg-white rounded-lg shadow-md"
         >
-            <div class="flex w-12 items-center justify-center bg-pink-800">
+            <div class="flex items-center justify-center w-12 bg-pink-800">
                 <svg
-                    class="h-6 w-6 fill-current text-white"
+                    class="w-6 h-6 text-white fill-current"
                     viewBox="0 0 40 40"
                     xmlns="http://www.w3.org/2000/svg"
                 >
@@ -16,7 +16,7 @@
                 </svg>
             </div>
 
-            <div class="-mx-3 px-4 py-2">
+            <div class="px-4 py-2 -mx-3">
                 <div class="mx-3">
                     <span class="font-semibold text-blue-500"
                         >Sample customer View Info</span
@@ -24,8 +24,8 @@
                 </div>
             </div>
         </div>
-        <div class="shadow rounded-lg bg-white">
-            <div class="table-responsive rounded-lg">
+        <div class="bg-white rounded-lg shadow">
+            <div class="rounded-lg table-responsive">
                 <table class="table" style="min-height: 200px">
                     <thead class="table-dark">
                         <tr>
@@ -55,7 +55,7 @@
                             <td>{{ invoice.paid_ammount ?? "" }}</td>
                             <td>
                                 <span
-                                    class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-3 py-1 rounded-full dark:bg-blue-900 dark:text-blue-300"
+                                    class="px-3 py-1 mr-2 text-xs font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300"
                                     >{{ invoice.payment_status.status }}</span
                                 >
                             </td>
@@ -105,6 +105,9 @@
                                         </li>
                                         <li>
                                             <Link class="dropdown-item"
+                                            :href="route('bill.sendmail')"
+                                                method="post"
+                                                :data="{ invoice_id: invoice.id }"
                                                 ><i
                                                     class="fa fa-envelope-square"
                                                     aria-hidden="true"
@@ -123,7 +126,7 @@
                 </table>
             </div>
             <div
-                class="flex flex-col items-center border-t bg-white px-1 py-1 xs:flex-row xs:justify-between"
+                class="flex flex-col items-center px-1 py-1 bg-white border-t xs:flex-row xs:justify-between"
             >
                 <!-- <pagination :links="invoices.links" /> -->
             </div>
@@ -134,7 +137,7 @@
                 <h2 class="text-lg font-medium text-gray-900">
                     Are you sure you want to delete your Customer?
                 </h2>
-                <div class="mt-6 flex justify-end">
+                <div class="flex justify-end mt-6">
                     <SecondaryButton @click="closeModal">
                         Cancel
                     </SecondaryButton>

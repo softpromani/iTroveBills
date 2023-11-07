@@ -16,9 +16,10 @@ class BillMail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public $data;
+    public function __construct($mailData)
     {
-        //
+        $this->data = $mailData;
     }
 
     /**
@@ -27,7 +28,8 @@ class BillMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Bill Mail',
+            subject: 'Your Bill From ITrove Bills',
+            replyTo: $this->data['email'],
         );
     }
 
@@ -37,7 +39,8 @@ class BillMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: 'email.bill',
+            with: $this->data,
         );
     }
 

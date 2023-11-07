@@ -7,8 +7,10 @@ use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\SellerCustomers;
 use App\Models\Status;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Inertia\Inertia;
 
 class CustomerBillController extends Controller
@@ -112,11 +114,19 @@ class CustomerBillController extends Controller
 
     public function template(Request $request)
     {
-        $inv_id = $request->invoice_id;
-        $invoice = Invoice::find($inv_id);
-        $invoice->load('invoiceitems');
-        $invoice->load('Customer');
-        $invoice->load('Company');
+        try {
+            $inv_id = Crypt::decrypt($request->invoice_id);
+            $invoice = Invoice::find($inv_id);
+            $invoice->load('invoiceitems');
+            $invoice->load('Customer');
+            $invoice->load('Company');
+        } catch (DecryptException $e) {
+            $inv_id = $request->invoice_id;
+            $invoice = Invoice::find($inv_id);
+            $invoice->load('invoiceitems');
+            $invoice->load('Customer');
+            $invoice->load('Company');
+        }
         return inertia('invoices/InvoiceTemplate', compact('invoice'));
     }
 
