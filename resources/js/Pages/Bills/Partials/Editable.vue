@@ -3,10 +3,7 @@
         <h2 class="font-medium text-center text-white font-weight-bolder">
             INVOICE
         </h2>
-        <span
-            class="text-white cursor-pointer top-2 right-2 position-absolute"
-            @click="toggleproductCard"
-        >
+        <span class="text-white cursor-pointer top-2 right-2 position-absolute" @click="toggleproductCard">
             <i class="fa-solid fa-bullseye"></i>
         </span>
     </div>
@@ -28,40 +25,21 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr
-                            v-for="(row, rowIndex) in tableData"
-                            :key="rowIndex"
-                        >
+                        <tr v-for="(row, rowIndex) in tableData" :key="rowIndex">
                             <td>{{ getSerialNumber(rowIndex) }}</td>
-                            <td
-                                v-for="(cell, cellIndex) in row"
-                                :key="cellIndex"
-                                @input="updateCell(rowIndex, cellIndex, $event)"
-                                contenteditable
-                            >
+                            <td v-for="(cell, cellIndex) in row" :key="cellIndex"
+                                @input="updateCell(rowIndex, cellIndex, $event)" contenteditable>
                                 {{ cell }}
                             </td>
                             <td>{{ calculateTaxableValue(rowIndex) }}</td>
                             <td>
-                                <span
-                                    class="cursor-pointer badge rounded-pill text-bg-primary"
-                                    @click="addRow"
-                                    v-if="rowIndex === tableData.length - 1"
-                                >
-                                    <i
-                                        class="fa fa-plus"
-                                        aria-hidden="true"
-                                    ></i>
+                                <span class="cursor-pointer badge rounded-pill text-bg-primary" @click="addRow"
+                                    v-if="rowIndex === tableData.length - 1">
+                                    <i class="fa fa-plus" aria-hidden="true"></i>
                                 </span>
-                                <span
-                                    class="cursor-pointer badge rounded-pill text-bg-danger"
-                                    @click="removeRow(rowIndex)"
-                                    v-else
-                                >
-                                    <i
-                                        class="fa fa-minus"
-                                        aria-hidden="true"
-                                    ></i>
+                                <span class="cursor-pointer badge rounded-pill text-bg-danger" @click="removeRow(rowIndex)"
+                                    v-else>
+                                    <i class="fa fa-minus" aria-hidden="true"></i>
                                 </span>
                             </td>
                         </tr>
@@ -83,10 +61,7 @@
                     </tbody>
                 </table>
             </div>
-            <button
-                class="text-white btn btn-info text-bold"
-                @click="submitForm"
-            >
+            <button class="text-white btn btn-info text-bold" @click="submitForm">
                 Submit
             </button>
         </div>
@@ -115,7 +90,7 @@ const updateCell = (rowIndex, cellIndex, event) => {
         }
         // If it's not a number, reset the cell content
         else {
-            event.target.textContent = tableData.value[rowIndex][cellIndex];
+            event.target.textContent =0;
         }
     } else {
         // For other cells, allow any input
@@ -124,8 +99,9 @@ const updateCell = (rowIndex, cellIndex, event) => {
 };
 
 // Function to add a new row
-const addRow = () => {
-    tableData.value.push(["", "", "", "", "", ""]);
+const addRow = (rowIndex) => {
+    const newRow = ["", "", "", "", "", ""];
+    tableData.value.splice(rowIndex + 1, 0, newRow);
 };
 
 // Function to remove a row
