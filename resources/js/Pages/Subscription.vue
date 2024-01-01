@@ -26,6 +26,7 @@
                         :buttonId="subscriptions.id"
                         :features="subscriptions.features"
                         :buttonText="'Buy Now'"
+                        :subscription_id="user_subscription_id"
                     />
                 </div>
             </div>
@@ -40,5 +41,6 @@ import SubscriptinCard from "@/Components/SubscriptinCard.vue";
 
 const props = defineProps({
     subscriptions: Object,
+    user_subscription_id:Number
 })
 </script>

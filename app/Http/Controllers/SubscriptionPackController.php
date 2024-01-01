@@ -15,8 +15,10 @@ class SubscriptionPackController extends Controller
     public function index()
     {
         $subscriptionPacks = SubscriptionPack::get();
+        $usersubscription = SellerSubscription::where("seller_id", auth()->user()->id)->first()->seller_id;
         return Inertia::render('Subscription', [
             'subscriptions' => $subscriptionPacks,
+            'user_subscription_id' => $usersubscription,
         ]);
     }
 
@@ -35,6 +37,7 @@ class SubscriptionPackController extends Controller
 
          if($response){
             auth()->user()->assignRole(User::$role_seller);
+            return redirect()->back()->with('success', 'Plane buy Successfully!');
          }
     }
 }

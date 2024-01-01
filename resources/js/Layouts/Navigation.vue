@@ -57,7 +57,7 @@
                 Dashboard
             </nav-link>
 
-            <nav-link
+            <!-- <nav-link
                 :href="route('users.index')"
                 :active="route().current('users.index')"
             >
@@ -78,7 +78,7 @@
                     </svg>
                 </template>
                 Users
-            </nav-link>
+            </nav-link> -->
 
             <nav-link :href="route('subscription.index')" :active="route().current('subscription.index')">
                 <template #icon>
@@ -278,7 +278,7 @@
                 Dashboard
             </nav-link>
 
-            <nav-link
+            <!-- <nav-link
                 href="#"
                 data-bs-toggle="modal"
                 data-bs-target="#exampleModal"
@@ -305,7 +305,7 @@
                         style="height: 20px"
                         alt="Example Image"
                 /></span>
-            </nav-link>
+            </nav-link> -->
 
             <nav-link
                 href="#"

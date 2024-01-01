@@ -72,7 +72,6 @@ class CustomerBillController extends Controller
             'invoicedetails.*.vehical_no' => 'required|string',
             'invoicedetails.*.totalWeight' => 'required|numeric',
             'invoicedetails.*.totalTaxableValue' => 'required|numeric',
-            'invoice_id' => 'required',
         ]);
         if ($valid) {
             $invoice_data = Invoice::create([
