@@ -21,12 +21,17 @@
             </div>
         </div>
         <div class="row">
-            <div class="border-b border-l border-black border-solid col-6">
+            <div class="border-b border-l border-black border-solid col-4">
                 <p class="text-center">
                     GSTIN- {{ props.invoice.company.gstin ?? "" }}
                 </p>
             </div>
-            <div class="border-b border-l border-r border-black border-solid col-6">
+            <div class="border-b border-l border-black border-solid col-4">
+                <p class="text-center">
+                    LUT NO- {{ props.invoice.company.company_lut[0].lut_no ?? "" }}
+                </p>
+            </div>
+            <div class="border-b border-l border-r border-black border-solid col-4">
                 <p class="text-center">
                     IEC-{{ props.invoice.company.iec ?? "" }}
                 </p>
