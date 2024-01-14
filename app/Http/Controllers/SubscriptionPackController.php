@@ -15,7 +15,7 @@ class SubscriptionPackController extends Controller
     public function index()
     {
         $subscriptionPacks = SubscriptionPack::get();
-        $usersubscription = SellerSubscription::where("seller_id", auth()->user()->id)->first()->seller_id;
+        $usersubscription = SellerSubscription::where("seller_id", auth()->user()->id)->first()->subscription_id??false;
         return Inertia::render('Subscription', [
             'subscriptions' => $subscriptionPacks,
             'user_subscription_id' => $usersubscription,
