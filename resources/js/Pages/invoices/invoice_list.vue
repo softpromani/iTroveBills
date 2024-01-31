@@ -118,6 +118,21 @@
                                                 Mail</Link
                                             >
                                         </li>
+                                        <li>
+                                            <Link class="dropdown-item"
+                                            :href="route('create.eway.bill')"
+                                                method="get"
+                                                :data="{ invoice_id: invoice.id }"
+                                                ><i
+                                                    class="fa fa-envelope-square"
+                                                    aria-hidden="true"
+                                                    style="
+                                                        color: rgb(245, 180, 0);
+                                                    "
+                                                ></i>
+                                                Generate E-Way Bill</Link
+                                            >
+                                        </li>
                                     </ul>
                                 </div>
                             </td>
@@ -169,23 +184,23 @@ import PrimaryButton from "@/Components/DangerButton.vue";
 import SecondaryButton from "@/Components/SecondaryButton.vue";
 import { useForm } from "@inertiajs/vue3";
 const props = defineProps({
-    invoices: Object,
+  invoices: Object,
 });
 const confirmCustomerDeletion = ref(false);
 const form = useForm({});
 let delete_id = null;
 const confirmUserDeletion = (id) => {
-    delete_id = id;
-    confirmCustomerDeletion.value = true;
+  delete_id = id;
+  confirmCustomerDeletion.value = true;
 };
 const closeModal = () => {
-    confirmCustomerDeletion.value = false;
+  confirmCustomerDeletion.value = false;
 };
 
 const deleteCustomer = () => {
-    form.post(route("company.customer.delete", delete_id), {
-        preserveScroll: true,
-        onSuccess: () => closeModal(),
-    });
+  form.post(route("company.customer.delete", delete_id), {
+    preserveScroll: true,
+    onSuccess: () => closeModal(),
+  });
 };
 </script>

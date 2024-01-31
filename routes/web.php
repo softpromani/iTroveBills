@@ -4,6 +4,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CustomerBillController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\MailController;
+use App\Http\Controllers\MastergstController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SubscriptionPackController;
@@ -29,13 +30,15 @@ Route::get('/', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
-});
+})->name('home');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('master_gst_auth',[MastergstController::class,'master_gst_auth'])->name('master.gst.auth');
 Route::middleware('auth')->group(function () {
+    Route::post('create-eway-bill',[MastergstController::class,'create_eway_bill'])->name('create.eway.bill');
     Route::get('subscription', [SubscriptionPackController::class, 'index'])->name('subscription.index');
     Route::get('buy/subscription', [SubscriptionPackController::class, 'subscription'])->name('subscription.subscription');
     Route::get('users', [UserController::class, 'index'])->name('users.index');
