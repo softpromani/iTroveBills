@@ -48,7 +48,7 @@ class CustomerController extends Controller
                 'address' => $request->address,
                 'pin' => $request->pin,
                 'status' => Status::moduleStatusId('Company','registerd'),
-                'tax_type' => $request->tax_type,
+                'type' => $request->tax_type,
             ])->id;
 
             // Find or create a SellerCustomers record based on seller_id and customer_id

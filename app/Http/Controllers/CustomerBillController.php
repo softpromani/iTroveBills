@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\SellerCustomers;
 use App\Models\Status;
+use DateTime;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -56,10 +57,34 @@ class CustomerBillController extends Controller
                 'name' => $customer->customer_detail['name'] . '/' . $customer->customer_detail['mobile'],
             ];
         });
+// financial year date
+// Get today's date
+$today = new DateTime();
+    
+// Get the current year
+$currentYear = (int)$today->format('Y');
 
+// Get the current month
+$currentMonth = (int)$today->format('m');
+
+// Determine the financial year based on the current date
+if ($currentMonth < 4) {
+    // If the month is before April, the financial year started last calendar year
+    $financialYearStart = $currentYear - 1;
+    $financialYearEnd = $currentYear;
+} else {
+    // If the month is April or later, the financial year starts this calendar year
+    $financialYearStart = $currentYear;
+    $financialYearEnd = $currentYear + 1;
+}
+
+// Format the financial year in the 'YYYY-YY' format
+$financialYear = sprintf("%d-%d", $financialYearStart, substr($financialYearEnd, -2));
+
+// end
         $company = Company::where('seller_id', Auth::id())->where('id', $company_id)->first();
         $inv_count = $company->ThisYearInvoice()->count() ?? 0;
-        $inv_no = $company->invoice_series . '-' . date('Y') . '-' . str_pad($inv_count + 1, 5, '0', STR_PAD_LEFT);
+        $inv_no = $company->invoice_series . '-' . $financialYear . '-' . str_pad($inv_count + 1, 5, '0', STR_PAD_LEFT);
         $customer_data = SellerCustomers::where('seller_id', Auth::id())->where('customer_company_id', $customer_id)->first();
         return Inertia::render('Bills/index', compact('customer_list', 'company_list', 'customer_data', 'inv_no', 'company_id', 'customer_id', 'company'));
     }
