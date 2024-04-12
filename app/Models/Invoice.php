@@ -14,8 +14,6 @@ class Invoice extends Model
     {
         parent::boot();
         static::updating(function ($invoice) {
-            Log::info($invoice->invoiceitems);
-            $invoice->load('invoiceitems');
             $invoice->invoiceitems()->delete();
         });
     }
