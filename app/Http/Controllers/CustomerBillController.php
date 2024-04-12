@@ -184,12 +184,15 @@ $financialYear = sprintf("%d-%d", $financialYearStart, substr($financialYearEnd,
             'invoice_id' => 'required',
         ]);
         if ($valid) {
-            $invoice_data = Invoice::find($request->invoice_id)->update([
+            $invoice_data = Invoice::findOrFail($request->invoice_id);
+            $invoice_data->touch();
+            $invoice_data->update([
                 'invoice_number' => $request->invoicedetails[0]['invoice'],
                 'total_ammount' => $request->invoicedetails[0]['totalTaxableValue'],
                 'total_weight' => $request->invoicedetails[0]['totalWeight'],
                 'vehicle_no' => $request->invoicedetails[0]['vehical_no'],
             ]);
+
             foreach ($request->invoicedata as $key => $data) {
                 InvoiceItem::create([
                     'invoice_id' => $request->invoice_id,
