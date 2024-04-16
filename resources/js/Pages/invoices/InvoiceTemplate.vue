@@ -211,7 +211,7 @@
                 </p>
             </div>
             <div class="font-bold border-b border-l border-r border-black border-solid col-6">
-                <img class="img" :src="props.invoice.company.sign ?? ''" alt="jpeg" style="height:100px;width:250px" />
+                <img class="img" :src="props.invoice.company.sign ?? ''" alt="jpeg" style="height:80px;width:230px" />
             </div>
         </div>
     </div>
