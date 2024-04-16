@@ -7,7 +7,7 @@
         <i class="fa fa-download" aria-hidden="true"></i>
     </button>
     <div class="container-fluid downloadbill">
-        <div class="row text-center text-center border-t  border-r border-black border-solid"><center>Tax Invoice</center></div>
+        <div class="row text-center text-center border-t  border-r border-black border-solid"><center>Export Invoice</center></div>
         <div class="row">
             <div class="border-t border-b border-l border-black border-solid col-2">
                 <img class="img" :src="props.invoice.company.logo ?? ''" alt="jpeg" />

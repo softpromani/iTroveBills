@@ -78,13 +78,13 @@ if ($currentMonth < 4) {
     $financialYearEnd = $currentYear + 1;
 }
 
-// Format the financial year in the 'YYYY-YY' format
-$financialYear = sprintf("%d-%d", $financialYearStart, substr($financialYearEnd, -2));
+// Format the financial year in the 'YY-YY' format
+$financialYear = sprintf("%d-%d", substr($financialYearStart,-2), substr($financialYearEnd, -2));
 
 // end
         $company = Company::where('seller_id', Auth::id())->where('id', $company_id)->first();
         $inv_count = $company->ThisYearInvoice()->count() ?? 0;
-        $inv_no = $company->invoice_series . '-' . $financialYear . '-' . str_pad($inv_count + 1, 5, '0', STR_PAD_LEFT);
+        $inv_no = $company->invoice_series . '-' . $financialYear . '/' . str_pad($inv_count + 1, 5, '0', STR_PAD_LEFT);
         $customer_data = SellerCustomers::where('seller_id', Auth::id())->where('customer_company_id', $customer_id)->first();
         return Inertia::render('Bills/index', compact('customer_list', 'company_list', 'customer_data', 'inv_no', 'company_id', 'customer_id', 'company'));
     }
