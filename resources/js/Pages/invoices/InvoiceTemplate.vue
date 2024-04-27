@@ -230,7 +230,7 @@ const props = defineProps({
 const amountInWords = ref("");
 
 const rupeeWords = [
-    "Zero",
+    // "Zero",
     "One",
     "Two",
     "Three",
