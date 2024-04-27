@@ -312,7 +312,7 @@ const convertToWords = () => {
     );
     const decimalPartWords = convertToWordsRecursive(decimalPart);
 
-    if (amountValue === 0) {
+    if (amountValue == 0) {
         amountInWords.value = "Zero Rupees";
     } else {
         amountInWords.value = `${convertToWordsRecursive(
