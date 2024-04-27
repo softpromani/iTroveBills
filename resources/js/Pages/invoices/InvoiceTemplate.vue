@@ -155,7 +155,7 @@
                 {{ data.rate ?? "" }}
             </div>
             <div class="border-b border-l border-r border-black border-solid col-2">
-                {{ data.rate * data.quantity ?? "" }}
+                {{ number_format(data.rate * data.quantity ??0,2,'.','') }}
             </div>
         </div>
         <div class="row">
