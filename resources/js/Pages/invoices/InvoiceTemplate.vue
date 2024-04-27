@@ -267,6 +267,7 @@ const teensWords = [
 ];
 
 const convertToWordsRecursive = (amount) => {
+    console.log(amount);
     if(amount<1){
         return "";
     }
@@ -313,7 +314,7 @@ const convertToWords = () => {
     const decimalPartWords = convertToWordsRecursive(decimalPart);
 
     if (amountValue === 0) {
-        amountInWords.value = "Rupees";
+        amountInWords.value = "Zero Rupees";
     } else {
         amountInWords.value = `${convertToWordsRecursive(
             amountValue
