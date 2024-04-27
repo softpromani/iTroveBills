@@ -10,6 +10,11 @@ class Invoice extends Model
 {
     protected $guarded = [];
     use HasFactory;
+    protected $casts = [
+        'total_ammount'=>'decimal:2',
+        'paid_ammount'=>'decimal:2',
+        'total_weight'=>'decimal:2',
+    ];
     public static function boot()
     {
         parent::boot();
