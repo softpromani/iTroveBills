@@ -267,6 +267,9 @@ const teensWords = [
 ];
 
 const convertToWordsRecursive = (amount) => {
+    if(amount<1){
+        return "";
+    }
     if (amount < 10) {
         return rupeeWords[amount];
     } else if (amount < 20) {
