@@ -8,5 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class InvoiceItem extends Model
 {
     use HasFactory;
+    protected $casts = [
+        'weight'=>'decimal:2',
+        'rate'=>'decimal:2',
+    ];
     protected $guarded = [];
+
 }
