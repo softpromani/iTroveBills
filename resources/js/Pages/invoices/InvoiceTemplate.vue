@@ -316,6 +316,7 @@ const convertToWords = () => {
     if (amountValue === 0) {
         amountInWords.value = "Zero Rupees";
     } else {
+        console.log( amountInWords.value);
         amountInWords.value = `${convertToWordsRecursive(
             amountValue
         )} Rupees and ${decimalPartWords} Paise`;
