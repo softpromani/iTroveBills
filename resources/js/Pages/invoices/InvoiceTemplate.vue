@@ -155,7 +155,10 @@
                 {{ data.rate ?? "" }}
             </div>
             <div class="border-b border-l border-r border-black border-solid col-2">
-                {{ number_format(data.rate * data.quantity ??0,2,'.','') }}
+                @php
+                $total=number_format((data.rate * data.quantity ??0),2,'.','');
+                @endphp
+                {{ $total }}
             </div>
         </div>
         <div class="row">
