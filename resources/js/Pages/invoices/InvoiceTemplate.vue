@@ -230,68 +230,96 @@ const props = defineProps({
 const amountInWords = ref("");
 
 const rupeeWords = [
-    "Zero", "One", "Two", "Three", "Four", 
-    "Five", "Six", "Seven", "Eight", "Nine",
+    "Zero",
+    "One",
+    "Two",
+    "Three",
+    "Four",
+    "Five",
+    "Six",
+    "Seven",
+    "Eight",
+    "Nine",
 ];
-
 const tensWords = [
-    "", "Ten", "Twenty", "Thirty", "Forty", 
-    "Fifty", "Sixty", "Seventy", "Eighty", "Ninety",
+    "",
+    "Ten",
+    "Twenty",
+    "Thirty",
+    "Forty",
+    "Fifty",
+    "Sixty",
+    "Seventy",
+    "Eighty",
+    "Ninety",
 ];
-
 const teensWords = [
-    "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", 
-    "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen",
+    "Ten",
+    "Eleven",
+    "Twelve",
+    "Thirteen",
+    "Fourteen",
+    "Fifteen",
+    "Sixteen",
+    "Seventeen",
+    "Eighteen",
+    "Nineteen",
 ];
 
 const convertToWordsRecursive = (amount) => {
-    if (amount === 0) {
-        return "";
-    } else if (amount < 10) {
+    if(amount==0){
+        return '';
+    }
+    if (amount < 10) {
         return rupeeWords[amount];
     } else if (amount < 20) {
         return teensWords[amount - 10];
     } else if (amount < 100) {
-        const tens = Math.floor(amount / 10);
-        const units = amount % 10;
-        return tensWords[tens] + (units ? " " + rupeeWords[units] : "");
+        return (
+            tensWords[Math.floor(amount / 10)] + " " + rupeeWords[amount % 10]
+        );
     } else if (amount < 1000) {
-        const hundreds = Math.floor(amount / 100);
-        const remainder = amount % 100;
-        const remainderWords = convertToWordsRecursive(remainder);
-        return rupeeWords[hundreds] + " Hundred" + (remainderWords ? " " + remainderWords : "");
+        return (
+            rupeeWords[Math.floor(amount / 100)] +
+            " Hundred " +
+            convertToWordsRecursive(amount % 100)
+        );
     } else if (amount < 100000) {
-        const thousands = Math.floor(amount / 1000);
-        const remainder = amount % 1000;
-        const remainderWords = convertToWordsRecursive(remainder);
-        return convertToWordsRecursive(thousands) + " Thousand" + (remainderWords ? " " + remainderWords : "");
+        return (
+            convertToWordsRecursive(Math.floor(amount / 1000)) +
+            " Thousand " +
+            convertToWordsRecursive(amount % 1000)
+        );
     } else if (amount < 10000000) {
-        const lakhs = Math.floor(amount / 100000);
-        const remainder = amount % 100000;
-        const remainderWords = convertToWordsRecursive(remainder);
-        return convertToWordsRecursive(lakhs) + " Lakh" + (remainderWords ? " " + remainderWords : "");
+        return (
+            convertToWordsRecursive(Math.floor(amount / 100000)) +
+            " Lakh " +
+            convertToWordsRecursive(amount % 100000)
+        );
     } else {
-        const crores = Math.floor(amount / 10000000);
-        const remainder = amount % 10000000;
-        const remainderWords = convertToWordsRecursive(remainder);
-        return convertToWordsRecursive(crores) + " Crore" + (remainderWords ? " " + remainderWords : "");
+        return (
+            convertToWordsRecursive(Math.floor(amount / 10000000)) +
+            " Crore " +
+            convertToWordsRecursive(amount % 10000000)
+        );
     }
 };
 
 const convertToWords = () => {
-    const amountValue = Math.floor(props.invoice.total_amount);
-    const decimalPart = Math.round((props.invoice.total_amount - amountValue) * 100);
-    const decimalPartWords = decimalPart === 0 ? "" : convertToWordsRecursive(decimalPart) + " Paise";
+    const amountValue = Math.floor(props.invoice.total_ammount);
+    const decimalPart = Math.round(
+        (props.invoice.total_ammount - amountValue) * 100
+    );
+    const decimalPartWords = convertToWordsRecursive(decimalPart);
 
-    if (amountValue === 0 && decimalPart === 0) {
+    if (amountValue === 0) {
         amountInWords.value = "Zero Rupees";
-    } else if (amountValue === 0) {
-        amountInWords.value = decimalPartWords;
     } else {
-        amountInWords.value = convertToWordsRecursive(amountValue) + " Rupees" + (decimalPartWords ? " and " + decimalPartWords : "");
+        amountInWords.value = `${convertToWordsRecursive(
+            amountValue
+        )} Rupees and ${decimalPartWords} Paise`;
     }
 };
-
 onMounted(() => {
     convertToWords();
 });
