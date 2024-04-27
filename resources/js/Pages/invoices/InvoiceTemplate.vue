@@ -227,99 +227,61 @@ const props = defineProps({
 });
 
 
-const amountInWords = ref("");
-
 const rupeeWords = [
-    "Zero",
-    "One",
-    "Two",
-    "Three",
-    "Four",
-    "Five",
-    "Six",
-    "Seven",
-    "Eight",
-    "Nine",
+  "Zero",
+  "One",
+  "Two",
+  "Three",
+  "Four",
+  "Five",
+  "Six",
+  "Seven",
+  "Eight",
+  "Nine",
 ];
-const tensWords = [
-    "",
-    "Ten",
-    "Twenty",
-    "Thirty",
-    "Forty",
-    "Fifty",
-    "Sixty",
-    "Seventy",
-    "Eighty",
-    "Ninety",
-];
-const teensWords = [
-    "Ten",
-    "Eleven",
-    "Twelve",
-    "Thirteen",
-    "Fourteen",
-    "Fifteen",
-    "Sixteen",
-    "Seventeen",
-    "Eighteen",
-    "Nineteen",
-];
+
+const tensWords = ["Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+const teensWords = ["Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
 
 const convertToWordsRecursive = (amount) => {
-    if(amount==0){
-        return '';
-    }
-    if (amount < 10) {
-        return rupeeWords[amount];
-    } else if (amount < 20) {
-        return teensWords[amount - 10];
-    } else if (amount < 100) {
-        return (
-            tensWords[Math.floor(amount / 10)] + " " + rupeeWords[amount % 10]
-        );
-    } else if (amount < 1000) {
-        return (
-            rupeeWords[Math.floor(amount / 100)] +
-            " Hundred " +
-            convertToWordsRecursive(amount % 100)
-        );
-    } else if (amount < 100000) {
-        return (
-            convertToWordsRecursive(Math.floor(amount / 1000)) +
-            " Thousand " +
-            convertToWordsRecursive(amount % 1000)
-        );
-    } else if (amount < 10000000) {
-        return (
-            convertToWordsRecursive(Math.floor(amount / 100000)) +
-            " Lakh " +
-            convertToWordsRecursive(amount % 100000)
-        );
-    } else {
-        return (
-            convertToWordsRecursive(Math.floor(amount / 10000000)) +
-            " Crore " +
-            convertToWordsRecursive(amount % 10000000)
-        );
-    }
+  if (amount === 0) {
+    return "";
+  }
+  if (amount < 10) {
+    return rupeeWords[amount];
+  } else if (amount < 20) {
+    return teensWords[amount - 10];
+  } else if (amount < 100) {
+    return `${tensWords[Math.floor(amount / 10)]} ${rupeeWords[amount % 10]}`; // Combine tens and units
+  } else {
+    // Handle larger denominations (hundreds, thousands, lakhs, crores, etc.)
+    const placeValue = Math.floor(Math.log10(amount) / 3); // Calculate the place value (hundreds, thousands, etc.)
+    const placeName = [ // Array of place names (optional)
+      "",
+      " Hundred",
+      " Thousand",
+      " Lakh",
+      " Crore",
+      // ... add more place names for larger denominations if needed
+    ][placeValue];
+
+    const remainingAmount = amount % (10 ** placeValue); // Extract the remaining amount for this place value
+    return `${convertToWordsRecursive(Math.floor(amount / (10 ** placeValue)))} ${placeName} ${convertToWordsRecursive(remainingAmount)}`;
+  }
 };
 
 const convertToWords = () => {
-    const amountValue = Math.floor(props.invoice.total_ammount);
-    const decimalPart = Math.round(
-        (props.invoice.total_ammount - amountValue) * 100
-    );
-    const decimalPartWords = convertToWordsRecursive(decimalPart);
+  const amountValue = Math.floor(props.invoice.total_ammount);
+  const decimalPart = Math.round((props.invoice.total_ammount - amountValue) * 100);
+  const decimalPartWords = convertToWordsRecursive(decimalPart);
 
-    if (amountValue == 0) {
-        amountInWords.value = "Zero Rupees";
-    } else {
-        amountInWords.value = `${convertToWordsRecursive(
-            amountValue
-        )} Rupees and ${decimalPartWords} Paise`;
-    }
+  if (amountValue === 0) {
+    amountInWords.value = "Zero Rupees";
+  } else {
+    amountInWords.value = `${convertToWordsRecursive(amountValue)} Rupees and ${decimalPartWords} Paise`;
+  }
 };
+
 onMounted(() => {
     convertToWords();
 });
