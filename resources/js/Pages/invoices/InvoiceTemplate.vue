@@ -117,7 +117,7 @@
                 HSN CODE
             </div>
             <div class="font-bold border-b border-l border-r border-black border-solid col-1">
-                Quantity
+                Qty
             </div>
             <div class="font-bold border-b border-black border-solid col-1">
                 Unit
