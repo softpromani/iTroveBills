@@ -311,17 +311,20 @@ const convertToWords = () => {
     const decimalPart = Math.round(
         (props.invoice.total_ammount - amountValue) * 100
     );
-    const decimalPartWords = convertToWordsRecursive(decimalPart);
 
-    if (amountValue === 0) {
-        amountInWords.value = "Zero Rupees";
+    // Converting the main part of the amount to words
+    const amountValueWords = convertToWordsRecursive(amountValue);
+
+    // Check if there is any decimal part to convert
+    if (decimalPart > 0) {
+        const decimalPartWords = convertToWordsRecursive(decimalPart);
+        amountInWords.value = `${amountValueWords} Rupees and ${decimalPartWords} Paise`;
     } else {
-        console.log( amountInWords.value);
-        amountInWords.value = `${convertToWordsRecursive(
-            amountValue
-        )} Rupees and ${decimalPartWords} Paise`;
+        // If there is no decimal part, exclude "and [decimalPartWords] Paise"
+        amountInWords.value = `${amountValueWords} Rupees`;
     }
 };
+
 onMounted(() => {
     convertToWords();
 });
