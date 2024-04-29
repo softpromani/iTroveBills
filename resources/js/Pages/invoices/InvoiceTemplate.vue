@@ -116,7 +116,7 @@
             <div class="font-bold border-b border-l border-black border-solid col-2">
                 HSN CODE
             </div>
-            <div class="font-bold border-b border-l border-r border-black border-solid col-2">
+            <div class="font-bold border-b border-l border-r border-black border-solid col-1">
                 Quantity
             </div>
             <div class="font-bold border-b border-black border-solid col-1">
@@ -125,7 +125,7 @@
             <div class="font-bold border-b border-l border-black border-solid col-1">
                 Weight
             </div>
-            <div class="font-bold border-b border-l border-black border-solid col-1">
+            <div class="font-bold border-b border-l border-black border-solid col-2">
                 Rate
             </div>
             <div class="font-bold border-b border-l border-r border-black border-solid col-2">
@@ -142,7 +142,7 @@
             <div class="border-b border-l border-black border-solid col-2">
                 {{ data.hsn_code ?? "" }}
             </div>
-            <div class="border-b border-l border-r border-black border-solid col-2">
+            <div class="border-b border-l border-r border-black border-solid col-1">
                 {{ data.quantity ?? "" }}
             </div>
             <div class="border-b border-black border-solid col-1">
@@ -154,7 +154,7 @@
             <div class="border-b border-l border-black border-solid col-1">
                 {{ data.rate ?? "" }}
             </div>
-            <div class="border-b border-l border-r border-black border-solid col-2">
+            <div class="border-b border-l border-r border-black border-solid col-3">
                 {{ data.rate * data.quantity ?? "" }}
             </div>
         </div>
