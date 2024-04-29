@@ -151,10 +151,10 @@
             <div class="border-b border-l border-black border-solid col-1">
                 {{ data.weight ?? "" }}
             </div>
-            <div class="border-b border-l border-black border-solid col-1">
+            <div class="border-b border-l border-black border-solid col-2">
                 {{ data.rate ?? "" }}
             </div>
-            <div class="border-b border-l border-r border-black border-solid col-3">
+            <div class="border-b border-l border-r border-black border-solid col-2">
                 {{ data.rate * data.quantity ?? "" }}
             </div>
         </div>
