@@ -129,7 +129,7 @@ const updateCell = (rowIndex, cellIndex, event) => {
         }
         // If it's not a number, reset the cell content
         else {
-            event.target.textContent = tableData.value[rowIndex][cellIndex];
+            event.target.textContent = 0;
         }
     } else {
         // For other cells, allow any input
