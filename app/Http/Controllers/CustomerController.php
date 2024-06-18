@@ -91,7 +91,7 @@ class CustomerController extends Controller
         ]);
         if($valid){
             SellerCustomers::find($id)->update([
-                'customer_data'=>json_encode($request->all())
+                'customer_company_data'=>json_encode($request->all())
             ]);
             return redirect()->route('company.customer.view')->with('success', 'Customer added successfully');
 
