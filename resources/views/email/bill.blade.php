@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Astrology</title>
+    <title>ITrove Bills</title>
     <style>
         .container {
             max-width: 600px;
@@ -41,6 +41,8 @@
             text-decoration: none;
             border: 1px solid purple;
             padding: 10px;
+            background-color: purple;
+            color: white;
             border-radius: 10px;
             margin-bottom:20px;
         }

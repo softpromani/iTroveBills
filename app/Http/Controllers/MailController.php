@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\BillMail;
 use App\Models\Invoice;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class MailController extends Controller
 {
@@ -23,8 +24,8 @@ class MailController extends Controller
         $data["Seller_Company"] = $invoice_company_data->Company->company_name;
         $data["invoice_number"] = $invoice_data->invoice_number;
 
-        Mail::to(env('MAIL_FROM_ADDRESS'))->send(new BillMail($data));
-        return redirect()->back()->with('success','Mail Send Successfully');
+        Mail::to($invoice_data->Customer->email)->send(new BillMail($data));
+        return redirect()->back()->with('success','Mail Sent Successfully');
     }
 }
 

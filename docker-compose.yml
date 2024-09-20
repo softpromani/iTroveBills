@@ -13,6 +13,7 @@ services:
       - "9000:80"
     volumes:
       - .:/var/www/html
+      - ./public:/var/www/html/public
     environment:
       DB_HOST: db # Use the service name of the MySQL service
       DB_PORT: 3306

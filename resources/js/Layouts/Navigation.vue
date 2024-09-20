@@ -15,11 +15,11 @@
     >
         <div class="flex items-center justify-center mt-8">
             <div class="flex items-center">
-                <img :src="$page.props.auth.user.app_logo??'itimages/it.png'" alt="" srcset="" style="height: 70px;">
+                <!-- <img :src="$page.props.auth.user.app_logo??'itimages/it.png'" alt="" srcset="" style="height: 70px;">
 
                 <span class="mx-2 text-2xl font-semibold text-white"
                     >{{ $page.props.auth.user.app_name??'Innovation Trove' }}</span
-                >
+                > -->
             </div>
         </div>
 
@@ -444,9 +444,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Veniam, eos pariatur. Sunt corrupti error voluptatem
-                    laudantium facilis reprehenderit, quod nesciunt?
+                    You don't have any Subscription Plans yet. Please click on Subscription Plans button to continue !
                 </div>
                 <div class="modal-footer">
                     <Link

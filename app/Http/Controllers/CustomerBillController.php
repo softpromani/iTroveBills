@@ -16,7 +16,7 @@ use Inertia\Inertia;
 
 class CustomerBillController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $customers = SellerCustomers::where('seller_id', Auth::id())->get();
         $company = Company::where('seller_id', Auth::id())->get();
@@ -26,13 +26,21 @@ class CustomerBillController extends Controller
                 'name' => $company->company_name,
             ];
         });
+
         $customer_list = $customers->map(function ($customer) {
             return [
                 'id' => $customer->customer_company_id,
                 'name' => $customer->customer_detail['name'] . '/' . $customer->customer_detail['mobile'],
             ];
         });
-        return Inertia::render('Bills/index', compact('customer_list', 'company_list'));
+
+        if(isset($request)){
+            $selectedCustId = $request->customer_id;
+            return Inertia::render('Bills/index', compact('customer_list', 'company_list', 'selectedCustId'));
+        }
+        else{
+            return Inertia::render('Bills/index', compact('customer_list', 'company_list'));
+        }
     }
 
     public function index_details(Request $request)
@@ -57,31 +65,31 @@ class CustomerBillController extends Controller
                 'name' => $customer->customer_detail['name'] . '/' . $customer->customer_detail['mobile'],
             ];
         });
-// financial year date
-// Get today's date
-$today = new DateTime();
-    
-// Get the current year
-$currentYear = (int)$today->format('Y');
+        // financial year date
+        // Get today's date
+        $today = new DateTime();
 
-// Get the current month
-$currentMonth = (int)$today->format('m');
+        // Get the current year
+        $currentYear = (int)$today->format('Y');
 
-// Determine the financial year based on the current date
-if ($currentMonth < 4) {
-    // If the month is before April, the financial year started last calendar year
-    $financialYearStart = $currentYear - 1;
-    $financialYearEnd = $currentYear;
-} else {
-    // If the month is April or later, the financial year starts this calendar year
-    $financialYearStart = $currentYear;
-    $financialYearEnd = $currentYear + 1;
-}
+        // Get the current month
+        $currentMonth = (int)$today->format('m');
 
-// Format the financial year in the 'YY-YY' format
-$financialYear = sprintf("%d-%d", substr($financialYearStart,-2), substr($financialYearEnd, -2));
+        // Determine the financial year based on the current date
+        if ($currentMonth < 4) {
+            // If the month is before April, the financial year started last calendar year
+            $financialYearStart = $currentYear - 1;
+            $financialYearEnd = $currentYear;
+        } else {
+            // If the month is April or later, the financial year starts this calendar year
+            $financialYearStart = $currentYear;
+            $financialYearEnd = $currentYear + 1;
+        }
 
-// end
+        // Format the financial year in the 'YY-YY' format
+        $financialYear = sprintf("%d-%d", substr($financialYearStart,-2), substr($financialYearEnd, -2));
+
+        // end
         $company = Company::where('seller_id', Auth::id())->where('id', $company_id)->first();
         $inv_count = $company->ThisYearInvoice()->count() ?? 0;
         $inv_no = $company->invoice_series . '-' . $financialYear . '/' . str_pad($inv_count + 1, 5, '0', STR_PAD_LEFT);

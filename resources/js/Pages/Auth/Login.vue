@@ -4,7 +4,8 @@
     <GuestLayout>
         <div class="row">
             <Link href="/" class="flex items-center justify-center">
-               <img src="itimages/itlogo.png" alt="" class="h-20 text-gray-500 fill-current w-30">
+               <img src="#" alt="" class="h-20 text-gray-500 fill-current w-30">
+               <!-- <img src="itimages/itlogo.png" alt="" class="h-20 text-gray-500 fill-current w-30"> -->
             </Link>
 
             <div v-if="status" class="mb-4 text-sm font-medium text-green-600">

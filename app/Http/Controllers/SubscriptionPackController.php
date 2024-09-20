@@ -37,7 +37,7 @@ class SubscriptionPackController extends Controller
 
          if($response){
             auth()->user()->assignRole(User::$role_seller);
-            return redirect()->back()->with('success', 'Plane buy Successfully!');
+            return redirect()->back()->with('success', 'Plan bought Successfully!');
          }
     }
 }

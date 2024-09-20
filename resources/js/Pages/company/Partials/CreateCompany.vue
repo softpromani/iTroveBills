@@ -302,6 +302,30 @@ function submit() {
                         srcset=""
                     />
                 </div>
+                <div class="mt-3 col-md-6">
+                    <InputLabel for="brand_banner" value="Brand Banner" />
+                    <input
+                        class="form-control"
+                        id="brand_banner"
+                        type="file"
+                        @input="form.brand_banner = $event.target.files[0]"
+                    />
+                    <InputError class="mt-2" :message="form.errors.sign" />
+                    <progress
+                        v-if="form.progress"
+                        :value="form.progress.percentage"
+                        max="100"
+                    >
+                        {{ form.progress.percentage }}%
+                    </progress>
+                    <img
+                        v-if="props.editdata"
+                        :src="form.brand_banner"
+                        alt=""
+                        sizes=""
+                        srcset=""
+                    />
+                </div>
             </div>
             <div class="flex items-center gap-4">
                 <PrimaryButton :disabled="form.processing">{{

@@ -31,7 +31,7 @@ return new class extends Migration
             $table->string('ad_code')->nullable();
             $table->unsignedBigInteger('seller_id')->nullable();
             $table->unsignedBigInteger('status');
-            $table->enum('type', ['gst', 'tpn', 'pan'])->default('gst');
+            $table->enum('tax_type', ['gst', 'tpn', 'pan'])->default('gst');
             $table->unsignedBigInteger('invoice_template_id')->nullable();
             $table->softDeletes();
             $table->timestamps();

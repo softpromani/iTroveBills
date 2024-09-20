@@ -19,7 +19,7 @@
             <div class="px-4 py-2 -mx-3">
                 <div class="mx-3">
                     <span class="font-semibold text-blue-500"
-                        >Sample customer View Info</span
+                        >Invoice Lists</span
                     >
                 </div>
             </div>
@@ -30,16 +30,16 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Sr.no.</th>
-                            <th>invoice_number</th>
-                            <th>invoice_date</th>
-                            <th>total_ammount</th>
-                            <th>paid_ammount</th>
-                            <th>payment_status</th>
-                            <th>total_weight</th>
-                            <th>vehicle_no</th>
-                            <th>no_packets</th>
-                            <th>customer_id</th>
-                            <th>company_id</th>
+                            <th>Invoice Number</th>
+                            <th>Invoice Date</th>
+                            <th>Total Amount</th>
+                            <th>Paid Amount</th>
+                            <th>Payment Status</th>
+                            <th>Total Weight</th>
+                            <th>Vehicle No</th>
+                            <th>No. Packets</th>
+                            <th>Customer</th>
+                            <th>Company</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -62,7 +62,7 @@
                             <td>{{ invoice.total_weight ?? "" }}</td>
                             <td>{{ invoice.vehicle_no ?? "" }}</td>
                             <td>{{ invoice.no_packets ?? "NO PACK" }}</td>
-                            <td>{{ invoice.customer.name ?? "" }}</td>
+                            <td>{{ invoice.customer.company_name ?? "" }}</td>
                             <td>{{ invoice.company.company_name ?? "" }}</td>
                             <td>
                                 <div class="dropdown">
@@ -133,6 +133,12 @@
                                                 Generate E-Way Bill</Link
                                             >
                                         </li>
+                                        <li>
+                                            <a @click.prevent="openModal(invoice.id)" class="dropdown-item" href="#">
+                                              <i class="fa fa-car" aria-hidden="true" style="color: rgb(245, 180, 0);"></i>
+                                              Package Update
+                                            </a>
+                                        </li>
                                     </ul>
                                 </div>
                             </td>
@@ -147,29 +153,40 @@
             </div>
         </div>
 
-        <Modal :show="confirmCustomerDeletion" @close="closeModal">
-            <div class="p-6">
-                <h2 class="text-lg font-medium text-gray-900">
-                    Are you sure you want to delete your Customer?
-                </h2>
-                <div class="flex justify-end mt-6">
-                    <SecondaryButton @click="closeModal">
-                        Cancel
-                    </SecondaryButton>
-
-                    <DangerButton
-                        class="ml-3"
-                        :class="{
-                            'opacity-25': form.processing,
-                        }"
-                        :disabled="form.processing"
-                        @click="deleteCustomer"
-                    >
-                        Delete Customer
-                    </DangerButton>
-                </div>
+    <!-- Modal Component -->
+    <div v-if="showModal" class="modal fade show" style="display: block;" aria-modal="true" role="dialog">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title">Update Package</h5>
+            <button type="button" class="close" @click="closeModal">
+                <span>&times;</span>
+            </button>
             </div>
-        </Modal>
+            <div class="modal-body">
+            <form @submit.prevent="submitForm">
+                <div class="form-group mb-3">
+                    <label for="no_packets">No. of Package</label>
+                    <input type="number" class="form-control" id="no_packets" v-model="no_packets" required>
+                </div>
+                <div class="form-group mb-3">
+                    <label for="vehicle_no">Vehicle Number</label>
+                    <input type="text" class="form-control" id="vehicle_no" v-model="vehicle_no" required>
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @click="closeModal">Close</button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Modal Backdrop -->
+    <div v-if="showModal" class="modal-backdrop fade show"></div>
+
+
     </AuthenticatedLayout>
 </template>
 
@@ -183,24 +200,81 @@ import DangerButton from "@/Components/DangerButton.vue";
 import PrimaryButton from "@/Components/DangerButton.vue";
 import SecondaryButton from "@/Components/SecondaryButton.vue";
 import { useForm } from "@inertiajs/vue3";
+import axios from 'axios';
+import Swal from 'sweetalert2';
+
 const props = defineProps({
   invoices: Object,
 });
-const confirmCustomerDeletion = ref(false);
 const form = useForm({});
-let delete_id = null;
-const confirmUserDeletion = (id) => {
-  delete_id = id;
-  confirmCustomerDeletion.value = true;
-};
-const closeModal = () => {
-  confirmCustomerDeletion.value = false;
+
+// Reactive variables for modal and form fields
+const showModal = ref(false);
+const no_packets = ref('');
+const vehicle_no = ref('');
+const invoiceId = ref(null);
+const invoices = ref(props.invoices); // Reactive invoices array
+
+// Method to open the modal and fetch invoice data
+const openModal = (id) => {
+  showModal.value = true;
+  invoiceId.value = id;
+
+  // Fetch invoice details for the selected invoice ID
+  axios.get(`/api/fetch-invoice/${id}`)
+    .then(response => {
+      const invoiceData = response.data;
+      no_packets.value = invoiceData.no_packets || '';
+      vehicle_no.value = invoiceData.vehicle_no || '';
+      invoiceId.value = invoiceData.id || '';
+    })
+    .catch(error => {
+      console.error('Error fetching invoice:', error);
+    });
 };
 
-const deleteCustomer = () => {
-  form.post(route("company.customer.delete", delete_id), {
-    preserveScroll: true,
-    onSuccess: () => closeModal(),
+// Method to close the modal and reset fields
+const closeModal = () => {
+  showModal.value = false;
+  no_packets.value = '';
+  vehicle_no.value = '';
+};
+
+// Method to submit the form and update the invoice
+const submitForm = () => {
+  axios.post(`/api/update-invoice-package`, {
+    no_packets: no_packets.value,
+    vehicle_no: vehicle_no.value,
+    invoice_id: invoiceId.value
+  })
+  .then(response => {
+    console.log('Package updated successfully:', response.data);
+     // Show success message
+     Swal.fire({
+      title: 'Success!',
+      text: 'Package updated successfully.',
+      icon: 'success',
+      confirmButtonText: 'OK'
+    }).then(() => {
+        setTimeout(() => {
+            location.reload(); // Reload the page after 10 seconds
+        }, 10000);
+    });
+
+    closeModal();
+
+    location.reload();
+  })
+  .catch(error => {
+    console.error('Error updating package:', error);
+    // Show error message
+    Swal.fire({
+      title: 'Error!',
+      text: 'There was an error updating the package.',
+      icon: 'error',
+      confirmButtonText: 'OK'
+    });
   });
 };
 </script>
+
