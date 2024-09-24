@@ -13,8 +13,6 @@
                         :options="customer_list"
                         filter
                         optionLabel="name"
-                        optionValue="id"
-                        :key="id"
                         placeholder="Select a Customer"
                         class="h-12 mb-1 col-md-4"
                     />
@@ -33,12 +31,8 @@
                         Search</PrimaryButton
                     >
                 </div>
-
             </div>
-
         </form>
-
-
         <CustomerDetailVue
             :billing_user_detail="data"
             :series="series"
@@ -56,13 +50,12 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 import Editable from "./Partials/Editable.vue";
 import CustomerDetailVue from "./Partials/CustomerDetail.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import Dropdown from "primevue/dropdown";
 import { Link, useForm, usePage } from "@inertiajs/vue3";
-
 const props = defineProps({
     customer_list: Array,
     company_list: Array,
@@ -71,7 +64,6 @@ const props = defineProps({
     company: Object,
     customer_id: Number,
     company_id: Number,
-    selectedCustId: Number,
 });
 const series = props.inv_no ? props.inv_no : "";
 const CompanyName = props.company ? props.company.company_name : "";
@@ -88,15 +80,4 @@ function getcustomerdetail() {
         preserveScroll: true,
     });
 }
-
-// Set the customer ID on component mount
-onMounted(() => {
-    console.log('Selected Customer ID:', props.selectedCustId);
-    if (props.selectedCustId) {
-
-        form.customer_id = props.selectedCustId;
-        console.log('Form Customer ID after mounting:', form.customer_id);
-    }
-});
-
 </script>

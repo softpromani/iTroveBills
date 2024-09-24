@@ -139,6 +139,12 @@
                                               Package Update
                                             </a>
                                         </li>
+                                        <li>
+                                            <a @click.prevent="openPayBillModal(invoice.id)" class="dropdown-item" href="#">
+                                              <i class="fa fa-inr" aria-hidden="true" style="color: rgb(245, 180, 0);"></i>
+                                              Pay Bill
+                                            </a>
+                                        </li>
                                     </ul>
                                 </div>
                             </td>
@@ -185,6 +191,83 @@
 
     <!-- Modal Backdrop -->
     <div v-if="showModal" class="modal-backdrop fade show"></div>
+
+     <!-- Modal Component -->
+     <div v-if="PayBillModal" class="modal fade show" style="display: block;" aria-modal="true" role="dialog">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title">Pay Bill</h5>
+            <button type="button" class="close" @click="closePayBillModal">
+                <span>&times;</span>
+            </button>
+            </div>
+            <div class="modal-body">
+            <form @submit.prevent="submitPayBillForm">
+                <fieldset class="mb-3">
+                    <legend class="col-form-label pt-0">Payment Method</legend>
+
+                    <div class="form-check form-check-inline">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        id="cash"
+                        value="cash"
+                        v-model="payment_method">
+                      <label class="form-check-label" for="cash">Cash</label>
+                    </div>
+
+                    <div class="form-check form-check-inline">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        id="netbanking"
+                        value="netbanking"
+                        v-model="payment_method">
+                      <label class="form-check-label" for="netbanking">Netbanking</label>
+                    </div>
+
+                    <div class="form-check form-check-inline">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        id="cheque"
+                        value="cheque"
+                        v-model="payment_method">
+                      <label class="form-check-label" for="cheque">Cheque</label>
+                    </div>
+                  </fieldset>
+
+                  <div class="form-group mb-3">
+                    <label for="reference_no">Reference Number</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="reference_no"
+                      v-model="reference_no"
+                      required>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="reference_no">Amount</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="reference_no"
+                      v-model="amount"
+                      required>
+                  </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @click="closePayBillModal">Close</button>
+                <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Modal Backdrop -->
+    <div v-if="PayBillModal" class="modal-backdrop fade show"></div>
 
 
     </AuthenticatedLayout>
@@ -276,5 +359,65 @@ const submitForm = () => {
     });
   });
 };
+
+// Reactive variables for pay bill modal and form fields
+const PayBillModal = ref(false);
+const reference_no = ref('');
+const payment_method = ref('');
+const amount = ref('');
+
+// Method to close the pay bill modal and reset fields
+const closePayBillModal = () => {
+  PayBillModal.value = false;
+  payment_method.value = '';
+  reference_no.value = '';
+  amount.value = '';
+};
+
+// Method to open the modal and fetch invoice data
+const openPayBillModal = (id) => {
+  PayBillModal.value = true;
+  invoiceId.value = id;
+};
+
+// Method to submit the form and update the invoice
+const submitPayBillForm = () => {
+  axios.post(`/api/pay-bill`, {
+    payment_method: payment_method.value,
+    reference_no: reference_no.value,
+    amount: amount.value,
+    invoice_id: invoiceId.value
+  })
+  .then(response => {
+    console.log('Bill paid successfully:', response.data);
+
+    // Show success message using SweetAlert
+    Swal.fire({
+      title: 'Success!',
+      text: 'Bill paid successfully.',
+      icon: 'success',
+      confirmButtonText: 'OK'
+    }).then(() => {
+      setTimeout(() => {
+        location.reload();  // Reload the page after 10 seconds
+      }, 10000); // 10-second delay
+    });
+
+    closePayBillModal(); // Close the modal after submission
+
+  })
+  .catch(error => {
+    console.error('Error paying bill:', error);
+
+    // Show error message using SweetAlert
+    Swal.fire({
+      title: 'Error!',
+      text: 'There was an error paying the bill.',
+      icon: 'error',
+      confirmButtonText: 'OK'
+    });
+  });
+};
+
 </script>
 
