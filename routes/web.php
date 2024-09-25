@@ -5,6 +5,7 @@ use App\Http\Controllers\CustomerBillController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\MastergstController;
+use App\Http\Controllers\PaymentRequestController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SubscriptionPackController;
@@ -67,6 +68,9 @@ Route::middleware('auth')->group(function () {
     Route::post('customer-store-bill',[CustomerBillController::class,'store'])->name('customer.store.bill');
     Route::get('invoice-list',[CustomerBillController::class,'invoice_list'])->name('invoice.list');
     Route::post('bill-mail',[MailController::class,'billmail'])->name('bill.sendmail');
+
+    Route::resource('payment-request', PaymentRequestController::class);
+
 });
 Route::get('view-invoice',[CustomerBillController::class,'template'])->name('view.invoice');
 
