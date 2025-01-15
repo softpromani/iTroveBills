@@ -6,6 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     image: website
+    user: "${UID}:${GID}" # Match the host user's UID and GID
     container_name: ItroveBill
     restart: unless-stopped
     tty: true

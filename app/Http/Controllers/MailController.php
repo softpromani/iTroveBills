@@ -22,6 +22,7 @@ class MailController extends Controller
         $data["name"] = $invoice_data->Customer->company_name;
         $data["billdate"] = $invoice_data->invoice_date;
         $data["Seller_Company"] = $invoice_company_data->Company->company_name;
+        $data["company_id"] = $invoice_data->Customer->id;
         $data["invoice_number"] = $invoice_data->invoice_number;
 
         Mail::to($invoice_data->Customer->email)->send(new BillMail($data));

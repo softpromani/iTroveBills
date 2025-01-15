@@ -19,7 +19,7 @@
             <div class="-mx-3 px-4 py-2">
                 <div class="mx-3">
                     <span class="font-semibold text-blue-500"
-                        >Sample Firm View Info</span
+                        >Firm List</span
                     >
                 </div>
             </div>

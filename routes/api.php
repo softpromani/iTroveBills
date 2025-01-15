@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\CustomerBillController;
+use App\Http\Controllers\PaymentTypeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,3 +23,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('fetch-invoice/{id}', [InvoiceController::class, 'fetchInvoice']);
 Route::post('update-invoice-package', [InvoiceController::class, 'updateInvoicePackage']);
+
+//Fetch payment types
+Route::get('fetch-payment-types', [PaymentTypeController::class, 'fetchPaymentType']);
+
+//Fetch payment types
+Route::post('pay-bill', [CustomerBillController::class, 'payBill']);

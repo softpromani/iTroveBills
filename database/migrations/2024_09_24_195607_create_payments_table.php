@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->string('invoice_id')->nullable();
+            $table->morphs('paymentable');
+            $table->double('paid_amount', 10, 2)->default(0.00);
+            $table->double('total_amount', 10, 2)->default(0.00);
+            $table->string('status')->default('due');
             $table->timestamps();
         });
     }

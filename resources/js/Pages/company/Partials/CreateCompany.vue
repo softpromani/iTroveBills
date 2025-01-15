@@ -26,20 +26,47 @@ const form = useForm({
     bank_ifsc: props.editdata.bank_ifsc ?? "",
     bank_account_no: props.editdata.bank_account_no ?? "",
     adcode: props.editdata.ad_code ?? "",
+    brand_banner: props.editdata.brand_banner ? [...props.editdata.brand_banner] : [],
 });
+
+function handleFileInput(event) {
+    const files = Array.from(event.target.files); // Convert FileList to an array
+    form.brand_banner = files.map((file) => ({
+        file,
+        url: URL.createObjectURL(file), // Create a preview URL for each file
+    }));
+}
+
 function submit() {
+    const formData = new FormData();
+
+    // Append all form fields to FormData
+    Object.entries(form).forEach(([key, value]) => {
+        if (key === "brand_banner") {
+            // Handle multiple files
+            value.forEach((fileObj, index) => {
+                formData.append(`${key}[${index}]`, fileObj.file);
+            });
+        } else {
+            formData.append(key, value);
+        }
+    });
+
     if (props.editdata) {
         form.post(route("company.update", props.editdata.id), {
+            data: formData,
             preserveScroll: true,
             onSuccess: () => form.reset(),
         });
     } else {
         form.post(route("company.store"), {
+            data: formData,
             preserveScroll: true,
             onSuccess: () => form.reset(),
         });
     }
 }
+
 </script>
 
 <template>
@@ -49,303 +76,165 @@ function submit() {
         </header>
 
         <form @submit.prevent="submit" class="mt-6 space-y-6">
+
             <div class="row">
                 <div class="mt-2 col-md-6">
                     <InputLabel for="company_name" value="Firm Name" />
 
-                    <TextInput
-                        id="company_name"
-                        type="text"
-                        class="block w-full mt-1"
-                        v-model="form.company_name"
-                        required
-                        autofocus
-                        autocomplete="company_name"
-                    />
+                    <TextInput id="company_name" type="text" class="block w-full mt-1" v-model="form.company_name"
+                        required autofocus autocomplete="company_name" />
 
-                    <InputError
-                        class="mt-2"
-                        :message="form.errors.company_name"
-                    />
+                    <InputError class="mt-2" :message="form.errors.company_name" />
                 </div>
                 <div class="mt-2 col-md-6">
                     <InputLabel for="address" value="Address" />
 
-                    <TextInput
-                        id="address"
-                        type="text"
-                        class="block w-full mt-1"
-                        v-model="form.address"
-                        required
-                        autofocus
-                        autocomplete="address"
-                    />
+                    <TextInput id="address" type="text" class="block w-full mt-1" v-model="form.address" required
+                        autofocus autocomplete="address" />
 
                     <InputError class="mt-2" :message="form.errors.address" />
                 </div>
                 <div class="mt-2 col-md-6">
                     <InputLabel for="mobile" value="Mobile" />
 
-                    <TextInput
-                        id="mobile"
-                        type="number"
-                        class="block w-full mt-1"
-                        v-model="form.mobile"
-                        required
-                        autofocus
-                        autocomplete="mobile"
-                    />
+                    <TextInput id="mobile" type="number" class="block w-full mt-1" v-model="form.mobile" required
+                        autofocus autocomplete="mobile" />
 
                     <InputError class="mt-2" :message="form.errors.mobile" />
                 </div>
                 <div class="mt-2 col-md-6">
                     <InputLabel for="email" value="Email" />
 
-                    <TextInput
-                        id="email"
-                        type="email"
-                        class="block w-full mt-1"
-                        v-model="form.email"
-                        required
-                        autocomplete="email"
-                    />
+                    <TextInput id="email" type="email" class="block w-full mt-1" v-model="form.email" required
+                        autocomplete="email" />
 
                     <InputError class="mt-2" :message="form.errors.email" />
                 </div>
                 <div class="mt-2 col-md-6">
                     <InputLabel for="city" value="City" />
 
-                    <TextInput
-                        id="city"
-                        type="text"
-                        class="block w-full mt-1"
-                        v-model="form.city"
-                        required
-                        autocomplete="city"
-                    />
+                    <TextInput id="city" type="text" class="block w-full mt-1" v-model="form.city" required
+                        autocomplete="city" />
 
                     <InputError class="mt-2" :message="form.errors.city" />
                 </div>
                 <div class="mt-2 col-md-6">
                     <InputLabel for="pin" value="Pin" />
 
-                    <TextInput
-                        id="pin"
-                        type="text"
-                        class="block w-full mt-1"
-                        v-model="form.pin"
-                        required
-                        autocomplete="pin"
-                    />
+                    <TextInput id="pin" type="text" class="block w-full mt-1" v-model="form.pin" required
+                        autocomplete="pin" />
 
                     <InputError class="mt-2" :message="form.errors.pin" />
                 </div>
                 <div class="mt-2 col-md-6">
                     <InputLabel for="gstin" value="GSTIN" />
 
-                    <TextInput
-                        id="gstin"
-                        type="text"
-                        class="block w-full mt-1"
-                        v-model="form.gstin"
-                        required
-                        autocomplete="gstin"
-                    />
+                    <TextInput id="gstin" type="text" class="block w-full mt-1" v-model="form.gstin" required
+                        autocomplete="gstin" />
 
                     <InputError class="mt-2" :message="form.errors.gstin" />
                 </div>
                 <div class="mt-2 col-md-6">
                     <InputLabel for="iec" value="IEC" />
 
-                    <TextInput
-                        id="iec"
-                        type="text"
-                        class="block w-full mt-1"
-                        v-model="form.iec"
-                        required
-                        autocomplete="iec"
-                    />
+                    <TextInput id="iec" type="text" class="block w-full mt-1" v-model="form.iec" required
+                        autocomplete="iec" />
 
                     <InputError class="mt-2" :message="form.errors.iec" />
                 </div>
                 <div class="mt-2 col-md-6">
                     <InputLabel for="invoice_series" value="Invoice Series" />
 
-                    <TextInput
-                        id="invoice_series"
-                        type="text"
-                        class="block w-full mt-1"
-                        v-model="form.invoice_series"
-                        required
-                        autocomplete="invoice_series"
-                    />
+                    <TextInput id="invoice_series" type="text" class="block w-full mt-1" v-model="form.invoice_series"
+                        required autocomplete="invoice_series" />
 
-                    <InputError
-                        class="mt-2"
-                        :message="form.errors.invoice_series"
-                    />
+                    <InputError class="mt-2" :message="form.errors.invoice_series" />
                 </div>
                 <div class="mt-2 col-md-6">
                     <InputLabel for="bank_name" value="Bank Name" />
 
-                    <TextInput
-                        id="bank_name"
-                        type="text"
-                        class="block w-full mt-1"
-                        v-model="form.bank_name"
-                        required
-                        autocomplete="bank_name"
-                    />
+                    <TextInput id="bank_name" type="text" class="block w-full mt-1" v-model="form.bank_name" required
+                        autocomplete="bank_name" />
 
                     <InputError class="mt-2" :message="form.errors.bank_name" />
                 </div>
                 <div class="mt-2 col-md-6">
                     <InputLabel for="bank_branch" value="Bank Branch" />
 
-                    <TextInput
-                        id="bank_branch"
-                        type="text"
-                        class="block w-full mt-1"
-                        v-model="form.bank_branch"
-                        required
-                        autocomplete="bank_branch"
-                    />
+                    <TextInput id="bank_branch" type="text" class="block w-full mt-1" v-model="form.bank_branch"
+                        required autocomplete="bank_branch" />
 
-                    <InputError
-                        class="mt-2"
-                        :message="form.errors.bank_branch"
-                    />
+                    <InputError class="mt-2" :message="form.errors.bank_branch" />
                 </div>
                 <div class="mt-2 col-md-6">
                     <InputLabel for="bank_ifsc" value="Bank IFSC" />
 
-                    <TextInput
-                        id="bank_ifsc"
-                        type="text"
-                        class="block w-full mt-1"
-                        v-model="form.bank_ifsc"
-                        required
-                        autocomplete="bank_ifsc"
-                    />
+                    <TextInput id="bank_ifsc" type="text" class="block w-full mt-1" v-model="form.bank_ifsc" required
+                        autocomplete="bank_ifsc" />
 
                     <InputError class="mt-2" :message="form.errors.bank_ifsc" />
                 </div>
                 <div class="mt-2 col-md-6">
                     <InputLabel for="bank_account_no" value="Bank Account No" />
 
-                    <TextInput
-                        id="bank_account_no"
-                        type="text"
-                        class="block w-full mt-1"
-                        v-model="form.bank_account_no"
-                        required
-                        autocomplete="bank_account_no"
-                    />
+                    <TextInput id="bank_account_no" type="text" class="block w-full mt-1" v-model="form.bank_account_no"
+                        required autocomplete="bank_account_no" />
 
-                    <InputError
-                        class="mt-2"
-                        :message="form.errors.bank_account_no"
-                    />
+                    <InputError class="mt-2" :message="form.errors.bank_account_no" />
                 </div>
                 <div class="mt-2 col-md-6">
                     <InputLabel for="adcode" value="ADCode" />
 
-                    <TextInput
-                        id="adcode"
-                        type="text"
-                        class="block w-full mt-1"
-                        v-model="form.adcode"
-                        required
-                        autocomplete="adcode"
-                    />
+                    <TextInput id="adcode" type="text" class="block w-full mt-1" v-model="form.adcode" required
+                        autocomplete="adcode" />
 
                     <InputError class="mt-2" :message="form.errors.adcode" />
                 </div>
                 <div class="mt-3 col-md-6">
                     <InputLabel for="formFile" value="Company Logo" />
-                    <input
-                        class="form-control"
-                        id="formFile"
-                        type="file"
-                        @input="form.logo = $event.target.files[0]"
-                    />
+                    <input class="form-control" id="formFile" type="file" @input="form.logo = $event.target.files[0]" />
                     <InputError class="mt-2" :message="form.errors.logo" />
-                    <img
-                        v-if="props.editdata"
-                        :src="form.logo"
-                        alt=""
-                        sizes=""
-                        srcset=""
-                    />
+                    <img v-if="props.editdata" :src="form.logo" alt="" sizes="" srcset="" />
                 </div>
                 <div class="mt-3 col-md-6">
                     <InputLabel for="sign" value="Signature" />
-                    <input
-                        class="form-control"
-                        id="sign"
-                        type="file"
-                        @input="form.sign = $event.target.files[0]"
-                    />
+                    <input class="form-control" id="sign" type="file" @input="form.sign = $event.target.files[0]" />
                     <InputError class="mt-2" :message="form.errors.sign" />
-                    <progress
-                        v-if="form.progress"
-                        :value="form.progress.percentage"
-                        max="100"
-                    >
+                    <progress v-if="form.progress" :value="form.progress.percentage" max="100">
                         {{ form.progress.percentage }}%
                     </progress>
-                    <img
-                        v-if="props.editdata"
-                        :src="form.sign"
-                        alt=""
-                        sizes=""
-                        srcset=""
-                    />
+                    <img v-if="props.editdata" :src="form.sign" alt="" sizes="" srcset="" />
                 </div>
                 <div class="mt-3 col-md-6">
                     <InputLabel for="brand_banner" value="Brand Banner" />
-                    <input
-                        class="form-control"
-                        id="brand_banner"
-                        type="file"
-                        @input="form.brand_banner = $event.target.files[0]"
-                    />
-                    <InputError class="mt-2" :message="form.errors.sign" />
-                    <progress
-                        v-if="form.progress"
-                        :value="form.progress.percentage"
-                        max="100"
-                    >
-                        {{ form.progress.percentage }}%
-                    </progress>
-                    <img
-                        v-if="props.editdata"
-                        :src="form.brand_banner"
-                        alt=""
-                        sizes=""
-                        srcset=""
-                    />
+                    <input class="form-control" id="brand_banner" type="file" multiple @change="handleFileInput" />
+                    <InputError class="mt-2" :message="form.errors.brand_banner" />
+                    <div v-if="form.progress">
+                        <div v-for="(file, index) in form.progress" :key="index" class="mb-2">
+                            <progress :value="file.percentage" max="100">
+                                {{ file.percentage }}%
+                            </progress>
+                        </div>
+                    </div>
+                    <div v-if="props.editdata">
+                        <img v-for="(file, index) in form.brand_banner" :key="index" :src="file.url" alt="Brand Banner"
+                            class="img-thumbnail" style="width: 150px; height: auto; margin: 5px;" />
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <PrimaryButton :disabled="form.processing">{{
+                        props.editdata.company_name ? "Update" : "Save"
+                        }}</PrimaryButton>
+
+                    <Transition enter-active-class="transition ease-in-out" enter-from-class="opacity-0"
+                        leave-active-class="transition ease-in-out" leave-to-class="opacity-0">
+                        <p v-if="form.recentlySuccessful" class="text-sm text-gray-600">
+                            Saved.
+                        </p>
+                    </Transition>
                 </div>
             </div>
-            <div class="flex items-center gap-4">
-                <PrimaryButton :disabled="form.processing">{{
-                    props.editdata.company_name ? "Update" : "Save"
-                }}</PrimaryButton>
 
-                <Transition
-                    enter-active-class="transition ease-in-out"
-                    enter-from-class="opacity-0"
-                    leave-active-class="transition ease-in-out"
-                    leave-to-class="opacity-0"
-                >
-                    <p
-                        v-if="form.recentlySuccessful"
-                        class="text-sm text-gray-600"
-                    >
-                        Saved.
-                    </p>
-                </Transition>
-            </div>
         </form>
     </section>
 </template>

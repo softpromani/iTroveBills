@@ -70,8 +70,24 @@ Route::middleware('auth')->group(function () {
     Route::post('bill-mail',[MailController::class,'billmail'])->name('bill.sendmail');
 
     Route::resource('payment-request', PaymentRequestController::class);
+    // performa invoices
+    Route::group(['prefix'=>'performa','as'=>'performa.'],function(){
+        Route::get('customer-bill',[CustomerBillController::class,'performa_index'])->name('customer.bill');
+        Route::get('customer-bill-edit',[CustomerBillController::class,'performa_edit'])->name('customer.bill.edit');
+        Route::post('customer-bill-update',[CustomerBillController::class,'performa_update'])->name('customer.bill.update');
+        Route::get('customer-detail-bill',[CustomerBillController::class,'performa_index_details'])->name('customer.detail.bill');
+        Route::post('customer-store-bill',[CustomerBillController::class,'performa_store'])->name('customer.store.bill');
+        Route::get('invoice-list',[CustomerBillController::class,'performa_invoice_list'])->name('invoice.list');
+        Route::post('bill-mail',[MailController::class,'performa_billmail'])->name('bill.sendmail');
+    
+    });
+
+    //Customer My Bill Route
+    Route::get('my-bill', [CustomerBillController::class, 'myBill'])->name('customer.mybill');
+
 
 });
 Route::get('view-invoice',[CustomerBillController::class,'template'])->name('view.invoice');
+Route::get('performa/view-invoice',[CustomerBillController::class,'performa_template'])->name('performa.view.invoice');
 
 require __DIR__.'/auth.php';

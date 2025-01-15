@@ -14,9 +14,9 @@ class PaymentTypeSeeder extends Seeder
     public function run(): void
     {
         $types = [
-            ['name' => 'Cash'],
-            ['name' => 'Online'],
-            ['name' => 'Cheque'],
+            ['name' => 'Cash', 'created_at' => now(), 'updated_at' => now() ],
+            ['name' => 'Netbanking', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Cheque', 'created_at' => now(), 'updated_at' => now()],
             // Add more roles as needed
         ];
 

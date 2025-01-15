@@ -9,6 +9,7 @@
                 </Link>
 
                 <form @submit.prevent="submit">
+                    <input type="hidden" v-if="company_id" v-model="form.company_id" />
                     <div class="row">
                         <div class="mt-3 col-md-6">
                             <InputLabel for="name" value="Name" />
@@ -66,6 +67,11 @@ import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 
+// Receive company_id from the controller
+const props = defineProps({
+    company_id: String
+});
+
 const form = useForm({
     name: "",
     email: "",
@@ -73,6 +79,7 @@ const form = useForm({
     mobile: "",
     password_confirmation: "",
     terms: false,
+    company_id: props.company_id ?? '',
 });
 
 const submit = () => {

@@ -75,6 +75,10 @@
             <h4>
                 Thank You
             </h4>
+
+
+            <br/><br/><br/>
+            <p><a href="{{ route('register', ['company_id' => Crypt::encrypt($data['company_id']) ]) }}">Create an account on ITrove Bill</a></p>
         </div>
 
         <!-- Footer -->

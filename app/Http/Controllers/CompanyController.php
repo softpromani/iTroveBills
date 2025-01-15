@@ -115,6 +115,7 @@ class CompanyController extends Controller
         return Inertia::render('company/index',compact('edata'));
     }
     public function update_company(Request $request,$id){
+        dd($request->all());
         $valid = $request->validate([
             'company_name' => 'required|string|max:255',
             'email' => 'email',

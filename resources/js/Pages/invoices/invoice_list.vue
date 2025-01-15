@@ -19,7 +19,7 @@
             <div class="px-4 py-2 -mx-3">
                 <div class="mx-3">
                     <span class="font-semibold text-blue-500"
-                        >Invoice Lists</span
+                        >Invoice List</span
                     >
                 </div>
             </div>
@@ -29,18 +29,17 @@
                 <table class="table" style="min-height: 200px">
                     <thead class="table-dark">
                         <tr>
-                            <th>Sr.no.</th>
-                            <th>Invoice Number</th>
-                            <th>Invoice Date</th>
-                            <th>Total Amount</th>
-                            <th>Paid Amount</th>
-                            <th>Payment Status</th>
-                            <th>Total Weight</th>
-                            <th>Vehicle No</th>
-                            <th>No. Packets</th>
-                            <th>Customer</th>
-                            <th>Company</th>
-                            <th>Action</th>
+                            <th class="col-1">Sr.no.</th>
+                            <th class="col-1">Invoice Number</th>
+                            <th class="col-1">Invoice Date</th>
+                            <th class="col-1">Total Amount</th>
+                            <th class="col-1">Paid Amount</th>
+                            <th class="col-2">Payment Status</th>
+                            <th class="col-1">Vehicle No</th>
+                            <th class="col-1">No. Packets</th>
+                            <th class="col-1">Customer</th>
+                            <th class="col-1">Company</th>
+                            <th class="col-1">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -52,14 +51,19 @@
                             <td>{{ invoice.invoice_number ?? "" }}</td>
                             <td>{{ invoice.invoice_date ?? "" }}</td>
                             <td>{{ invoice.total_ammount ?? "" }}</td>
-                            <td>{{ invoice.paid_ammount ?? "" }}</td>
+                            <td>{{ invoice.payment.paid_amount ?? "" }}</td>
                             <td>
                                 <span
-                                    class="px-3 py-1 mr-2 text-xs font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300"
-                                    >{{ invoice.payment_status.status }}</span
+                                  class="px-3 py-1 mr-2 text-xs font-medium rounded-full"
+                                  :class="{
+                                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300': invoice.payment.status === 'due',
+                                    'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300': invoice.payment.status === 'partial-paid',
+                                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': invoice.payment.status === 'paid'
+                                  }"
                                 >
+                                  {{ invoice.payment.status }}
+                                </span>
                             </td>
-                            <td>{{ invoice.total_weight ?? "" }}</td>
                             <td>{{ invoice.vehicle_no ?? "" }}</td>
                             <td>{{ invoice.no_packets ?? "NO PACK" }}</td>
                             <td>{{ invoice.customer.company_name ?? "" }}</td>
@@ -207,35 +211,17 @@
                 <fieldset class="mb-3">
                     <legend class="col-form-label pt-0">Payment Method</legend>
 
-                    <div class="form-check form-check-inline">
-                      <input
-                        class="form-check-input"
-                        type="radio"
-                        id="cash"
-                        value="cash"
-                        v-model="payment_method">
-                      <label class="form-check-label" for="cash">Cash</label>
+                    <div v-for="(type, index) in paymentTypes" :key="index" class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          :id="type.name"
+                          :value="type.id"
+                          v-model="payment_method_id"
+                        >
+                        <label class="form-check-label" :for="type.name">{{ type.name }}</label>
                     </div>
 
-                    <div class="form-check form-check-inline">
-                      <input
-                        class="form-check-input"
-                        type="radio"
-                        id="netbanking"
-                        value="netbanking"
-                        v-model="payment_method">
-                      <label class="form-check-label" for="netbanking">Netbanking</label>
-                    </div>
-
-                    <div class="form-check form-check-inline">
-                      <input
-                        class="form-check-input"
-                        type="radio"
-                        id="cheque"
-                        value="cheque"
-                        v-model="payment_method">
-                      <label class="form-check-label" for="cheque">Cheque</label>
-                    </div>
                   </fieldset>
 
                   <div class="form-group mb-3">
@@ -255,6 +241,10 @@
                       id="reference_no"
                       v-model="amount"
                       required>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="remark">Remark (if any)</label>
+                    <textarea class="form-control" id="remark" v-model="remark"></textarea>
                   </div>
                 <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" @click="closePayBillModal">Close</button>
@@ -363,47 +353,73 @@ const submitForm = () => {
 // Reactive variables for pay bill modal and form fields
 const PayBillModal = ref(false);
 const reference_no = ref('');
-const payment_method = ref('');
+const payment_method_id = ref('');
 const amount = ref('');
+const remark = ref('');
+const paymentTypes = ref([]);
 
 // Method to close the pay bill modal and reset fields
 const closePayBillModal = () => {
   PayBillModal.value = false;
-  payment_method.value = '';
+  payment_method_id.value = '';
   reference_no.value = '';
   amount.value = '';
+  remark.value = '';
 };
 
 // Method to open the modal and fetch invoice data
 const openPayBillModal = (id) => {
   PayBillModal.value = true;
   invoiceId.value = id;
+
+  axios.get(`/api/fetch-payment-types`)
+    .then(response => {
+      paymentTypes.value = response.data;
+    })
+    .catch(error => {
+      console.error('Error fetching types:', error);
+    });
+
 };
 
 // Method to submit the form and update the invoice
 const submitPayBillForm = () => {
   axios.post(`/api/pay-bill`, {
-    payment_method: payment_method.value,
+    payment_method_id: payment_method_id.value,
     reference_no: reference_no.value,
     amount: amount.value,
+    remark: remark.value,
     invoice_id: invoiceId.value
   })
   .then(response => {
-    console.log('Bill paid successfully:', response.data);
+    console.log('Bill paid successfully:', response);
+    if(response.data.status == 1)
+    {
+        Swal.fire({
+        title: 'Success!',
+        text: response.data.message,
+        icon: 'success',
+        confirmButtonText: 'OK'
+        }).then(() => {
+        setTimeout(() => {
+            location.reload();
+        }, 5000);
+        });
+    }
+    else{
+        Swal.fire({
+        title: 'Info!',
+        text: response.data.message,
+        icon: 'warning',
+        confirmButtonText: 'OK'
+        }).then(() => {
+        setTimeout(() => {
+            location.reload();
+        }, 5000);
+        });
+    }
 
-    // Show success message using SweetAlert
-    Swal.fire({
-      title: 'Success!',
-      text: 'Bill paid successfully.',
-      icon: 'success',
-      confirmButtonText: 'OK'
-    }).then(() => {
-      setTimeout(() => {
-        location.reload();  // Reload the page after 10 seconds
-      }, 10000); // 10-second delay
-    });
-
-    closePayBillModal(); // Close the modal after submission
+    closePayBillModal();
 
   })
   .catch(error => {

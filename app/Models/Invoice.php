@@ -21,6 +21,25 @@ class Invoice extends Model
         static::updating(function ($invoice) {
             $invoice->invoiceitems()->delete();
         });
+
+        static::created(function($invoice) {
+            // Create a payment record associated with the invoice
+            Log::info('created event -'.json_encode($invoice));
+            $invoice->payment()->create(['total_amount' => $invoice->total_ammount]);
+        });
+
+
+        static::updated(function($invoice) {
+            // Define the attributes to find the existing payment
+            $attributes = ['paymentable_id' => $invoice->id, 'paymentable_type' => get_class($invoice)];
+
+            // Define the values to update or create
+            $values = ['total_amount' => $invoice->total_ammount];
+
+            // Use updateOrCreate
+            $invoice->payment()->updateOrCreate($attributes, $values);
+        });
+
     }
     public function Company()
     {
@@ -39,5 +58,8 @@ class Invoice extends Model
         return $this->belongsTo(Status::class, 'payment_status');
     }
 
-   
+    public function payment()
+    {
+        return $this->morphOne(Payment::class, 'paymentable');
+    }
 }

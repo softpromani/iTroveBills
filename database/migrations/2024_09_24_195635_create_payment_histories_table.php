@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('payment_histories', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('payment_id');
+            $table->unsignedBigInteger('payment_type_id');
+            $table->double('amount', 10, 2)->default(0.00);
+            $table->string('reference_no')->nullable();
+            $table->text('remark')->nullable();
+            $table->text('payload_response')->nullable();
+            $table->string('status')->default('pending');
             $table->timestamps();
         });
     }
