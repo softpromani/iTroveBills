@@ -61,7 +61,7 @@
                                     'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': invoice.payment.status === 'paid'
                                   }"
                                 >
-                                  {{ invoice.payment.status }}
+                                  {{ invoice.payment?.status }}
                                 </span>
                             </td>
                             <td>{{ invoice.vehicle_no ?? "" }}</td>

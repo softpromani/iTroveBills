@@ -403,4 +403,15 @@ class CustomerBillController extends Controller
         $invoices->load('payment');
         return inertia('my-invoices/invoice_list', compact('invoices'));
     }
+
+    public function Fetch_bill_create_payment_for_old_data(){
+        $invoices=Invoice::get();
+        foreach($invoices as $inv){
+           $res= $inv->payment()->firstOrCreate([
+                'paid_amount'=>0.00,
+                'total_amount'=>$inv->total_ammount
+            ]);
+          echo json_encode($res);
+        }
+    }
 }
