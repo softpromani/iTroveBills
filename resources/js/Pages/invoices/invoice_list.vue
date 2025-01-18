@@ -51,7 +51,7 @@
                             <td>{{ invoice.invoice_number ?? "" }}</td>
                             <td>{{ invoice.invoice_date ?? "" }}</td>
                             <td>{{ invoice.total_ammount ?? "" }}</td>
-                            <td>{{ invoice.payment.paid_amount ?? "" }}</td>
+                            <td>{{ invoice.payment?.paid_amount ?? "" }}</td>
                             <td>
                                 <span
                                   class="px-3 py-1 mr-2 text-xs font-medium rounded-full"
