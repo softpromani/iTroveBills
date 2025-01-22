@@ -216,7 +216,7 @@
         </div>
         <div class="row">
             <div class="col-2">
-                 <img class="img" :src="props.invoice.company.sign ?? ''" alt="jpeg" style="height:80px;width:230px" />
+                 <!-- <img class="img" :src="props.invoice.company.sign ?? ''" alt="jpeg" style="height:80px;width:230px" /> -->
             </div>
         </div>
     </div>
