@@ -115,7 +115,7 @@ class CompanyController extends Controller
         return Inertia::render('company/index',compact('edata'));
     }
     public function update_company(Request $request,$id){
-        dd($request->all());
+        // dd($request->all());
         $valid = $request->validate([
             'company_name' => 'required|string|max:255',
             'email' => 'email',
@@ -132,6 +132,16 @@ class CompanyController extends Controller
             'bank_account_no' => 'required',
             'adcode' => 'required',
         ]);
+        if($request->has('brand_banner')){
+            $banners=[];
+            foreach($request->brand_banner as $banner){
+                $banner=$banner['file'];
+                $bname=time() .'-'.rand(0000,9999). '.' . $banner->getClientOriginalExtension();
+                $banner->move(public_path('company_file/inv_banner/'),$bname);
+                $banners[]='company_file/inv_banner/'.$bname;
+            }
+            Company::find($id)->update(['brand_banner'=>json_encode($banners)]);
+        }
         if ($request->hasFile('logo')) {
             if (Company::find($id)->logo) {
                 $oldImagePath = public_path(Company::find($id)->logo);

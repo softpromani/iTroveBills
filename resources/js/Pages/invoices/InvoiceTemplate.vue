@@ -215,8 +215,10 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-2">
-                 <!-- <img class="img" :src="props.invoice.company.sign ?? ''" alt="jpeg" style="height:80px;width:230px" /> -->
+            <div class="col-6 col-md-3 col-lg-2" v-for="(image,index) in props.invoice?.company?.brand_banner" :key="index">
+                <div class="brand-image-container">
+                    <img :src="image" alt="Brand Banner" class="img-fluid" style="height:80px;width:230px" />
+                </div>
             </div>
         </div>
     </div>
@@ -367,4 +369,19 @@ onMounted(() => {
             visibility: hidden;
         }
     }
+</style>
+<style scoped>
+.brand-image-container {
+  width: 100%;
+  height: 100px; /* Set a fixed height for all images */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-image-container img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* Keeps aspect ratio, adds space if needed */
+}
 </style>

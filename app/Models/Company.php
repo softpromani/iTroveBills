@@ -11,6 +11,9 @@ class Company extends Model
 {
     use HasFactory,SoftDeletes;
     protected $guarded = [];
+    protected $casts = [
+        'brand_banner' => 'array', // Automatically JSON decode
+    ];
     public function CompanyLut(){
         return $this->hasMany(CompanyLUT::class,'company_id','id');
     }
