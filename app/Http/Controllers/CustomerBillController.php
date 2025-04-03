@@ -369,23 +369,13 @@ class CustomerBillController extends Controller
             $invoice = PerformaInvoice::find($inv_id);
             $invoice->load('invoiceitems');
             $invoice->load('Customer');
-            $invoice->load(['Company' => function ($query) {
-                // Load the 'CompanyLut' relationship and order it by the 'created_at' timestamp
-                $query->with(['CompanyLut' => function ($subquery) {
-                    $subquery->latest()->first(); // Assuming there's a timestamp column like 'created_at' or 'updated_at'
-                }]);
-            }]);
+            $invoice->load(['Company']);
         } catch (DecryptException $e) {
             $inv_id = $request->invoice_id;
             $invoice = PerformaInvoice::find($inv_id);
             $invoice->load('invoiceitems');
             $invoice->load('Customer');
-            $invoice->load(['Company' => function ($query) {
-                // Load the 'CompanyLut' relationship and order it by the 'created_at' timestamp
-                $query->with(['CompanyLut' => function ($subquery) {
-                    $subquery->latest()->first(); // Assuming there's a timestamp column like 'created_at' or 'updated_at'
-                }]);
-            }]);
+            $invoice->load(['Company']);
         }
         return inertia('Performa-invoices/InvoiceTemplate', compact('invoice'));
     }
