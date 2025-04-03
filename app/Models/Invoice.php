@@ -62,4 +62,9 @@ class Invoice extends Model
     {
         return $this->morphOne(Payment::class, 'paymentable');
     }
+
+    public function lut()
+    {
+        return $this->belongsTo(CompanyLUT::class, 'lut_id');
+    }
 }

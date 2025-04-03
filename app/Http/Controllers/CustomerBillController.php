@@ -109,6 +109,7 @@ class CustomerBillController extends Controller
             'invoicedetails.*.totalTaxableValue' => 'required|numeric',
         ]);
         if ($valid) {
+            $lut = CompanyLUT::where('company_id', $request->invoicedetails[0]['company'])->latest()->first();
             $invoice_data = Invoice::create([
                 'invoice_number' => $request->invoicedetails[0]['invoice'],
                 'invoice_date' => now(),
@@ -118,6 +119,7 @@ class CustomerBillController extends Controller
                 'vehicle_no' => $request->invoicedetails[0]['vehical_no'],
                 'customer_company_id' => $request->invoicedetails[0]['customer'],
                 'company_id' => $request->invoicedetails[0]['company'],
+                'lut_id' => isset($lut) ? $lut->id : Null,
             ]);
 
             foreach ($request->invoicedata as $key => $data) {
@@ -154,23 +156,16 @@ class CustomerBillController extends Controller
             $invoice = Invoice::find($inv_id);
             $invoice->load('invoiceitems');
             $invoice->load('Customer');
-            $invoice->load(['Company' => function ($query) {
-                // Load the 'CompanyLut' relationship and order it by the 'created_at' timestamp
-                $query->with(['CompanyLut' => function ($subquery) {
-                    $subquery->latest()->first(); // Assuming there's a timestamp column like 'created_at' or 'updated_at'
-                }]);
-            }]);
+            $invoice->load('lut');
+            $invoice->load('Company');
+            
         } catch (DecryptException $e) {
             $inv_id = $request->invoice_id;
             $invoice = Invoice::find($inv_id);
             $invoice->load('invoiceitems');
             $invoice->load('Customer');
-            $invoice->load(['Company' => function ($query) {
-                // Load the 'CompanyLut' relationship and order it by the 'created_at' timestamp
-                $query->with(['CompanyLut' => function ($subquery) {
-                    $subquery->latest()->first(); // Assuming there's a timestamp column like 'created_at' or 'updated_at'
-                }]);
-            }]);
+            $invoice->load('lut');
+            $invoice->load('Company');
         }
         return inertia('invoices/InvoiceTemplate', compact('invoice'));
     }
