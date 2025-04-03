@@ -35,4 +35,8 @@ class PerformaInvoice extends Model
     {
         return $this->hasMany(PerformaInvoiceItem::class,'invoice_id');
     }
+    public function lut()
+    {
+        return $this->belongsTo(CompanyLUT::class, 'lut_id');
+    }
 }

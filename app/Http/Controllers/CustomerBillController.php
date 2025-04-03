@@ -9,6 +9,7 @@ use App\Models\PerformaInvoice;
 use App\Models\PerformaInvoiceItem;
 use App\Models\SellerCustomers;
 use App\Models\Status;
+use App\Models\CompanyLUT;
 use DateTime;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
@@ -326,6 +327,7 @@ class CustomerBillController extends Controller
             'invoicedetails.*.totalTaxableValue' => 'required|numeric',
         ]);
         if ($valid) {
+            $lut = CompanyLUT::where('company_id', $request->invoicedetails[0]['company'])->latest()->first();
             $invoice_data = PerformaInvoice::create([
                 'invoice_number' => $request->invoicedetails[0]['invoice'],
                 'invoice_date' => now(),
@@ -335,6 +337,7 @@ class CustomerBillController extends Controller
                 'vehicle_no' => $request->invoicedetails[0]['vehical_no'],
                 'customer_company_id' => $request->invoicedetails[0]['customer'],
                 'company_id' => $request->invoicedetails[0]['company'],
+                'lut_id' => isset($lut) ? $lut->id : Null,
             ]);
 
             foreach ($request->invoicedata as $key => $data) {
@@ -369,6 +372,7 @@ class CustomerBillController extends Controller
             $invoice = PerformaInvoice::find($inv_id);
             $invoice->load('invoiceitems');
             $invoice->load('Customer');
+            $invoice->load('lut');
             $invoice->load(['Company']);
         } catch (DecryptException $e) {
             $inv_id = $request->invoice_id;

@@ -29,7 +29,7 @@
             </div>
             <div class="border-b border-l border-black border-solid col-4">
                 <p class="text-center">
-                    LUT NO- {{ props.invoice.company.company_lut[0].lut_no ?? "" }}
+                    LUT NO- {{ props.invoice.lut.lut_no ?? "" }}
                 </p>
             </div>
             <div class="border-b border-l border-r border-black border-solid col-4">

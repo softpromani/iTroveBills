@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('invoices', function (Blueprint $table) {
-            $table->string('lut_id')->nullable()->after('company_id');
+        Schema::table('performa_invoices', function (Blueprint $table) {
+            $table->bigInteger('lut_id')->nullable();
         });
     }
 
@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('invoices', function (Blueprint $table) {
+        Schema::table('performa_invoices', function (Blueprint $table) {
             $table->dropColumn('lut_id');
         });
     }
