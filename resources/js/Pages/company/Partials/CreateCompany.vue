@@ -30,41 +30,41 @@ const form = useForm({
 });
 
 function handleFileInput(event) {
-    const files = Array.from(event.target.files); // Convert FileList to an array
-    form.brand_banner = files.map((file) => ({
+    const files = Array.from(event.target.files);
+    const newFiles = files.map((file) => ({
         file,
-        url: URL.createObjectURL(file), // Create a preview URL for each file
+        url: URL.createObjectURL(file),
     }));
+    // Append to existing ones in case of multiple uploads
+    form.brand_banner.push(...newFiles);
 }
 
 function submit() {
     const formData = new FormData();
 
-    // Append all form fields to FormData
     Object.entries(form).forEach(([key, value]) => {
         if (key === "brand_banner") {
-            // Handle multiple files
             value.forEach((fileObj, index) => {
-                formData.append(`${key}[${index}]`, fileObj.file);
+                if (fileObj.file) {
+                    formData.append(`${key}[${index}]`, fileObj.file);
+                } else {
+                    // If it doesn't have a File object, it's an existing image (e.g., a URL string)
+                    formData.append(`${key}_existing[${index}]`, fileObj);
+                }
             });
         } else {
             formData.append(key, value);
         }
     });
 
-    if (props.editdata) {
-        form.post(route("company.update", props.editdata.id), {
-            data: formData,
-            preserveScroll: true,
-            onSuccess: () => form.reset(),
-        });
-    } else {
-        form.post(route("company.store"), {
-            data: formData,
-            preserveScroll: true,
-            onSuccess: () => form.reset(),
-        });
-    }
+    const routeName = props.editdata ? "company.update" : "company.store";
+    const routeParams = props.editdata ? props.editdata.id : undefined;
+
+    form.post(route(routeName, routeParams), {
+        data: formData,
+        preserveScroll: true,
+        onSuccess: () => form.reset(),
+    });
 }
 
 </script>
@@ -205,26 +205,28 @@ function submit() {
                     </progress>
                     <img v-if="props.editdata" :src="form.sign" alt="" sizes="" srcset="" />
                 </div>
+
                 <div class="mt-3 col-md-6">
                     <InputLabel for="brand_banner" value="Brand Banner" />
                     <input class="form-control" id="brand_banner" type="file" multiple @change="handleFileInput" />
                     <InputError class="mt-2" :message="form.errors.brand_banner" />
-                    <div v-if="form.progress">
-                        <div v-for="(file, index) in form.progress" :key="index" class="mb-2">
-                            <progress :value="file.percentage" max="100">
-                                {{ file.percentage }}%
-                            </progress>
-                        </div>
-                    </div>
-                    <div v-if="props.editdata">
-                        <img v-for="(file, index) in form.brand_banner" :key="index" :src="file.url" alt="Brand Banner"
-                            class="img-thumbnail" style="width: 150px; height: auto; margin: 5px;" />
+
+                    <div v-if="form.brand_banner.length">
+                        <img
+                            v-for="(file, index) in form.brand_banner"
+                            :key="index"
+                            :src="file.url || file" 
+                            alt="Brand Banner"
+                            class="img-thumbnail"
+                            style="width: 150px; height: auto; margin: 5px;"
+                        />
                     </div>
                 </div>
+
                 <div class="flex items-center gap-4">
                     <PrimaryButton :disabled="form.processing">{{
                         props.editdata.company_name ? "Update" : "Save"
-                        }}</PrimaryButton>
+                    }}</PrimaryButton>
 
                     <Transition enter-active-class="transition ease-in-out" enter-from-class="opacity-0"
                         leave-active-class="transition ease-in-out" leave-to-class="opacity-0">
