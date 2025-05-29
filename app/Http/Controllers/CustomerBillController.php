@@ -373,13 +373,13 @@ class CustomerBillController extends Controller
             $invoice->load('invoiceitems');
             $invoice->load('Customer');
             $invoice->load('lut');
-            $invoice->load(['Company']);
+            $invoice->load('Company');
         } catch (DecryptException $e) {
             $inv_id = $request->invoice_id;
             $invoice = PerformaInvoice::find($inv_id);
             $invoice->load('invoiceitems');
             $invoice->load('Customer');
-            $invoice->load(['Company']);
+            $invoice->load('Company');
         }
         return inertia('Performa-invoices/InvoiceTemplate', compact('invoice'));
     }
