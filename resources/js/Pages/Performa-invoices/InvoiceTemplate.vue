@@ -29,7 +29,7 @@
             </div>
             <div class="border-b border-l border-black border-solid col-4">
                 <p class="text-center">
-                    LUT NO- {{ props.invoice.lut.lut_no ?? "" }} / {{ props.invoice.lut.formatted_expiry_date }}
+                    LUT NO- {{ props.invoice?.lut?.lut_no ?? "" }} / {{ props.invoice?.lut?.formatted_expiry_date??'' }}
                 </p>
             </div>
             <div class="border-b border-l border-r border-black border-solid col-4">
