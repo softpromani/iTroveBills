@@ -150,7 +150,7 @@ class CompanyController extends Controller
             'bank_account_no' => 'required',
             'adcode' => 'required',
         ]);
-
+        dd($request->all());
         if ($request->has('brand_banner')) {
             $company = Company::find($id);
         
