@@ -156,7 +156,7 @@ class CompanyController extends Controller
         
             // Delete old banners if they exist
             if ($company->brand_banner) {
-                $oldBanners = json_decode($company->brand_banner, true);
+                $oldBanners = json_decode($company->brand_banner??[], true);
                 if (is_array($oldBanners)) {
                     foreach ($oldBanners as $oldBanner) {
                         $oldBannerPath = public_path($oldBanner);
