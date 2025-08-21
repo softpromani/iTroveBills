@@ -151,38 +151,38 @@ class CompanyController extends Controller
             'adcode' => 'required',
         ]);
         // dd($request->all());
-        // if ($request->has('brand_banner')) {
-        //     $company = Company::find($id);
+        if ($request->has('brand_banner')) {
+            $company = Company::find($id);
         
-        //     // Delete old banners if they exist
-        //     if ($company->brand_banner) {
-        //         $oldBanners = json_decode($company->brand_banner??[], true);
-        //         if (is_array($oldBanners)) {
-        //             foreach ($oldBanners as $oldBanner) {
-        //                 $oldBannerPath = public_path($oldBanner);
-        //                 if (File::exists($oldBannerPath)) {
-        //                     File::delete($oldBannerPath);
-        //                 }
-        //             }
-        //         }
-        //     }
+            // Delete old banners if they exist
+            if ($company->brand_banner) {
+                $oldBanners = $company->brand_banner??[];
+                if (is_array($oldBanners)) {
+                    foreach ($oldBanners as $oldBanner) {
+                        $oldBannerPath = public_path($oldBanner);
+                        if (File::exists($oldBannerPath)) {
+                            File::delete($oldBannerPath);
+                        }
+                    }
+                }
+            }
         
-        //     // Upload new banners
-        //     $banners = [];
-        //     foreach ($request->brand_banner as $bannerItem) {
-        //         if (isset($bannerItem['file']) && $bannerItem['file'] instanceof \Illuminate\Http\UploadedFile) {
-        //             $bannerFile = $bannerItem['file'];
-        //             $bannerName = time() . '-' . rand(1000, 9999) . '.' . $bannerFile->getClientOriginalExtension();
-        //             $bannerFile->move(public_path('company_file/inv_banner/'), $bannerName);
-        //             $banners[] = 'company_file/inv_banner/' . $bannerName;
-        //         }
-        //     }
+            // Upload new banners
+            $banners = [];
+            foreach ($request->brand_banner as $bannerItem) {
+                if (isset($bannerItem['file']) && $bannerItem['file'] instanceof \Illuminate\Http\UploadedFile) {
+                    $bannerFile = $bannerItem['file'];
+                    $bannerName = time() . '-' . rand(1000, 9999) . '.' . $bannerFile->getClientOriginalExtension();
+                    $bannerFile->move(public_path('company_file/inv_banner/'), $bannerName);
+                    $banners[] = 'company_file/inv_banner/' . $bannerName;
+                }
+            }
         
-        //     // Update company with new banners
-        //     Company::find($id)->update([
-        //         'brand_banner' => $banners
-        //     ]);
-        // }
+            // Update company with new banners
+            Company::find($id)->update([
+                'brand_banner' => $banners
+            ]);
+        }
 
         if ($request->hasFile('logo')) {
             if (Company::find($id)->logo) {
