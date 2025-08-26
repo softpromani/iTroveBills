@@ -9,6 +9,7 @@ const user = usePage().props.auth.user;
 const props = defineProps({
     editdata: Object,
 });
+
 const form = useForm({
     company_name: props.editdata.company_name ?? "",
     email: props.editdata.email ?? "",
@@ -26,48 +27,40 @@ const form = useForm({
     bank_ifsc: props.editdata.bank_ifsc ?? "",
     bank_account_no: props.editdata.bank_account_no ?? "",
     adcode: props.editdata.ad_code ?? "",
-    brand_banner: props.editdata.brand_banner ? [...props.editdata.brand_banner] : [],
+    brand_banner: [], // always keep as array of Files
 });
 
+// handle file input for multiple images
 function handleFileInput(event) {
     const files = Array.from(event.target.files);
-    const newFiles = files.map((file) => ({
-        file,
-        url: URL.createObjectURL(file),
-    }));
-    // Append to existing ones in case of multiple uploads
-    form.brand_banner.push(...newFiles);
+    form.brand_banner.push(...files);
 }
 
 function submit() {
-    const formData = new FormData();
-
-    Object.entries(form).forEach(([key, value]) => {
-        if (key === "brand_banner") {
-            value.forEach((fileObj, index) => {
-                if (fileObj.file) {
-                    formData.append(`${key}[${index}]`, fileObj.file);
-                } else {
-                    // If it doesn't have a File object, it's an existing image (e.g., a URL string)
-                    formData.append(`${key}_existing[${index}]`, fileObj);
-                }
-            });
-        } else {
-            formData.append(key, value);
-        }
-    });
-
     const routeName = props.editdata ? "company.update" : "company.store";
     const routeParams = props.editdata ? props.editdata.id : undefined;
 
-    form.post(route(routeName, routeParams), {
-        data: formData,
+    form.transform((data) => {
+        const formData = new FormData();
+
+        Object.entries(data).forEach(([key, value]) => {
+            if (key === "brand_banner") {
+                value.forEach((file, index) => {
+                    formData.append(`${key}[${index}]`, file);
+                });
+            } else {
+                formData.append(key, value);
+            }
+        });
+
+        return formData;
+    }).post(route(routeName, routeParams), {
         preserveScroll: true,
         onSuccess: () => form.reset(),
     });
 }
-
 </script>
+
 
 <template>
     <section class="container">
@@ -215,13 +208,14 @@ function submit() {
                         <img
                             v-for="(file, index) in form.brand_banner"
                             :key="index"
-                            :src="file.url || file" 
+                            :src="file instanceof File ? URL.createObjectURL(file) : file"
                             alt="Brand Banner"
                             class="img-thumbnail"
                             style="width: 150px; height: auto; margin: 5px;"
                         />
                     </div>
                 </div>
+
 
                 <div class="flex items-center gap-4">
                     <PrimaryButton :disabled="form.processing">{{

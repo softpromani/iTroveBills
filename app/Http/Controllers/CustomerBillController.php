@@ -159,7 +159,7 @@ class CustomerBillController extends Controller
             $invoice->load('Customer');
             $invoice->load('lut');
             $invoice->load('Company');
-            
+
         } catch (DecryptException $e) {
             $inv_id = $request->invoice_id;
             $invoice = Invoice::find($inv_id);
@@ -237,7 +237,7 @@ class CustomerBillController extends Controller
 
     }
 
-    // performa 
+    // performa
     public function performa_index(Request $request)
     {
         $customers = SellerCustomers::where('seller_id', Auth::id())->get();

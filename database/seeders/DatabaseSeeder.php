@@ -20,8 +20,8 @@ class DatabaseSeeder extends Seeder
         // ]);
         $this->call([
             RoleSeeder::class, // Add your seeder class here
-            SubscriptionPackSeeder::class, // Add your seeder class here
             StatusSeeder::class, // Add your seeder class here
+            SubscriptionPackSeeder::class, // Add your seeder class here
             PaymentTypeSeeder::class, // Add your seeder class here
             // Other seeders
         ]);

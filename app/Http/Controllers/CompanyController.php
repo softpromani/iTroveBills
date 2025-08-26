@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\CompanyLUT;
 use App\Models\Status;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Redirect;
@@ -25,81 +26,87 @@ class CompanyController extends Controller
     }
     public function store_company(Request $request)
     {
-
         $valid = $request->validate([
-            'company_name' => 'required|string|max:255',
-            'email' => 'email|required|unique:companies,email',
-            'mobile' => 'required',
-            'address' => 'required|string',
-            'city' => 'required|string',
-            'pin' => 'required',
-            'gstin' => 'required|unique:companies,gstin',
-            'iec' => 'required',
-            'invoice_series' => 'required',
-            'bank_name' => 'required',
-            'bank_branch' => 'required',
-            'bank_ifsc' => 'required',
-            'bank_account_no' => 'required',
-            'adcode' => 'required',
-            'logo' => 'required|image|mimes:jpg,png,jpeg',
-            'sign' => 'required|image|mimes:jpg,png,jpeg',
-            'brand_banner' => 'nullable',
+            'company_name'      => 'required|string|max:255',
+            'email'             => 'required|email|unique:companies,email',
+            'mobile'            => 'required',
+            'address'           => 'required|string',
+            'city'              => 'required|string',
+            'pin'               => 'required',
+            'gstin'             => 'required|unique:companies,gstin',
+            'iec'               => 'required',
+            'invoice_series'    => 'required',
+            'bank_name'         => 'required',
+            'bank_branch'       => 'required',
+            'bank_ifsc'         => 'required',
+            'bank_account_no'   => 'required',
+            'adcode'            => 'required',
+            'logo'              => 'required|image|mimes:jpg,png,jpeg',
+            'sign'              => 'required|image|mimes:jpg,png,jpeg',
+            'brand_banner.*'    => 'nullable',
         ]);
 
+        // Logo upload
+        $upload_logo = null;
         if ($request->hasFile('logo')) {
-            $logo = $request->logo;
+            $logo = $request->file('logo');
             $logoName = time() . '.' . $logo->getClientOriginalExtension();
             $logo->move(public_path('company_file/logo/'), $logoName);
             $upload_logo = 'company_file/logo/' . $logoName;
         }
 
+        // Sign upload
+        $upload_sign = null;
         if ($request->hasFile('sign')) {
-            $sign = $request->sign;
+            $sign = $request->file('sign');
             $signName = time() . '.' . $sign->getClientOriginalExtension();
             $sign->move(public_path('company_file/sign/'), $signName);
             $upload_sign = 'company_file/sign/' . $signName;
         }
 
-        if ($request->hasFile('brand_banner')) {
+        // New banners array
+        $newBanners = [];
+
+        // Handle Brand Banners
+        if ($request->brand_banner) {
             // Upload new banners
-            $banners = [];
-            foreach ($request->brand_banner as $bannerItem) {
-                if (isset($bannerItem['file']) && $bannerItem['file'] instanceof \Illuminate\Http\UploadedFile) {
-                    $bannerFile = $bannerItem['file'];
+            foreach ($request->brand_banner as $bannerFile) {
+                $bannerFile = $bannerFile['file'];
+                if ($bannerFile ) {
                     $bannerName = time() . '-' . rand(1000, 9999) . '.' . $bannerFile->getClientOriginalExtension();
                     $bannerFile->move(public_path('company_file/inv_banner/'), $bannerName);
-                    $banners[] = 'company_file/inv_banner/' . $bannerName;
+                    $newBanners[] = 'company_file/inv_banner/' . $bannerName;
                 }
             }
         }
 
-        if ($valid) {
-            $company = Company::create([
-                'company_name' => $request->company_name,
-                'email' => $request->email,
-                'mobile' => $request->mobile,
-                'address' => $request->address,
-                'city' => $request->city,
-                'pin' => $request->pin,
-                'gstin' => $request->gstin,
-                'iec' => $request->iec,
-                'invoice_series' => $request->invoice_series,
-                'bank_name' => $request->bank_name,
-                'bank_branch' => $request->bank_branch,
-                'bank_ifsc' => $request->bank_ifsc,
-                'bank_account_no' => $request->bank_account_no,
-                'ad_code' => $request->adcode,
-                'seller_id' => Auth::id(),
-                'status' => Status::moduleStatusId('Company','active'),
-                'logo' => $upload_logo,
-                'sign' => $upload_sign,
-                'brand_banner' => json_encode($banners)
-            ]);
-            if($company){
-                return redirect()->route('company.index')->with('success', 'Company created successfully!');
-            }
+        $company = Company::create([
+            'company_name'    => $request->company_name,
+            'email'           => $request->email,
+            'mobile'          => $request->mobile,
+            'address'         => $request->address,
+            'city'            => $request->city,
+            'pin'             => $request->pin,
+            'gstin'           => $request->gstin,
+            'iec'             => $request->iec,
+            'invoice_series'  => $request->invoice_series,
+            'bank_name'       => $request->bank_name,
+            'bank_branch'     => $request->bank_branch,
+            'bank_ifsc'       => $request->bank_ifsc,
+            'bank_account_no' => $request->bank_account_no,
+            'ad_code'         => $request->adcode,
+            'seller_id'       => Auth::id(),
+            'status'          => Status::moduleStatusId('Company', 'active'),
+            'logo'            => $upload_logo,
+            'sign'            => $upload_sign,
+            'brand_banner'    => $newBanners,
+        ]);
+
+        if ($company) {
+            return redirect()->route('company.index')->with('success', 'Company created successfully!');
         }
-        return Redirect::route('company.index')->withErrors($valid);
+
+        return redirect()->route('company.index')->withErrors($valid);
     }
 
     public function delete_company($id){
@@ -132,110 +139,115 @@ class CompanyController extends Controller
         $edata = Company::find($request->id);
         return Inertia::render('company/index',compact('edata'));
     }
-    public function update_company(Request $request,$id)
+
+
+    public function update_company(Request $request, $id)
     {
         $valid = $request->validate([
-            'company_name' => 'required|string|max:255',
-            'email' => 'email',
-            'mobile' => 'required', // Example mobile validation rules
-            'address' => 'required|string',
-            'city' => 'required|string',
-            'pin' => 'required',
-            'gstin' => 'required',
-            'iec' => 'required',
-            'invoice_series' => 'required',
-            'bank_name' => 'required',
-            'bank_branch' => 'required',
-            'bank_ifsc' => 'required',
-            'bank_account_no' => 'required',
-            'adcode' => 'required',
+            'company_name'      => 'required|string|max:255',
+            'email'             => 'nullable|email',
+            'mobile'            => 'required',
+            'address'           => 'required|string',
+            'city'              => 'required|string',
+            'pin'               => 'required',
+            'gstin'             => 'required',
+            'iec'               => 'required',
+            'invoice_series'    => 'required',
+            'bank_name'         => 'required',
+            'bank_branch'       => 'required',
+            'bank_ifsc'         => 'required',
+            'bank_account_no'   => 'required',
+            'adcode'            => 'required',
+            'brand_banner.*'    => 'nullable', // validate each file
         ]);
-        // dd($request->all());
-        if ($request->has('brand_banner')) {
-            $company = Company::find($id);
-        
-            // Delete old banners if they exist
-            if ($company->brand_banner) {
-                $oldBanners = $company->brand_banner??[];
-                if (is_array($oldBanners)) {
-                    foreach ($oldBanners as $oldBanner) {
-                        $oldBannerPath = public_path($oldBanner);
-                        if (File::exists($oldBannerPath)) {
-                            File::delete($oldBannerPath);
-                        }
+
+        $company = Company::findOrFail($id);
+
+        // Existing banners array
+        $existingBanners = [];
+
+        // Only decode if it's a string
+        if (!empty($company->brand_banner)) {
+            if (is_string($company->brand_banner)) {
+                $existingBanners = json_decode($company->brand_banner, true) ?? [];
+            } elseif (is_array($company->brand_banner)) {
+                $existingBanners = $company->brand_banner; // already an array
+            }
+        }
+
+
+        // New banners array
+        $newBanners = [];
+
+        // Handle Brand Banners
+        if ($request->brand_banner) {
+            // Delete old banners if any
+            if (!empty($existingBanners)) {
+                foreach ($existingBanners as $oldBanner) {
+                    $oldBannerPath = public_path($oldBanner);
+                    if (File::exists($oldBannerPath)) {
+                        File::delete($oldBannerPath);
                     }
                 }
             }
-        
+
             // Upload new banners
-            $banners = [];
-            foreach ($request->brand_banner as $bannerItem) {
-                if (isset($bannerItem['file']) && $bannerItem['file'] instanceof \Illuminate\Http\UploadedFile) {
-                    $bannerFile = $bannerItem['file'];
+            foreach ($request->brand_banner as $bannerFile) {
+                $bannerFile = $bannerFile['file'];
+                if ($bannerFile ) {
                     $bannerName = time() . '-' . rand(1000, 9999) . '.' . $bannerFile->getClientOriginalExtension();
                     $bannerFile->move(public_path('company_file/inv_banner/'), $bannerName);
-                    $banners[] = 'company_file/inv_banner/' . $bannerName;
+                    $newBanners[] = 'company_file/inv_banner/' . $bannerName;
                 }
             }
-        
-            // Update company with new banners
-            Company::find($id)->update([
-                'brand_banner' => $banners
-            ]);
+        } else {
+            // Keep existing banners if no new files uploaded
+            $newBanners = $existingBanners;
         }
 
+        // Handle Logo
         if ($request->hasFile('logo')) {
-            if (Company::find($id)->logo) {
-                $oldImagePath = public_path(Company::find($id)->logo);
-                if (File::exists($oldImagePath)) {
-                    File::delete($oldImagePath);
-                }
+            if ($company->logo && File::exists(public_path($company->logo))) {
+                File::delete(public_path($company->logo));
             }
-            $logo = $request->logo;
+            $logo = $request->file('logo');
             $logoName = time() . '.' . $logo->getClientOriginalExtension();
             $logo->move(public_path('company_file/logo/'), $logoName);
-            $upload_logo = 'company_file/logo/' . $logoName;
-            Company::find($id)->update([
-                'logo' =>  $upload_logo
-            ]);
+            $company->logo = 'company_file/logo/' . $logoName;
         }
+
+        // Handle Sign
         if ($request->hasFile('sign')) {
-            if (Company::find($id)->sign) {
-                $oldImagePath = public_path(Company::find($id)->sign);
-                if (File::exists($oldImagePath)) {
-                    File::delete($oldImagePath);
-                }
+            if ($company->sign && File::exists(public_path($company->sign))) {
+                File::delete(public_path($company->sign));
             }
-            $sign = $request->sign;
+            $sign = $request->file('sign');
             $signName = time() . '.' . $sign->getClientOriginalExtension();
             $sign->move(public_path('company_file/sign/'), $signName);
-            $upload_sign = 'company_file/sign/' . $signName;
-            Company::find($id)->update([
-                'sign' =>  $upload_sign
-            ]);
+            $company->sign = 'company_file/sign/' . $signName;
         }
-        if ($valid) {
-            $company = Company::find($id)->update([
-                'company_name' => $request->company_name,
-                'email' => $request->email,
-                'mobile' => $request->mobile,
-                'address' => $request->address,
-                'city' => $request->city,
-                'pin' => $request->pin,
-                'gstin' => $request->gstin,
-                'iec' => $request->iec,
-                'invoice_series' => $request->invoice_series,
-                'bank_name' => $request->bank_name,
-                'bank_branch' => $request->bank_branch,
-                'bank_ifsc' => $request->bank_ifsc,
-                'bank_account_no' => $request->bank_account_no,
-                'ad_code' => $request->adcode,
-                'seller_id' => Auth::id(),
-            ]);
-            if($company){
-                return redirect()->route('company.view')->with('success', 'Company updated successfully!');
-            }
-        }
-        return Redirect::route('company.index')->withErrors($valid);
+
+        // Update all fields
+        $company->update([
+            'company_name'      => $request->company_name,
+            'email'             => $request->email,
+            'mobile'            => $request->mobile,
+            'address'           => $request->address,
+            'city'              => $request->city,
+            'pin'               => $request->pin,
+            'gstin'             => $request->gstin,
+            'iec'               => $request->iec,
+            'invoice_series'    => $request->invoice_series,
+            'bank_name'         => $request->bank_name,
+            'bank_branch'       => $request->bank_branch,
+            'bank_ifsc'         => $request->bank_ifsc,
+            'bank_account_no'   => $request->bank_account_no,
+            'ad_code'           => $request->adcode,
+            'seller_id'         => Auth::id(),
+            'brand_banner'      => $newBanners, // encode array to JSON
+        ]);
+
+        return redirect()->route('company.view')->with('success', 'Company updated successfully!');
     }
+
 }
