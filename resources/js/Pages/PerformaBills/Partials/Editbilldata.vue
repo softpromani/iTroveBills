@@ -10,6 +10,7 @@
             <i class="fa-solid fa-bullseye"></i>
         </span>
     </div>
+
     <transition name="slide-fade">
         <div v-if="showproductCard">
             <div class="-mt-4 rounded-lg shadow table-responsive">
@@ -28,65 +29,56 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr
-                            v-for="(row, rowIndex) in tableData"
-                            :key="rowIndex"
-                        >
+                        <tr v-for="(row, rowIndex) in tableData" :key="rowIndex">
                             <td>{{ getSerialNumber(rowIndex) }}</td>
-                            <td
-                                v-for="(cell, cellIndex) in row"
+
+                            <!-- Editable cells -->
+                            <td v-for="(cell, cellIndex) in row"
                                 :key="cellIndex"
-                                @input="updateCell(rowIndex, cellIndex, $event)"
-                                contenteditable
-                            >
-                                {{ cell }}
+                                contenteditable="true"
+                                :data-row="rowIndex"
+                                :data-cell="cellIndex"
+                                v-html="cell"
+                                @blur="updateCell(rowIndex, cellIndex, $event)">
                             </td>
+
+                            <!-- Taxable value column -->
                             <td>{{ calculateTaxableValue(rowIndex) }}</td>
+
+                            <!-- Action column -->
                             <td>
                                 <span
                                     class="cursor-pointer badge rounded-pill text-bg-primary"
                                     @click="addRow"
-                                    v-if="rowIndex === tableData.length - 1"
-                                >
-                                    <i
-                                        class="fa fa-plus"
-                                        aria-hidden="true"
-                                    ></i>
+                                    v-if="rowIndex === tableData.length - 1">
+                                    <i class="fa fa-plus" aria-hidden="true"></i>
                                 </span>
                                 <span
                                     class="cursor-pointer badge rounded-pill text-bg-danger"
                                     @click="removeRow(rowIndex)"
-                                    v-else
-                                >
-                                    <i
-                                        class="fa fa-minus"
-                                        aria-hidden="true"
-                                    ></i>
+                                    v-else>
+                                    <i class="fa fa-minus" aria-hidden="true"></i>
                                 </span>
                             </td>
                         </tr>
+
+                        <!-- Totals row -->
                         <tr>
                             <td></td>
                             <td></td>
                             <td></td>
                             <td></td>
                             <td class="font-bold">Total Weight:</td>
-                            <td class="font-bold">
-                                {{ calculateTotalWeight() }}
-                            </td>
+                            <td class="font-bold">{{ calculateTotalWeight() }}</td>
                             <td class="font-bold">Total:</td>
-                            <td class="font-bold">
-                                {{ calculateTotalTaxableValue() }}
-                            </td>
+                            <td class="font-bold">{{ calculateTotalTaxableValue() }}</td>
                             <td></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <button
-                class="text-white btn btn-info text-bold"
-                @click="updatebill"
-            >
+
+            <button class="text-white btn btn-info text-bold" @click="updatebill">
                 Submit
             </button>
         </div>
@@ -94,15 +86,19 @@
 </template>
 
 <script setup>
-import { ref ,onMounted } from "vue";
-import { Link, useForm, usePage } from "@inertiajs/vue3";
+import { ref, onMounted } from "vue";
+import { useForm } from "@inertiajs/vue3";
+
 const form = useForm({});
 const props = defineProps({
     invoiceitem: Object,
 });
 
-// Define the initial table data with one empty row
 const tableData = ref([]);
+const invoicedetails = ref([]);
+const showproductCard = ref(true);
+
+// Fill initial table data
 onMounted(() => {
     if (props.invoiceitem) {
         tableData.value = props.invoiceitem.map((item) => [
@@ -113,102 +109,78 @@ onMounted(() => {
             item.weight,
             item.rate,
         ]);
+    } else {
+        tableData.value = [["", "", "", "", "", ""]];
     }
 });
-const invoicedetails = ref([]);
-const showproductCard = ref(true);
-// Function to update cell data
+
+// Update cell value
 const updateCell = (rowIndex, cellIndex, event) => {
-    // Validate if the input is a number for Quantity, Rate, and Weight cells
+    let cellValue = event.target.innerText.trim();
+
     if ([2, 4, 5].includes(cellIndex)) {
-        // Replace these indices with the actual indices of Quantity, Rate, and Weight
-        const cellValue = event.target.textContent;
-        if (!isNaN(cellValue)) {
-            // Update the cell with the numeric value
-            tableData.value[rowIndex][cellIndex] = parseFloat(cellValue);
-        }
-        // If it's not a number, reset the cell content
-        else {
-            event.target.textContent = 0;
-        }
-    } else {
-        // For other cells, allow any input
-        tableData.value[rowIndex][cellIndex] = event.target.textContent;
+        cellValue = parseFloat(cellValue) || 0;
     }
+    tableData.value[rowIndex][cellIndex] = cellValue;
 };
 
-// Function to add a new row
+// Add new row
 const addRow = () => {
-    tableData.value.push(["", "", "", "", "", "",]);
+    tableData.value.push(["", "", "", "", "", ""]);
 };
 
-// Function to remove a row
+// Remove row
 const removeRow = (rowIndex) => {
     tableData.value.splice(rowIndex, 1);
 };
 
-// Function to get the serial number based on the row index
-const getSerialNumber = (rowIndex) => {
-    return rowIndex + 1;
-};
+// Serial number
+const getSerialNumber = (rowIndex) => rowIndex + 1;
 
-// Function to calculate the "Taxable Value" for a row
+// Taxable value for a row
 const calculateTaxableValue = (rowIndex) => {
     const quantity = parseFloat(tableData.value[rowIndex][2]) || 0;
     const rate = parseFloat(tableData.value[rowIndex][5]) || 0;
     return (quantity * rate).toFixed(2);
 };
 
-// Function to calculate the "Total Taxable Value"
+// Total taxable value
 const calculateTotalTaxableValue = () => {
-    let total = 0;
-    for (let rowIndex = 0; rowIndex < tableData.value.length; rowIndex++) {
-        total += parseFloat(calculateTaxableValue(rowIndex));
-    }
-    return total.toFixed(2);
+    return tableData.value.reduce((total, row, index) => {
+        return total + parseFloat(calculateTaxableValue(index));
+    }, 0).toFixed(2);
 };
 
-// Function to calculate the "Total Weight"
+// Total weight
 const calculateTotalWeight = () => {
-    let totalWeight = 0;
-    for (let rowIndex = 0; rowIndex < tableData.value.length; rowIndex++) {
-        const weight = parseFloat(tableData.value[rowIndex][4]) || 0;
-        totalWeight += weight;
-    }
-    return totalWeight.toFixed(2);
+    return tableData.value.reduce((total, row) => {
+        return total + (parseFloat(row[4]) || 0);
+    }, 0).toFixed(2);
 };
 
-// Method to handle form submission
+// Submit invoice
 const updatebill = () => {
-    const invoiceNoValue = document.getElementById("invoice_no").value;
-    const vehical_no = document.getElementById("vehical_no").value;
-    // Define the index where you want to push the data
-    const indexToUpdate = 0; // Change this to the desired index
+    const invoiceNoValue = document.getElementById("invoice_no")?.value || "";
+    const vehical_no = document.getElementById("vehical_no")?.value || "";
 
-    // Push data to the specified index
-    invoicedetails.value[indexToUpdate] = {
+    invoicedetails.value[0] = {
         invoice: invoiceNoValue,
         vehical_no: vehical_no,
         totalWeight: calculateTotalWeight(),
         totalTaxableValue: calculateTotalTaxableValue(),
     };
 
-    // Get the updated table data and do something with it
-    const updatedData = tableData.value;
-    const updatedInvoiceDetails = invoicedetails.value;
-
     form.post(
-        route("customer.bill.update", {
-            invoicedata: updatedData,
-            invoice_id: props.invoiceitem[0].invoice_id,
-            invoicedetails: updatedInvoiceDetails,
+        route("performa.customer.bill.update", {
+            invoicedata: tableData.value,
+            invoice_id: props.invoiceitem?.[0]?.invoice_id,
+            invoicedetails: invoicedetails.value,
         }),
-        {
-            preserveScroll: true,
-        }
+        { preserveScroll: true }
     );
 };
 
+// Toggle product card
 const toggleproductCard = () => {
     showproductCard.value = !showproductCard.value;
 };

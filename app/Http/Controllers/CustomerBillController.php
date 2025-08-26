@@ -134,7 +134,7 @@ class CustomerBillController extends Controller
                     'rate' => $data[5],
                 ]);
             }
-            return redirect()->route('company.customer.view')->with('success', 'Invoice Created Successfully');
+            return redirect()->route('invoice.list')->with('success', 'Invoice Created Successfully');
         } else {
             return back();
         }
@@ -210,7 +210,7 @@ class CustomerBillController extends Controller
                     'rate' => $data[5],
                 ]);
             }
-            return redirect()->route('company.customer.view')->with('success', 'Invoice Updated Successfully');
+            return redirect()->route('invoice.list')->with('success', 'Invoice Updated Successfully');
         } else {
             return back();
         }
@@ -351,11 +351,57 @@ class CustomerBillController extends Controller
                     'rate' => $data[5],
                 ]);
             }
-            return redirect()->route('company.customer.view')->with('success', 'Performa Invoice Created Successfully');
+            return redirect()->route('performa.invoice.list')->with('success', 'Performa Invoice Created Successfully');
         } else {
             return back();
         }
     }
+
+    public function performa_edit(Request $request)
+    {
+        $edit_data = Invoice::find($request->invoice_id);
+        $edit_data->load('invoiceitems');
+        $edit_data->load('Customer');
+        return Inertia::render('Bills/editbill', compact('edit_data'));
+    }
+
+    public function performa_update(Request $request)
+    {
+        $valid = $request->validate([
+            'invoicedata.*.*' => 'required',
+            'invoicedetails.*.invoice' => 'required|string',
+            'invoicedetails.*.vehical_no' => 'required|string',
+            'invoicedetails.*.totalWeight' => 'required|numeric',
+            'invoicedetails.*.totalTaxableValue' => 'required|numeric',
+            'invoice_id' => 'required',
+        ]);
+        if ($valid) {
+            $invoice_data = PerformaInvoice::findOrFail($request->invoice_id);
+            $invoice_data->touch();
+            $invoice_data->update([
+                'invoice_number' => $request->invoicedetails[0]['invoice'],
+                'total_ammount' => $request->invoicedetails[0]['totalTaxableValue'],
+                'total_weight' => $request->invoicedetails[0]['totalWeight'],
+                'vehicle_no' => $request->invoicedetails[0]['vehical_no'],
+            ]);
+
+            foreach ($request->invoicedata as $key => $data) {
+                PerformaInvoiceItem::create([
+                    'invoice_id' => $request->invoice_id,
+                    'desc_product' => $data[0],
+                    'hsn_code' => $data[1],
+                    'quantity' => $data[2],
+                    'unit' => $data[3],
+                    'weight' => $data[4],
+                    'rate' => $data[5],
+                ]);
+            }
+            return redirect()->route('performa.invoice.list')->with('success', 'Proforma Invoice Updated Successfully');
+        } else {
+            return back();
+        }
+    }
+
     public function performa_invoice_list()
     {
         $invoices = auth()->user()->performa_invoices;
