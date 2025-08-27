@@ -359,10 +359,10 @@ class CustomerBillController extends Controller
 
     public function performa_edit(Request $request)
     {
-        $edit_data = Invoice::find($request->invoice_id);
+        $edit_data = PerformaInvoice::find($request->invoice_id);
         $edit_data->load('invoiceitems');
         $edit_data->load('Customer');
-        return Inertia::render('Bills/editbill', compact('edit_data'));
+        return Inertia::render('PerformaBills/editbill', compact('edit_data'));
     }
 
     public function performa_update(Request $request)
