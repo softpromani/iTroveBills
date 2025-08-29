@@ -321,7 +321,7 @@
                 <form @submit.prevent="submitlut" class="mt-6 space-y-6">
                     <div class="mt-6">
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <InputLabel
                                     for="lut_no"
                                     value="LUT No"
@@ -339,7 +339,25 @@
                                     class="mt-2"
                                 />
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <InputLabel
+                                    for="starting_bill_no"
+                                    value="Starting Bill No"
+                                    class="sr-only"
+                                />
+                                <TextInput
+                                    id="starting_bill_no"
+                                    v-model="form.starting_bill_no"
+                                    type="text"
+                                    class="mt-1 block w-3/4"
+                                    placeholder="Starting Bill No"
+                                />
+                                <InputError
+                                    :message="form.errors.starting_bill_no"
+                                    class="mt-2"
+                                />
+                            </div>
+                            <div class="col-md-4">
                                 <InputLabel
                                     for="expiry_date"
                                     value="Expiry Date"
@@ -442,6 +460,7 @@ const addingCompanyLUT = ref(false);
 const form = useForm({
     expiry_date: "",
     lut_no: "",
+    starting_bill_no: "",
 });
 
 let delete_id = null;

@@ -115,9 +115,10 @@ class CompanyController extends Controller
         return redirect()->route('company.view')->with('success', 'Company deleted successfully!');
     }
 
-    public function lut_company(Request $request,$id){
+    public function lut_commpany(Request $request,$id){
         $valid = $request->validate([
             'lut_no' => 'required',
+            'starting_bill_no' => 'nullable',
             'expiry_date' => 'required',
         ]);
         if ($valid) {
@@ -126,6 +127,7 @@ class CompanyController extends Controller
                 'status'=>Status::moduleStatusId('Company','active'),
                 'expiry_date'=>$request->expiry_date,
                 'lut_no'=>$request->lut_no,
+                'starting_bill_count'=>$request->starting_bill_no,
             ]);
 
             if($lut){
