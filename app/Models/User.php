@@ -75,6 +75,11 @@ class User extends Authenticatable
         return $this->hasManyThrough(PerformaInvoice::class, Company::class, 'seller_id', 'company_id', 'id', 'id');
     }
 
+    public function gst_invoices()
+    {
+        return $this->hasManyThrough(GSTInvoice::class, Company::class, 'seller_id', 'company_id', 'id', 'id');
+    }
+
     public function myinvoices()
     {
         return $this->hasManyThrough(Invoice::class, Company::class, 'seller_id', 'customer_company_id', 'id', 'id');

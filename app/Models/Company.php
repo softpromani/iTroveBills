@@ -28,7 +28,7 @@ class Company extends Model
 
     public function ThisYearInvoice(){
          // Calculate the start and end dates for the fiscal year
-        $startOfYear = Carbon::now()->month >= 4 
+        $startOfYear = Carbon::now()->month >= 4
         ? Carbon::now()->startOfYear()->addMonths(3) // April 1 of the current year
         : Carbon::now()->subYear()->startOfYear()->addMonths(3); // April 1 of the previous year
         $endOfYear = $startOfYear->copy()->addYear()->subDay(); // March 31 of the next year
@@ -38,13 +38,14 @@ class Company extends Model
         // \Log::info('Fiscal Year End: ' . $endOfYear);
         return $this->Invoices()->whereBetween('invoice_date', [$startOfYear, $endOfYear]);
     }
-    // performa 
+    // performa
     public function PerformaInvoices(){
         return $this->hasMany(PerformaInvoice::class,'company_id','id');
     }
+
     public function ThisYearPerformaInvoice(){
         // Calculate the start and end dates for the fiscal year
-       $startOfYear = Carbon::now()->month >= 4 
+       $startOfYear = Carbon::now()->month >= 4
        ? Carbon::now()->startOfYear()->addMonths(3) // April 1 of the current year
        : Carbon::now()->subYear()->startOfYear()->addMonths(3); // April 1 of the previous year
        $endOfYear = $startOfYear->copy()->addYear()->subDay(); // March 31 of the next year
@@ -53,6 +54,25 @@ class Company extends Model
        // \Log::info('Fiscal Year Start: ' . $startOfYear);
        // \Log::info('Fiscal Year End: ' . $endOfYear);
        return $this->PerformaInvoices()->whereBetween('invoice_date', [$startOfYear, $endOfYear]);
+   }
+    // end performa
+
+    // GST
+    public function GstInvoices(){
+        return $this->hasMany(GSTInvoice::class,'company_id','id');
+    }
+
+    public function ThisYearGstInvoice(){
+        // Calculate the start and end dates for the fiscal year
+       $startOfYear = Carbon::now()->month >= 4
+       ? Carbon::now()->startOfYear()->addMonths(3) // April 1 of the current year
+       : Carbon::now()->subYear()->startOfYear()->addMonths(3); // April 1 of the previous year
+       $endOfYear = $startOfYear->copy()->addYear()->subDay(); // March 31 of the next year
+
+       // // Debug: Log the calculated dates
+       // \Log::info('Fiscal Year Start: ' . $startOfYear);
+       // \Log::info('Fiscal Year End: ' . $endOfYear);
+       return $this->GstInvoices()->whereBetween('invoice_date', [$startOfYear, $endOfYear]);
    }
     // end performa
 }

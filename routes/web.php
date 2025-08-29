@@ -3,6 +3,7 @@
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CustomerBillController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\GSTInvoiceController;
 use App\Http\Controllers\HsnSacMasterController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\MastergstController;
@@ -10,7 +11,10 @@ use App\Http\Controllers\PaymentRequestController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SubscriptionPackController;
+use App\Models\Invoice;
+use App\Models\SellerCustomers;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -35,7 +39,41 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+    $user = Auth::user();
+
+    $companyIds = $user->companies()->pluck('id');
+
+    $stats = [
+        'totalRevenue' => Invoice::whereIn('company_id', $companyIds)->sum('total_ammount'),
+        'activeInvoices' => Invoice::whereIn('company_id', $companyIds)
+                                   ->where('payment_status', 1) // paid/active
+                                   ->count(),
+        'totalCustomers' => Invoice::whereIn('company_id', $companyIds)
+                                   ->distinct('customer_company_id')
+                                   ->count('customer_company_id'),
+        'pendingPayments' => Invoice::whereIn('company_id', $companyIds)
+                                    ->where('payment_status', 0) // pending
+                                    ->sum('total_ammount'),
+    ];
+
+    $recentActivity = Invoice::with('company') // lowercase relation
+                             ->whereIn('company_id', $companyIds)
+                             ->latest('invoice_date')
+                             ->take(5)
+                             ->get();
+
+    // Get user's subscription information
+    $subscription = $user->subscriptions()
+                         ->with(['sellerSubscription']) // assuming you have a plan relationship
+                         ->where('status', '10') // or whatever status field you use
+                         ->latest()
+                         ->first();
+
+    return Inertia::render('Dashboard', [
+        'stats' => $stats,
+        'recentActivity' => $recentActivity,
+        'subscription' => $subscription
+    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('master_gst_auth',[MastergstController::class,'master_gst_auth'])->name('master.gst.auth');
@@ -71,6 +109,7 @@ Route::middleware('auth')->group(function () {
     Route::post('bill-mail',[MailController::class,'billmail'])->name('bill.sendmail');
 
     Route::resource('payment-request', PaymentRequestController::class);
+
     // performa invoices
     Route::group(['prefix'=>'performa','as'=>'performa.'],function(){
         Route::get('customer-bill',[CustomerBillController::class,'performa_index'])->name('customer.bill');
@@ -80,8 +119,19 @@ Route::middleware('auth')->group(function () {
         Route::post('customer-store-bill',[CustomerBillController::class,'performa_store'])->name('customer.store.bill');
         Route::get('invoice-list',[CustomerBillController::class,'performa_invoice_list'])->name('invoice.list');
         Route::post('bill-mail',[MailController::class,'performa_billmail'])->name('bill.sendmail');
-
     });
+
+    // GST invoices
+    Route::group(['prefix'=>'gst','as'=>'gst.'],function(){
+        Route::get('customer-bill',[GSTInvoiceController::class,'gst_index'])->name('customer.bill');
+        Route::get('customer-bill-edit',[GSTInvoiceController::class,'gst_edit'])->name('customer.bill.edit');
+        Route::post('customer-bill-update',[GSTInvoiceController::class,'gst_update'])->name('customer.bill.update');
+        Route::get('customer-detail-bill',[GSTInvoiceController::class,'gst_index_details'])->name('customer.detail.bill');
+        Route::post('customer-store-bill',[GSTInvoiceController::class,'gst_store'])->name('customer.store.bill');
+        Route::get('invoice-list',[GSTInvoiceController::class,'gst_invoice_list'])->name('invoice.list');
+        Route::post('bill-mail',[MailController::class,'gst_billmail'])->name('bill.sendmail');
+    });
+
     Route::get('old-payments-feed',[CustomerBillController::class,'Fetch_bill_create_payment_for_old_data']);
     //Customer My Bill Route
     Route::get('my-bill', [CustomerBillController::class, 'myBill'])->name('customer.mybill');

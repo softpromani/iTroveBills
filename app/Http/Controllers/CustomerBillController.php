@@ -141,7 +141,6 @@ class CustomerBillController extends Controller
         ));
     }
 
-
     public function store(Request $request)
     {
         $valid = $request->validate([
@@ -306,7 +305,7 @@ class CustomerBillController extends Controller
             return Inertia::render('PerformaBills/index', compact('customer_list', 'company_list'));
         }
     }
-  public function performa_index_details(Request $request)
+    public function performa_index_details(Request $request)
     {
         $request->validate([
             'customer_id' => 'required',
@@ -399,7 +398,6 @@ class CustomerBillController extends Controller
             'company'
         ));
     }
-
 
     public function performa_store(Request $request)
     {

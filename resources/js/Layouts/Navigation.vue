@@ -334,6 +334,65 @@
                 </div>
             </transition>
 
+            <a
+                class="flex items-center px-6 py-2 mt-4 text-gray-100 no-underline dropdown-toggle"
+                href="#"
+                @click="showingGSTInvoices = !showingGSTInvoices"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg"
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true">
+                    <title>GST Invoice</title>
+                    <!-- Document outline -->
+                    <path d="M4 4h16v16H4V4z" />
+                    <!-- Horizontal lines representing text -->
+                    <path d="M8 8h8" />
+                    <path d="M8 12h8" />
+                    <path d="M8 16h5" />
+                    <!-- Small check or mark to indicate “Proforma” -->
+                    <path d="M15 18l2 2 4-4" />
+                    </svg>
+
+                <span class="mx-3">GST Invoices</span>
+            </a>
+            <transition
+                enter-to-class="transition-all duration-300 ease-in-out"
+                enter-from-class="opacity-25 max-h-0"
+                leave-from-class="opacity-100 max-h-xl"
+                leave-to-class="opacity-0 max-h-0"
+            >
+                <div v-show="showingGSTInvoices">
+                    <ul
+                        class="p-2 mx-4 mt-2 space-y-2 overflow-hidden text-sm font-medium text-white bg-gray-700 bg-opacity-50 rounded-md shadow-inner"
+                        aria-label="submenu"
+                    >
+
+                        <!-- performa invoices -->
+                        <li class="px-2 py-1 transition-colors duration-150">
+                            <Link
+                                class="text-white no-underline first-letter:w-full"
+                                :href="route('gst.customer.bill')"
+                                >Create Invoice</Link
+                            >
+                        </li>
+                        <li class="px-2 py-1 transition-colors duration-150">
+                            <Link
+                                class="text-white no-underline first-letter:w-full"
+                                :href="route('gst.invoice.list')"
+                                >View Invoice List </Link
+                            >
+                        </li>
+                         <!-- end performa invoices -->
+                    </ul>
+                </div>
+            </transition>
+
             <nav-link :href="route('payment-request.index')" :active="route().current('payment-request.index')">
                 <template #icon>
                    <svg xmlns="http://www.w3.org/2000/svg"
@@ -588,13 +647,15 @@ export default {
         let showingCustomerMenu = ref(false);
         let showingInvoices = ref(false);
         let showingProformaInvoices = ref(false);
+        let showingGSTInvoices = ref(false);
 
         return {
             showingTwoLevelMenu,
             showingTwoLevelMenu2,
             showingCustomerMenu,
             showingInvoices,
-            showingProformaInvoices
+            showingProformaInvoices,
+            showingGSTInvoices
         };
     },
 

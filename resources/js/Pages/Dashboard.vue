@@ -23,8 +23,8 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-blue-100 text-sm font-medium">Total Revenue</p>
-                        <p class="text-3xl font-bold">₹2,45,680</p>
-                        <p class="text-blue-100 text-xs mt-1">+12% from last month</p>
+                        <p class="text-3xl font-bold">₹{{ formatCurrency(stats.totalRevenue) }}</p>
+                        <p class="text-blue-100 text-xs mt-1">From all invoices</p>
                     </div>
                     <div class="bg-blue-400 rounded-full p-3">
                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
@@ -39,8 +39,8 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-green-100 text-sm font-medium">Active Invoices</p>
-                        <p class="text-3xl font-bold">142</p>
-                        <p class="text-green-100 text-xs mt-1">+8 new this week</p>
+                        <p class="text-3xl font-bold">{{ stats.activeInvoices }}</p>
+                        <p class="text-green-100 text-xs mt-1">Paid invoices</p>
                     </div>
                     <div class="bg-green-400 rounded-full p-3">
                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
@@ -54,8 +54,8 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-purple-100 text-sm font-medium">Total Customers</p>
-                        <p class="text-3xl font-bold">89</p>
-                        <p class="text-purple-100 text-xs mt-1">+5 new customers</p>
+                        <p class="text-3xl font-bold">{{ stats.totalCustomers }}</p>
+                        <p class="text-purple-100 text-xs mt-1">Unique customers</p>
                     </div>
                     <div class="bg-purple-400 rounded-full p-3">
                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
@@ -69,8 +69,8 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-orange-100 text-sm font-medium">Pending Payments</p>
-                        <p class="text-3xl font-bold">₹45,280</p>
-                        <p class="text-orange-100 text-xs mt-1">12 overdue invoices</p>
+                        <p class="text-3xl font-bold">₹{{ formatCurrency(stats.pendingPayments) }}</p>
+                        <p class="text-orange-100 text-xs mt-1">Unpaid invoices</p>
                     </div>
                     <div class="bg-orange-400 rounded-full p-3">
                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
@@ -197,43 +197,32 @@
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold text-gray-900">Recent Activity</h3>
-                        <Link href="#" class="text-sm text-blue-600 hover:text-blue-700">View All</Link>
+                        <Link :href="route('invoice.list')" class="text-sm text-blue-600 hover:text-blue-700">View All</Link>
                     </div>
                     <div class="space-y-4">
-                        <div class="flex items-start space-x-3">
-                            <div class="bg-green-100 rounded-full p-1">
-                                <div class="bg-green-500 rounded-full w-2 h-2"></div>
+                        <div v-if="recentActivity.length === 0" class="text-center py-8">
+                            <div class="text-gray-400 mb-2">
+                                <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
                             </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm text-gray-900">Invoice #INV-2024-001 paid</p>
-                                <p class="text-xs text-gray-500">2 hours ago</p>
-                            </div>
+                            <p class="text-sm text-gray-500">No recent activity</p>
                         </div>
-                        <div class="flex items-start space-x-3">
+                        <div v-else v-for="activity in recentActivity" :key="activity.id" class="flex items-start space-x-3">
                             <div class="bg-blue-100 rounded-full p-1">
                                 <div class="bg-blue-500 rounded-full w-2 h-2"></div>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm text-gray-900">New customer "ABC Corp" added</p>
-                                <p class="text-xs text-gray-500">5 hours ago</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start space-x-3">
-                            <div class="bg-yellow-100 rounded-full p-1">
-                                <div class="bg-yellow-500 rounded-full w-2 h-2"></div>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm text-gray-900">Proforma #PRO-2024-045 created</p>
-                                <p class="text-xs text-gray-500">1 day ago</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start space-x-3">
-                            <div class="bg-red-100 rounded-full p-1">
-                                <div class="bg-red-500 rounded-full w-2 h-2"></div>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm text-gray-900">Payment overdue: INV-2024-032</p>
-                                <p class="text-xs text-gray-500">2 days ago</p>
+                                <p class="text-sm text-gray-900">
+                                    Invoice #{{ activity.invoice_number || `INV-${activity.id}` }}
+                                    <span v-if="activity.payment_status === 1" class="text-green-600">- Paid</span>
+                                    <span v-else class="text-orange-600">- Pending</span>
+                                </p>
+                                <p class="text-xs text-gray-500">
+                                    {{ activity.company?.name || 'Company' }} -
+                                    ₹{{ formatCurrency(activity.total_ammount) }}
+                                </p>
+                                <p class="text-xs text-gray-500">{{ formatDate(activity.invoice_date) }}</p>
                             </div>
                         </div>
                     </div>
@@ -241,41 +230,77 @@
 
                 <!-- Quick Stats -->
                 <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">This Month</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Summary</h3>
                     <div class="space-y-4">
                         <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-600">Invoices Sent</span>
-                            <span class="text-sm font-semibold text-gray-900">24</span>
+                            <span class="text-sm text-gray-600">Total Revenue</span>
+                            <span class="text-sm font-semibold text-green-600">₹{{ formatCurrency(stats.totalRevenue) }}</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-600">Payments Received</span>
-                            <span class="text-sm font-semibold text-green-600">18</span>
+                            <span class="text-sm text-gray-600">Active Invoices</span>
+                            <span class="text-sm font-semibold text-green-600">{{ stats.activeInvoices }}</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-600">Pending Invoices</span>
-                            <span class="text-sm font-semibold text-orange-600">6</span>
+                            <span class="text-sm text-gray-600">Pending Amount</span>
+                            <span class="text-sm font-semibold text-orange-600">₹{{ formatCurrency(stats.pendingPayments) }}</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-600">New Customers</span>
-                            <span class="text-sm font-semibold text-blue-600">5</span>
+                            <span class="text-sm text-gray-600">Total Customers</span>
+                            <span class="text-sm font-semibold text-blue-600">{{ stats.totalCustomers }}</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Subscription Status -->
-                <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+                <!-- Dynamic Subscription Status -->
+                <div v-if="subscription" class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold">Subscription Status</h3>
-                        <div class="bg-green-400 rounded-full px-2 py-1">
-                            <span class="text-xs font-medium">Active</span>
+                        <div :class="getSubscriptionStatusClass(subscription.status)">
+                            <span class="text-xs font-medium">{{ getSubscriptionStatusText(subscription.status) }}</span>
                         </div>
                     </div>
-                    <p class="text-sm opacity-90 mb-2">Professional Plan</p>
-                    <p class="text-xs opacity-75">Next billing: Jan 15, 2024</p>
-                    <Link href="#" class="inline-block mt-3 text-xs bg-white bg-opacity-20 hover:bg-opacity-30 rounded px-3 py-1 transition-all">
-                        Manage Plan
+
+                    <!-- Plan Name -->
+                    <p class="text-sm opacity-90 mb-2">
+                        {{ subscription.seller_subscription?.title || 'Current Plan' }}
+                    </p>
+
+                    <!-- Expiry -->
+                    <p class="text-xs opacity-75 mb-2" v-if="subscription.end_date">
+                        {{ getSubscriptionExpiryText(subscription) }}
+                    </p>
+
+                    <!-- Amount -->
+                    <p class="text-xs opacity-75 mb-3" v-if="subscription.order_ammount">
+                        ₹{{ formatCurrency(subscription.order_ammount) }} / {{ subscription.sellerSubscription?.month || 1 }} month(s)
+                    </p>
+
+                    <!-- Actions -->
+                    <div class="flex gap-2">
+                        <Link :href="route('subscription.index')" class="inline-block text-xs bg-white bg-opacity-20 hover:bg-opacity-30 rounded px-3 py-1 transition-all">
+                            Manage Plan
+                        </Link>
+                        <Link v-if="isSubscriptionExpiring(subscription)" :href="route('subscription.index')" class="inline-block text-xs bg-yellow-500 bg-opacity-80 hover:bg-opacity-100 rounded px-3 py-1 transition-all">
+                            Renew Now
+                        </Link>
+                    </div>
+                </div>
+
+                <!-- No Subscription State -->
+                <div v-else class="bg-gradient-to-r from-gray-500 to-gray-600 rounded-lg shadow-lg p-6 text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Subscription Status</h3>
+                        <div class="bg-red-400 rounded-full px-2 py-1">
+                            <span class="text-xs font-medium">No Active Plan</span>
+                        </div>
+                    </div>
+                    <p class="text-sm opacity-90 mb-2">You don't have an active subscription</p>
+                    <p class="text-xs opacity-75 mb-3">Subscribe to access all features</p>
+                    <Link :href="route('subscription.index')" class="inline-block text-xs hover:bg-blue-600 rounded px-3 py-1 transition-all">
+                        Choose a Plan
                     </Link>
                 </div>
+
             </div>
         </div>
     </AuthenticatedLayout>
@@ -284,7 +309,29 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3';
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
+
+// Props from the controller
+const props = defineProps({
+    stats: {
+        type: Object,
+        required: true,
+        default: () => ({
+            totalRevenue: 0,
+            activeInvoices: 0,
+            totalCustomers: 0,
+            pendingPayments: 0
+        })
+    },
+    recentActivity: {
+        type: Array,
+        default: () => []
+    },
+    subscription: {
+        type: Object,
+        default: null
+    }
+});
 
 // Current date and time
 const currentDate = ref('');
@@ -303,6 +350,82 @@ const updateDateTime = () => {
         minute: '2-digit'
     });
 };
+
+// Helper functions
+const formatCurrency = (amount) => {
+    if (!amount) return '0';
+    return new Intl.NumberFormat('en-IN').format(amount);
+};
+
+const formatDate = (date) => {
+    if (!date) return '';
+    return new Date(date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+};
+
+// Subscription helper functions
+// Map DB status codes to text & classes
+const getSubscriptionStatusClass = (status) => {
+    const statusClasses = {
+        10: 'bg-green-400 rounded-full px-2 py-1', // Active
+        0:  'bg-red-400 rounded-full px-2 py-1',   // Expired
+        20: 'bg-gray-400 rounded-full px-2 py-1',  // Cancelled
+        30: 'bg-yellow-400 rounded-full px-2 py-1',// Pending
+        40: 'bg-orange-400 rounded-full px-2 py-1' // Suspended
+    };
+    return statusClasses[status] || 'bg-gray-400 rounded-full px-2 py-1';
+};
+
+const getSubscriptionStatusText = (status) => {
+    const statusTexts = {
+        10: 'Active',
+        0: 'Expired',
+        20: 'Cancelled',
+        30: 'Pending',
+        40: 'Suspended'
+    };
+    return statusTexts[status] || 'Unknown';
+};
+
+const getSubscriptionExpiryText = (subscription) => {
+    const expiryDate = subscription.end_date;
+    if (!expiryDate) return '';
+
+    const expiry = new Date(expiryDate);
+    const now = new Date();
+    const diffTime = expiry - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+        return `Expired ${Math.abs(diffDays)} days ago`;
+    } else if (diffDays === 0) {
+        return 'Expires today';
+    } else if (diffDays === 1) {
+        return 'Expires tomorrow';
+    } else if (diffDays <= 7) {
+        return `Expires in ${diffDays} days`;
+    } else {
+        return `Expires: ${formatDate(expiryDate)}`;
+    }
+};
+
+const isSubscriptionExpiring = (subscription) => {
+    if (!subscription || subscription.status !== 10) return false; // Only active
+
+    const expiryDate = subscription.end_date;
+    if (!expiryDate) return false;
+
+    const expiry = new Date(expiryDate);
+    const now = new Date();
+    const diffTime = expiry - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    return diffDays <= 7 && diffDays >= 0;
+};
+
 
 let timeInterval;
 
