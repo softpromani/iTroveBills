@@ -219,7 +219,7 @@
                                     <span v-else class="text-orange-600">- Pending</span>
                                 </p>
                                 <p class="text-xs text-gray-500">
-                                    {{ activity.company?.name || 'Company' }} -
+                                    {{ activity.company?.name || 'Amount' }} -
                                     ₹{{ formatCurrency(activity.total_ammount) }}
                                 </p>
                                 <p class="text-xs text-gray-500">{{ formatDate(activity.invoice_date) }}</p>
