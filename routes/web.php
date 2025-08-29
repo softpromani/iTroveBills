@@ -65,7 +65,7 @@ Route::get('/dashboard', function () {
     // Get user's subscription information
     $subscription = $user->subscriptions()
                          ->with(['sellerSubscription']) // assuming you have a plan relationship
-                         ->where('status', '10') // or whatever status field you use
+                        //  ->where('status', '10') // or whatever status field you use
                          ->latest()
                          ->first();
 
