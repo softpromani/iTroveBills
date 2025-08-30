@@ -38,9 +38,9 @@
             <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-green-100 text-sm font-medium">Active Invoices</p>
-                        <p class="text-3xl font-bold">{{ stats.activeInvoices }}</p>
-                        <p class="text-green-100 text-xs mt-1">Paid invoices</p>
+                        <p class="text-green-100 text-sm font-medium">Total Paid Amount</p>
+                        <p class="text-3xl font-bold">₹{{ formatCurrency(stats?.totalPaid) ?? 0 }}</p>
+                        <p class="text-green-100 text-xs mt-1">Collected payments</p>
                     </div>
                     <div class="bg-green-400 rounded-full p-3">
                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
@@ -53,9 +53,9 @@
             <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-purple-100 text-sm font-medium">Total Customers</p>
-                        <p class="text-3xl font-bold">{{ stats.totalCustomers }}</p>
-                        <p class="text-purple-100 text-xs mt-1">Unique customers</p>
+                        <p class="text-purple-100 text-sm font-medium">Total Due Amount</p>
+                        <p class="text-3xl font-bold">₹{{ formatCurrency(stats?.totalDue) ?? 0 }}</p>
+                        <p class="text-purple-100 text-xs mt-1">Pending payments</p>
                     </div>
                     <div class="bg-purple-400 rounded-full p-3">
                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
@@ -68,9 +68,9 @@
             <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg shadow-lg p-6 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-orange-100 text-sm font-medium">Pending Payments</p>
-                        <p class="text-3xl font-bold">₹{{ formatCurrency(stats.pendingPayments) }}</p>
-                        <p class="text-orange-100 text-xs mt-1">Unpaid invoices</p>
+                        <p class="text-orange-100 text-sm font-medium">Total Customers</p>
+                        <p class="text-3xl font-bold">{{ stats?.totalCustomers ?? 0 }}</p>
+                        <p class="text-orange-100 text-xs mt-1">Unique customers</p>
                     </div>
                     <div class="bg-orange-400 rounded-full p-3">
                         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
@@ -215,9 +215,12 @@
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm text-gray-900">
                                     Invoice #{{ activity.invoice_number || `INV-${activity.id}` }}
-                                    <span v-if="activity.payment_status === 1" class="text-green-600">- Paid</span>
-                                    <span v-else class="text-orange-600">- Pending</span>
+
+                                    <span v-if="activity.payment_status === 'paid'" class="text-green-600">- Paid</span>
+                                    <span v-else-if="activity.payment_status === 'partial-paid'" class="text-yellow-600">- Partial Paid</span>
+                                    <span v-else class="text-red-600">- Due</span>
                                 </p>
+
                                 <p class="text-xs text-gray-500">
                                     {{ activity.company?.name || 'Amount' }} -
                                     ₹{{ formatCurrency(activity.total_ammount) }}
@@ -237,12 +240,12 @@
                             <span class="text-sm font-semibold text-green-600">₹{{ formatCurrency(stats.totalRevenue) }}</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-600">Active Invoices</span>
-                            <span class="text-sm font-semibold text-green-600">{{ stats.activeInvoices }}</span>
+                            <span class="text-sm text-gray-600">Paid Amount</span>
+                            <span class="text-sm font-semibold text-green-600">₹{{ formatCurrency(stats?.totalPaid) ?? 0 }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-600">Pending Amount</span>
-                            <span class="text-sm font-semibold text-orange-600">₹{{ formatCurrency(stats.pendingPayments) }}</span>
+                            <span class="text-sm font-semibold text-orange-600">₹{{ formatCurrency(stats?.totalDue) ?? 0 }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-600">Total Customers</span>
@@ -318,9 +321,9 @@ const props = defineProps({
         required: true,
         default: () => ({
             totalRevenue: 0,
-            activeInvoices: 0,
-            totalCustomers: 0,
-            pendingPayments: 0
+            totalPaid: 0,
+            totalDue: 0,
+            totalCustomers: 0
         })
     },
     recentActivity: {

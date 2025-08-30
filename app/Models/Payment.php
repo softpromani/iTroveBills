@@ -14,4 +14,9 @@ class Payment extends Model
     {
         return $this->hasMany(PaymentHistory::class, 'payment_id', 'id');
     }
+
+    public function paymentable()
+    {
+        return $this->morphTo();
+    }
 }

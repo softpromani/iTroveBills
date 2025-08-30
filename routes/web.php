@@ -12,6 +12,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SubscriptionPackController;
 use App\Models\Invoice;
+use App\Models\Payment;
 use App\Models\SellerCustomers;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
@@ -44,23 +45,48 @@ Route::get('/dashboard', function () {
     $companyIds = $user->companies()->pluck('id');
 
     $stats = [
-        'totalRevenue' => Invoice::whereIn('company_id', $companyIds)->sum('total_ammount'),
-        'activeInvoices' => Invoice::whereIn('company_id', $companyIds)
-                                   ->where('payment_status', 1) // paid/active
-                                   ->count(),
+        'totalRevenue' => Payment::whereHasMorph(
+                                'paymentable',
+                                [\App\Models\Invoice::class],
+                                function ($q) use ($companyIds) {
+                                    $q->whereIn('company_id', $companyIds);
+                                })
+                                ->sum('total_amount'),
+
+        'totalPaid' => Payment::whereHasMorph(
+                                'paymentable',
+                                [\App\Models\Invoice::class],
+                                function ($q) use ($companyIds) {
+                                    $q->whereIn('company_id', $companyIds);
+                                })
+                                ->sum('paid_amount'),
+
+        'totalDue' => Payment::whereHasMorph(
+                                'paymentable',
+                                [\App\Models\Invoice::class],
+                                function ($q) use ($companyIds) {
+                                    $q->whereIn('company_id', $companyIds);
+                                })
+                                ->selectRaw('SUM(total_amount - paid_amount) as due')
+                                ->value('due'),
+
         'totalCustomers' => Invoice::whereIn('company_id', $companyIds)
-                                   ->distinct('customer_company_id')
-                                   ->count('customer_company_id'),
-        'pendingPayments' => Invoice::whereIn('company_id', $companyIds)
-                                    ->where('payment_status', 0) // pending
-                                    ->sum('total_ammount'),
+                                    ->distinct('customer_company_id')
+                                    ->count('customer_company_id'),
     ];
 
-    $recentActivity = Invoice::with('company') // lowercase relation
-                             ->whereIn('company_id', $companyIds)
-                             ->latest('invoice_date')
-                             ->take(5)
-                             ->get();
+    $recentActivity = Invoice::with(['company', 'payment', 'paymentStatus' => function ($q) {
+                        $q->latest('created_at')->take(1); // get latest payment record
+                        }])
+                        ->whereIn('company_id', $companyIds)
+                        ->latest('invoice_date')
+                        ->take(5)
+                        ->get()
+                        ->map(function ($invoice) {
+                            $latestPayment = $invoice->payment->first(); // this is now a Collection
+                            $invoice->payment_status = $latestPayment ? $latestPayment->status : 'due';
+                            return $invoice;
+                        });
 
     // Get user's subscription information
     $subscription = $user->subscriptions()
