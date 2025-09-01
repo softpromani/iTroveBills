@@ -10,11 +10,13 @@ use App\Models\PerformaInvoiceItem;
 use App\Models\SellerCustomers;
 use App\Models\Status;
 use App\Models\CompanyLUT;
+use Carbon\Carbon;
 use DateTime;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class CustomerBillController extends Controller
@@ -181,14 +183,90 @@ class CustomerBillController extends Controller
         }
     }
 
-    public function invoice_list()
+   public function invoice_list(Request $request)
     {
-        $invoices = auth()->user()->invoices;
-        $invoices->load('paymentStatus');
-        $invoices->load('Customer');
-        $invoices->load('Company');
-        $invoices->load('payment');
-        return inertia('invoices/invoice_list', compact('invoices'));
+        $invoicesQuery = auth()->user()->invoices();
+
+        // Apply filters
+        if ($request->filled('customer_id')) {
+            // Get company_id from seller_customers table
+            $companyId = SellerCustomers::where('id', $request->customer_id)
+                ->value('customer_company_id');
+
+            if ($companyId) {
+                $invoicesQuery->where('customer_company_id', $companyId);
+            }
+        }
+
+        if ($request->filled('customer_name')) {
+            // Option 1: Search in companies table
+            $customerIds = Company::where('company_name', 'like', '%' . $request->customer_name . '%')
+                ->pluck('id');
+
+            $invoicesQuery->whereIn('customer_company_id', $customerIds);
+
+            // Option 2: If you want to search via seller_customers JSON
+            /*
+            $customerIds = SellerCustomers::where(
+                DB::raw("JSON_UNQUOTE(JSON_EXTRACT(customer_company_data, '$.name'))"),
+                'like',
+                '%' . $request->customer_name . '%'
+            )->pluck('customer_company_id');
+
+            $invoicesQuery->whereIn('customer_company_id', $customerIds);
+            */
+        }
+        if ($request->filled('financial_year')) {
+            $financialYear = $request->financial_year;
+            $startDate = Carbon::createFromDate($financialYear, 4, 1)->startOfDay();
+            $endDate = Carbon::createFromDate($financialYear + 1, 3, 31)->endOfDay();
+
+            $invoicesQuery->whereBetween('invoice_date', [$startDate, $endDate]);
+        }
+
+        if ($request->filled('payment_status')) {
+            $invoicesQuery->whereHas('payment', function($q) use ($request) {
+                $q->where('status', $request->payment_status);
+            });
+        }
+
+        // Get the filtered invoices
+        $invoices = $invoicesQuery->get();
+        $invoices->load('paymentStatus', 'Customer', 'Company', 'payment');
+
+        // Get filter data
+        $customers = SellerCustomers::select('id', 'customer_company_data')
+            ->get()
+            ->map(function($customer) {
+                $detail = json_decode($customer->customer_company_data, true);
+                return [
+                    'id' => $customer->id,
+                    'name' => $detail['name'] ?? 'Unknown',
+                    'email' => $detail['email'] ?? '',
+                    'mobile' => $detail['mobile'] ?? ''
+                ];
+            });
+
+        $paymentStatuses = ['due', 'partial-paid', 'paid'];
+
+        $currentYear = Carbon::now()->year;
+        $currentMonth = Carbon::now()->month;
+        $financialYears = [];
+
+        for ($i = 0; $i < 5; $i++) {
+            $year = $currentMonth >= 4 ? $currentYear - $i : $currentYear - $i - 1;
+            $financialYears[] = [
+                'value' => $year,
+                'label' => $year . '-' . ($year + 1)
+            ];
+        }
+
+        return inertia('invoices/invoice_list', compact(
+            'invoices',
+            'customers',
+            'paymentStatuses',
+            'financialYears'
+        ));
     }
 
     public function template(Request $request)

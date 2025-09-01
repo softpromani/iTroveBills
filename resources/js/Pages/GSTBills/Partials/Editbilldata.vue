@@ -3,10 +3,7 @@
         <h2 class="font-medium text-center text-white font-weight-bolder">
             EDIT INVOICE
         </h2>
-        <span
-            class="text-white cursor-pointer top-2 right-2 position-absolute"
-            @click="toggleproductCard"
-        >
+        <span class="text-white cursor-pointer top-2 right-2 position-absolute" @click="toggleproductCard">
             <i class="fa-solid fa-bullseye"></i>
         </span>
     </div>
@@ -34,8 +31,6 @@
                     <tbody>
                         <tr v-for="(row, rowIndex) in tableData" :key="`row-${rowIndex}`">
                             <td>{{ rowIndex + 1 }}</td>
-
-                            <!-- Description of Product -->
                             <td>
                                 <input
                                     type="text"
@@ -46,8 +41,6 @@
                                     placeholder="Enter description"
                                 />
                             </td>
-
-                            <!-- HSN Code with Autocomplete -->
                             <td class="position-relative">
                                 <input
                                     type="text"
@@ -63,8 +56,6 @@
                                     autocomplete="off"
                                     :ref="el => setFieldRef(`hsn-${rowIndex}`, el)"
                                 />
-
-                                <!-- Dropdown -->
                                 <div
                                     v-if="showDropdown[rowIndex] && hsnResults[rowIndex] && hsnResults[rowIndex].length > 0"
                                     class="dropdown-menu show position-absolute w-100"
@@ -82,8 +73,6 @@
                                     </div>
                                 </div>
                             </td>
-
-                            <!-- Quantity -->
                             <td>
                                 <input
                                     type="number"
@@ -96,8 +85,6 @@
                                     :ref="el => setFieldRef(`quantity-${rowIndex}`, el)"
                                 />
                             </td>
-
-                            <!-- Unit -->
                             <td>
                                 <input
                                     type="text"
@@ -109,8 +96,6 @@
                                     :ref="el => setFieldRef(`unit-${rowIndex}`, el)"
                                 />
                             </td>
-
-                            <!-- Weight -->
                             <td>
                                 <input
                                     type="number"
@@ -123,8 +108,6 @@
                                     :ref="el => setFieldRef(`weight-${rowIndex}`, el)"
                                 />
                             </td>
-
-                            <!-- Rate -->
                             <td>
                                 <input
                                     type="number"
@@ -137,11 +120,7 @@
                                     :ref="el => setFieldRef(`rate-${rowIndex}`, el)"
                                 />
                             </td>
-
-                            <!-- Taxable Value (calculated) -->
                             <td class="text-end">{{ calculateTaxableValue(rowIndex) }}</td>
-
-                            <!-- GST Percentage -->
                             <td>
                                 <input
                                     type="number"
@@ -156,8 +135,6 @@
                                     :ref="el => setFieldRef(`gst-percentage-${rowIndex}`, el)"
                                 />
                             </td>
-
-                            <!-- GST Amount -->
                             <td>
                                 <input
                                     type="number"
@@ -171,25 +148,16 @@
                                     :ref="el => setFieldRef(`gst-amount-${rowIndex}`, el)"
                                 />
                             </td>
-
-                            <!-- Subtotal Amount (calculated) -->
                             <td class="text-end">{{ calculateSubtotalAmount(rowIndex) }}</td>
-
                             <td>
                                 <span class="cursor-pointer badge rounded-pill text-bg-primary me-2" @click="addRow(rowIndex)">
                                     <i class="fa fa-plus" aria-hidden="true"></i>
                                 </span>
-                                <span
-                                    class="cursor-pointer badge rounded-pill text-bg-danger"
-                                    @click="removeRow(rowIndex)"
-                                    v-if="tableData.length > 1"
-                                >
+                                <span class="cursor-pointer badge rounded-pill text-bg-danger" @click="removeRow(rowIndex)" v-if="tableData.length > 1">
                                     <i class="fa fa-minus" aria-hidden="true"></i>
                                 </span>
                             </td>
                         </tr>
-
-                        <!-- Totals Row -->
                         <tr class="table-info">
                             <td colspan="5" class="text-end font-bold">TOTALS:</td>
                             <td class="font-bold text-end">{{ calculateTotalWeight() }}</td>
@@ -203,46 +171,81 @@
                     </tbody>
                 </table>
             </div>
+            <div class="mt-3 d-flex gap-2">
+                <button
+                    class="btn btn-info text-white text-bold"
+                    @click="updatebill"
+                    :disabled="form.processing"
+                >
+                    <span v-if="form.processing">Updating...</span>
+                    <span v-else>Update Invoice</span>
+                </button>
+                <button class="btn btn-secondary" @click="cancelUpdate">
+                    Cancel
+                </button>
+            </div>
 
-            <button class="text-white btn btn-info text-bold mt-3" @click="updatebill">
-                Update Invoice
-            </button>
+            <!-- Display errors if any -->
+            <div v-if="Object.keys(form.errors).length > 0" class="alert alert-danger mt-3">
+                <h6>Please fix the following errors:</h6>
+                <ul class="mb-0">
+                    <li v-for="(error, field) in form.errors" :key="field">{{ error }}</li>
+                </ul>
+            </div>
         </div>
     </transition>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from "vue";
-import { useForm } from "@inertiajs/vue3";
+import { ref, onMounted, nextTick, watch, reactive } from "vue";
+import { useForm, router } from "@inertiajs/vue3";
 import axios from 'axios';
 
-const form = useForm({});
+// Define props to receive data from parent
 const props = defineProps({
-    invoiceitem: Object,
+    invoicedetails: Object,
+    invoiceitem: Array,
+    invoiceId: [String, Number],
 });
 
-// Initial table data - [Description, HSN, Quantity, Unit, Weight, Rate, GST_Percentage, GST_Amount]
+// Initialize form data using useForm with correct route
+const form = useForm({
+    invoicedata: [],
+    invoicedetails: [],
+    invoice_id: null,
+});
+
+// State for the table data
 const tableData = ref([]);
-const invoicedetails = ref([]);
 const showproductCard = ref(true);
 
 // HSN Code search related
 const hsnResults = ref({});
 const showDropdown = ref({});
 const searchTimeout = ref(null);
-
-// Field references for focus management
 const fieldRefs = ref({});
 
-// Set field references
+// Add loading state
+const isLoading = ref(false);
+
 const setFieldRef = (key, el) => {
     if (el) {
         fieldRefs.value[key] = el;
     }
 };
 
-// Fill initial table data
+// Fill initial data on component mount
 onMounted(() => {
+    console.log('Mounted - Props received:', {
+        invoicedetails: props.invoicedetails,
+        invoiceitem: props.invoiceitem,
+        invoiceId: props.invoiceId
+    });
+
+    // Set the invoice ID
+    form.invoice_id = props.invoiceId || props.invoicedetails?.id;
+
+    // Populate table with line items from parent prop
     if (props.invoiceitem && props.invoiceitem.length > 0) {
         tableData.value = props.invoiceitem.map((item) => [
             item.desc_product || "",
@@ -257,9 +260,26 @@ onMounted(() => {
     } else {
         tableData.value = [["", "", 0, "", 0, 0, 0, 0]];
     }
+
+    console.log('Initial table data:', tableData.value);
 });
 
-// Toggle product card
+// Watch for changes in props
+watch(() => props.invoiceitem, (newItems) => {
+    if (newItems && newItems.length > 0) {
+        tableData.value = newItems.map((item) => [
+            item.desc_product || "",
+            item.hsn_code || "",
+            parseFloat(item.quantity) || 0,
+            item.unit || "",
+            parseFloat(item.weight) || 0,
+            parseFloat(item.rate) || 0,
+            parseFloat(item.gst_percentage) || 0,
+            parseFloat(item.gst_amount) || 0,
+        ]);
+    }
+}, { deep: true });
+
 const toggleproductCard = () => {
     showproductCard.value = !showproductCard.value;
 };
@@ -532,18 +552,32 @@ const calculateGrandTotal = () => {
 
 // Submit invoice update
 const updatebill = () => {
-    const invoiceNoValue = document.getElementById("invoice_no")?.value || "";
-    const customer = document.getElementById("customer")?.value || "";
-    const company = document.getElementById("company")?.value || "";
-    const vehical_no = document.getElementById("vehical_no")?.value || "";
+    console.log('Update bill function called');
+    console.log('Current form data:', form);
+    console.log('Current table data:', tableData.value);
+    console.log('Invoice details from props:', props.invoicedetails);
 
-    // Validate required fields
-    if (!invoiceNoValue || !customer || !company || !vehical_no) {
-        alert('Please fill in all required fields (Invoice No, Customer, Company, Vehicle No)');
+    // Validation
+    if (!props.invoicedetails?.invoice_no && !form.invoice_no) {
+        alert('Invoice number is required');
         return;
     }
 
-    // Validate table data
+    if (!props.invoicedetails?.customer && !form.customer) {
+        alert('Customer is required');
+        return;
+    }
+
+    if (!props.invoicedetails?.company && !form.company) {
+        alert('Company is required');
+        return;
+    }
+
+    if (!props.invoicedetails?.vehical_no && !form.vehical_no) {
+        alert('Vehicle number is required');
+        return;
+    }
+
     const hasValidData = tableData.value.some(row =>
         row[0].trim() !== '' || row[1].trim() !== '' || parseFloat(row[2]) > 0
     );
@@ -553,33 +587,55 @@ const updatebill = () => {
         return;
     }
 
-    invoicedetails.value[0] = {
-        invoice: invoiceNoValue,
-        customer: customer,
-        company: company,
-        vehical_no: vehical_no,
+    // Clear previous errors
+    form.clearErrors();
+
+    // Set data for submission
+    form.invoicedata = tableData.value;
+    form.invoicedetails = [{
+        invoice: props.invoicedetails?.invoice_no || form.invoice_no,
+        customer: props.invoicedetails?.customer || form.customer,
+        company: props.invoicedetails?.company || form.company,
+        vehical_no: props.invoicedetails?.vehical_no || form.vehical_no,
         totalWeight: calculateTotalWeight(),
         totalTaxableValue: calculateTotalTaxableValue(),
         totalGstAmount: calculateTotalGstAmount(),
         grandTotal: calculateGrandTotal(),
-    };
+    }];
 
-    form.post(
-        route("gst.customer.bill.update", {
-            invoicedata: tableData.value,
-            invoice_id: props.invoiceitem?.[0]?.invoice_id,
-            invoicedetails: invoicedetails.value,
-        }),
-        {
-            preserveScroll: true,
-            onSuccess: () => {
-                // Handle success if needed
-            },
-            onError: (errors) => {
-                console.error('Update errors:', errors);
-            }
+    console.log('Submitting data:', {
+        invoicedata: form.invoicedata,
+        invoicedetails: form.invoicedetails,
+        invoice_id: form.invoice_id
+    });
+
+    // Set loading state
+    isLoading.value = true;
+
+    // Post data to the controller
+    form.post(route("gst.customer.bill.update", { invoice_id: form.invoice_id }), {
+        preserveScroll: true,
+        onSuccess: (response) => {
+            console.log('Update successful:', response);
+            alert('Invoice updated successfully!');
+            // Redirect to invoice list or stay on page
+            router.visit(route('gst.invoice.list'));
+        },
+        onError: (errors) => {
+            console.error('Update errors:', errors);
+            alert('Error updating invoice. Please check the form and try again.');
+        },
+        onFinish: () => {
+            isLoading.value = false;
         }
-    );
+    });
+};
+
+// Cancel update
+const cancelUpdate = () => {
+    if (confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
+        router.visit(route('gst.invoice.list'));
+    }
 };
 </script>
 
@@ -615,6 +671,18 @@ const updatebill = () => {
     text-align: right;
 }
 
+.slide-fade-enter-active {
+    transition: all 0.3s ease-out;
+}
+.slide-fade-leave-active {
+    transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
+}
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+    transform: translateX(20px);
+    opacity: 0;
+}
+
 /* Custom scrollbar for dropdown */
 .dropdown-menu::-webkit-scrollbar {
     width: 6px;
@@ -637,5 +705,10 @@ const updatebill = () => {
 .form-control:focus {
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
     border-color: #80bdff;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 </style>

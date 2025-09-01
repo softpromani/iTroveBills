@@ -7,7 +7,9 @@
         <i class="fa fa-download" aria-hidden="true"></i>
     </button>
     <div class="container-fluid downloadbill">
-        <div class="row text-center text-center border-t  border-r border-black border-solid"><center>Performa Invoice</center></div>
+        <div class="row text-center text-center border-t border-r border-black border-solid">
+            <center>GST Invoice</center>
+        </div>
         <div class="row">
             <div class="border-t border-b border-l border-black border-solid col-2">
                 <img class="img" :src="props.invoice.company.logo ?? ''" alt="jpeg" />
@@ -29,7 +31,7 @@
             </div>
             <div class="border-b border-l border-black border-solid col-4">
                 <p class="text-center">
-                    LUT NO- {{ props.invoice?.lut?.lut_no ?? "" }} / {{ props.invoice?.lut?.formatted_expiry_date??'' }}
+                    LUT NO- {{ props.invoice?.lut?.lut_no ?? "" }} / {{ props.invoice?.lut?.formatted_expiry_date ?? '' }}
                 </p>
             </div>
             <div class="border-b border-l border-r border-black border-solid col-4">
@@ -41,12 +43,8 @@
         <div class="row">
             <div class="border-b border-l border-r border-black border-solid col-12">
                 <p class="text-center">
-                    MOBILE-{{
-                        props.invoice.company.mobile ?? ""
-                    }}
-                    &nbsp;&nbsp;&nbsp; EMAIL-{{
-                        props.invoice.company.email ?? ""
-                    }}
+                    MOBILE-{{ props.invoice.company.mobile ?? "" }}
+                    &nbsp;&nbsp;&nbsp; EMAIL-{{ props.invoice.company.email ?? "" }}
                 </p>
             </div>
         </div>
@@ -87,7 +85,6 @@
             <div class="font-bold border-b border-l border-black border-solid col-2">
                 ADDRESS :
             </div>
-
             <div class="border-b border-l border-r border-black border-solid col-10">
                 {{ props.invoice.customer.address ?? "No address" }}
             </div>
@@ -106,32 +103,45 @@
                 {{ props.invoice.vehicle_no ?? "" }}
             </div>
         </div>
+
+        <!-- Updated Header Row with all GST fields -->
         <div class="row">
             <div class="font-bold border-b border-l border-black border-solid col-1">
                 S.No
             </div>
             <div class="font-bold border-b border-l border-black border-solid col-2">
-                Description of Goods
+                Description of Product
             </div>
-            <div class="font-bold border-b border-l border-black border-solid col-2">
-                HSN CODE
+            <div class="font-bold border-b border-l border-black border-solid col-1">
+                HSN Code
             </div>
-            <div class="font-bold border-b border-l border-r border-black border-solid col-1">
-                Qty
+            <div class="font-bold border-b border-l border-black border-solid col-1">
+                Quantity
             </div>
-            <div class="font-bold border-b border-black border-solid col-1">
+            <div class="font-bold border-b border-l border-black border-solid col-1">
                 Unit
             </div>
             <div class="font-bold border-b border-l border-black border-solid col-1">
                 Weight
             </div>
-            <div class="font-bold border-b border-l border-black border-solid col-2">
+            <div class="font-bold border-b border-l border-black border-solid col-1">
                 Rate
             </div>
-            <div class="font-bold border-b border-l border-r border-black border-solid col-2">
+            <div class="font-bold border-b border-l border-black border-solid col-1">
                 Taxable Value
             </div>
+            <div class="font-bold border-b border-l border-black border-solid col-1">
+                GST %
+            </div>
+            <div class="font-bold border-b border-l border-black border-solid col-1">
+                GST Amount
+            </div>
+            <div class="font-bold border-b border-l border-r border-black border-solid col-1">
+                Subtotal
+            </div>
         </div>
+
+        <!-- Updated Data Rows with all GST fields -->
         <div class="row" v-for="(data, index) in props.invoice.invoiceitems" :key="data.id">
             <div class="border-b border-l border-black border-solid col-1">
                 {{ index + 1 ?? "" }}
@@ -139,45 +149,101 @@
             <div class="border-b border-l border-black border-solid col-2">
                 {{ data.desc_product ?? "" }}
             </div>
-            <div class="border-b border-l border-black border-solid col-2">
+            <div class="border-b border-l border-black border-solid col-1">
                 {{ data.hsn_code ?? "" }}
             </div>
-            <div class="border-b border-l border-r border-black border-solid col-1">
+            <div class="border-b border-l border-black border-solid col-1">
                 {{ data.quantity ?? "" }}
             </div>
-            <div class="border-b border-black border-solid col-1">
+            <div class="border-b border-l border-black border-solid col-1">
                 {{ data.unit ?? "" }}
             </div>
             <div class="border-b border-l border-black border-solid col-1">
                 {{ data.weight ?? "" }}
             </div>
-            <div class="border-b border-l border-black border-solid col-2">
+            <div class="border-b border-l border-black border-solid col-1">
                 {{ data.rate ?? "" }}
             </div>
-            <div class="border-b border-l border-r border-black border-solid col-2">
-                {{ (data.rate * data.quantity ?? 0).toFixed(2) }}
+            <div class="border-b border-l border-black border-solid col-1">
+                {{ calculateTaxableValue(data) }}
+            </div>
+            <div class="border-b border-l border-black border-solid col-1">
+                {{ data.gst_percentage ?? "0" }}%
+            </div>
+            <div class="border-b border-l border-black border-solid col-1">
+                {{ calculateGstAmount(data) }}
+            </div>
+            <div class="border-b border-l border-r border-black border-solid col-1">
+                {{ calculateSubtotal(data) }}
+            </div>
+        </div>
+
+        <!-- Updated Totals Row -->
+        <div class="row">
+            <div class="font-bold border-b border-l border-black border-solid col-3">
+                TOTALS:
+            </div>
+            <div class="border-b border-l border-black border-solid col-1">
+                {{ calculateTotalQuantity() }}
+            </div>
+            <div class="border-b border-l border-black border-solid col-1">
+                -
+            </div>
+            <div class="font-bold border-b border-l border-black border-solid col-1">
+                {{ calculateTotalWeight() }}
+            </div>
+            <div class="border-b border-l border-black border-solid col-1">
+                -
+            </div>
+            <div class="font-bold border-b border-l border-black border-solid col-1">
+                {{ calculateTotalTaxableValue() }}
+            </div>
+            <div class="border-b border-l border-black border-solid col-1">
+                -
+            </div>
+            <div class="font-bold border-b border-l border-black border-solid col-1">
+                {{ calculateTotalGstAmount() }}
+            </div>
+            <div class="font-bold border-b border-l border-r border-black border-solid col-1">
+                {{ calculateGrandTotal() }}
+            </div>
+        </div>
+
+        <!-- Additional GST Summary Section -->
+        <div class="row">
+            <div class="font-bold border-b border-l border-black border-solid col-6">
+                GST SUMMARY
+            </div>
+            <div class="font-bold border-b border-l border-r border-black border-solid col-6">
+                AMOUNT
             </div>
         </div>
         <div class="row">
-            <div class="font-bold border-b border-l border-black border-solid col-3">
-                No. OF PACKAGES
+            <div class="border-b border-l border-black border-solid col-6">
+                Total Taxable Value
             </div>
-            <div class="border-b border-l border-black border-solid col-1">
-                {{ props.invoice.no_packets ?? "No Packs" }}
-            </div>
-            <div class="font-bold border-b border-l border-black border-solid col-3">
-                Total weight
-            </div>
-            <div class="border-b border-l border-black border-solid col-1">
-                {{ props.invoice.total_weight ?? "" }}
-            </div>
-            <div class="font-bold border-b border-l border-black border-solid col-2">
-                Sub Total
-            </div>
-            <div class="border-b border-l border-r border-black border-solid col-2">
-                ₹ {{ props.invoice.total_ammount ?? "" }}
+            <div class="border-b border-l border-r border-black border-solid col-6">
+                ₹ {{ calculateTotalTaxableValue() }}
             </div>
         </div>
+        <div class="row">
+            <div class="border-b border-l border-black border-solid col-6">
+                Total GST Amount
+            </div>
+            <div class="border-b border-l border-r border-black border-solid col-6">
+                ₹ {{ calculateTotalGstAmount() }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="font-bold border-b border-l border-black border-solid col-6">
+                Grand Total (Inclusive of GST)
+            </div>
+            <div class="font-bold border-b border-l border-r border-black border-solid col-6">
+                ₹ {{ calculateGrandTotal() }}
+            </div>
+        </div>
+
+        <!-- Existing sections remain the same -->
         <div class="row">
             <div class="font-bold border-b border-l border-black border-solid col-4">
                 Amount in words
@@ -203,8 +269,7 @@
                     IFSC-{{ props.invoice.company.bank_ifsc ?? "" }}
                 </p>
                 <p class="-pt-3">
-                    Account Number -
-                    {{ props.invoice.company.bank_account_no ?? "" }}
+                    Account Number - {{ props.invoice.company.bank_account_no ?? "" }}
                 </p>
                 <p class="-pt-3">
                     A D CODE-{{ props.invoice.company.ad_code ?? "" }}
@@ -216,24 +281,76 @@
         </div>
         <div class="row">
             <div class="col-2">
-                 <img class="img" :src="props.invoice.company.sign ?? ''" alt="jpeg" style="height:80px;width:230px" />
+                <img class="img" :src="props.invoice.company.sign ?? ''" alt="jpeg" style="height:80px;width:230px" />
             </div>
         </div>
     </div>
 </template>
+
 <script setup>
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import { ref, onMounted } from "vue";
+
 const printInvoice = () => {
     window.print();
 };
+
 const props = defineProps({
     invoice: Object,
 });
 
-
 const amountInWords = ref("");
 
+// GST Calculation Methods
+const calculateTaxableValue = (data) => {
+    const quantity = parseFloat(data.quantity) || 0;
+    const rate = parseFloat(data.rate) || 0;
+    return (quantity * rate).toFixed(2);
+};
+
+const calculateGstAmount = (data) => {
+    const taxableValue = parseFloat(calculateTaxableValue(data)) || 0;
+    const gstPercentage = parseFloat(data.gst_percentage) || 0;
+    return (taxableValue * gstPercentage / 100).toFixed(2);
+};
+
+const calculateSubtotal = (data) => {
+    const taxableValue = parseFloat(calculateTaxableValue(data)) || 0;
+    const gstAmount = parseFloat(calculateGstAmount(data)) || 0;
+    return (taxableValue + gstAmount).toFixed(2);
+};
+
+const calculateTotalQuantity = () => {
+    return props.invoice.invoiceitems.reduce((total, item) => {
+        return total + (parseFloat(item.quantity) || 0);
+    }, 0).toFixed(2);
+};
+
+const calculateTotalWeight = () => {
+    return props.invoice.invoiceitems.reduce((total, item) => {
+        return total + (parseFloat(item.weight) || 0);
+    }, 0).toFixed(2);
+};
+
+const calculateTotalTaxableValue = () => {
+    return props.invoice.invoiceitems.reduce((total, item) => {
+        return total + parseFloat(calculateTaxableValue(item));
+    }, 0).toFixed(2);
+};
+
+const calculateTotalGstAmount = () => {
+    return props.invoice.invoiceitems.reduce((total, item) => {
+        return total + parseFloat(calculateGstAmount(item));
+    }, 0).toFixed(2);
+};
+
+const calculateGrandTotal = () => {
+    return props.invoice.invoiceitems.reduce((total, item) => {
+        return total + parseFloat(calculateSubtotal(item));
+    }, 0).toFixed(2);
+};
+
+// Existing amount to words conversion code
 const rupeeWords = [
     "",
     "One",
@@ -272,8 +389,7 @@ const teensWords = [
 ];
 
 const convertToWordsRecursive = (amount) => {
-    console.log(amount);
-    if(amount<1){
+    if (amount < 1) {
         return "";
     }
     if (amount < 10) {
@@ -312,20 +428,16 @@ const convertToWordsRecursive = (amount) => {
 };
 
 const convertToWords = () => {
-    const amountValue = Math.floor(props.invoice.total_ammount);
-    const decimalPart = Math.round(
-        (props.invoice.total_ammount - amountValue) * 100
-    );
+    const grandTotal = parseFloat(calculateGrandTotal());
+    const amountValue = Math.floor(grandTotal);
+    const decimalPart = Math.round((grandTotal - amountValue) * 100);
 
-    // Converting the main part of the amount to words
     const amountValueWords = convertToWordsRecursive(amountValue);
 
-    // Check if there is any decimal part to convert
     if (decimalPart > 0) {
         const decimalPartWords = convertToWordsRecursive(decimalPart);
         amountInWords.value = `${amountValueWords} Rupees and ${decimalPartWords} Paise`;
     } else {
-        // If there is no decimal part, exclude "and [decimalPartWords] Paise"
         amountInWords.value = `${amountValueWords} Rupees`;
     }
 };
@@ -333,38 +445,38 @@ const convertToWords = () => {
 onMounted(() => {
     convertToWords();
 });
-
 </script>
+
 <style>
-    .font {
-        font-size: 42px;
-        font-weight: bolder;
-        font-family: "Algerian";
-        letter-spacing: 5px;
-        margin-top: 10px;
-    }
+.font {
+    font-size: 42px;
+    font-weight: bolder;
+    font-family: "Algerian";
+    letter-spacing: 5px;
+    margin-top: 10px;
+}
 
-    .height {
-        height: 80px;
-        overflow: hidden;
-    }
+.height {
+    height: 80px;
+    overflow: hidden;
+}
 
-    .images {
-        height: auto;
-        width: 100%;
-        object-fit: cover;
-        object-position: center;
-        padding-top: 10px;
-    }
+.images {
+    height: auto;
+    width: 100%;
+    object-fit: cover;
+    object-position: center;
+    padding-top: 10px;
+}
 
-    .img {
-        width: 100px;
-        padding: 5px;
-    }
+.img {
+    width: 100px;
+    padding: 5px;
+}
 
-    @media print {
-        .buttondata {
-            visibility: hidden;
-        }
+@media print {
+    .buttondata {
+        visibility: hidden;
     }
+}
 </style>

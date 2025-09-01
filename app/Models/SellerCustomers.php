@@ -17,4 +17,13 @@ class SellerCustomers extends Model
     public function getCustomerDetailAttribute(){
         return json_decode($this->customer_company_data,true);
     }
+
+    // Scope for searching by customer name
+    public function scopeSearchByName($query, $name)
+    {
+        return $query->whereRaw(
+            "JSON_UNQUOTE(JSON_EXTRACT(customer_company_data, '$.name')) LIKE ?",
+            ['%' . $name . '%']
+        );
+    }
 }

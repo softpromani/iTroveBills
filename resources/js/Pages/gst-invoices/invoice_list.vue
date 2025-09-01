@@ -78,7 +78,7 @@
                                         </li>
                                         <li>
                                             <Link
-                                                :href="route('view.invoice')"
+                                                :href="route('gst.view.invoice')"
                                                 method="get"
                                                 :data="{ invoice_id: invoice.id }"
                                                 class="dropdown-item"

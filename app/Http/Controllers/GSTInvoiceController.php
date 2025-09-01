@@ -267,17 +267,27 @@ class GSTInvoiceController extends Controller
 
     public function gst_edit(Request $request)
     {
-        $edit_data = GSTInvoice::find($request->invoice_id);
-        $edit_data->load('invoiceitems');
-        $edit_data->load('Customer');
-        return Inertia::render('GSTBills/editbill', compact('edit_data'));
+        try {
+            $edit_data = GSTInvoice::with(['invoiceitems', 'Customer', 'Company'])->findOrFail($request->invoice_id);
+            return Inertia::render('GSTBills/editbill', compact('edit_data'));
+
+        } catch (\Exception $e) {
+            return redirect()->route('gst.invoice.list')
+                ->with('error', 'Invoice not found or access denied.');
+        }
     }
 
-    public function gst_update(Request $request)
+    /**
+     * Update the specified GST invoice.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $invoice_id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function gst_update(Request $request, $invoice_id)
     {
-        // Custom validation with better error messages
+        // Enhanced validation
         $request->validate([
-            'invoice_id' => 'required|exists:gst_invoices,id',
             'invoicedata' => 'required|array|min:1',
             'invoicedata.*.0' => 'nullable|string|max:255', // Description
             'invoicedata.*.1' => 'nullable|string|max:50',  // HSN Code
@@ -290,17 +300,16 @@ class GSTInvoiceController extends Controller
 
             'invoicedetails' => 'required|array',
             'invoicedetails.0.invoice' => 'required|string|max:100',
-            'invoicedetails.0.customer' => 'required|string',
-            'invoicedetails.0.company' => 'required|string',
+            'invoicedetails.0.customer' => 'required',
+            'invoicedetails.0.company' => 'required',
             'invoicedetails.0.vehical_no' => 'required|string|max:50',
             'invoicedetails.0.totalWeight' => 'required|numeric|min:0',
             'invoicedetails.0.totalTaxableValue' => 'required|numeric|min:0',
             'invoicedetails.0.totalGstAmount' => 'required|numeric|min:0',
             'invoicedetails.0.grandTotal' => 'required|numeric|min:0',
         ], [
-            'invoice_id.required' => 'Invoice ID is required.',
-            'invoice_id.exists' => 'Invoice not found.',
             'invoicedata.required' => 'Invoice items are required.',
+            'invoicedata.min' => 'At least one invoice item is required.',
             'invoicedetails.0.invoice.required' => 'Invoice number is required.',
             'invoicedetails.0.customer.required' => 'Customer is required.',
             'invoicedetails.0.company.required' => 'Company is required.',
@@ -308,19 +317,22 @@ class GSTInvoiceController extends Controller
         ]);
 
         try {
+            // Find the invoice to update, or fail if not found
+            $invoice = GSTInvoice::findOrFail($invoice_id);
+
             // Check if invoice number already exists for other invoices
             $existingInvoice = GSTInvoice::where('invoice_number', $request->invoicedetails[0]['invoice'])
-                                    ->where('id', '!=', $request->invoice_id)
-                                    ->first();
+                                        ->where('id', '!=', $invoice_id)
+                                        ->first();
             if ($existingInvoice) {
-                return back()->withErrors(['invoice' => 'Invoice number already exists.'])->withInput();
+                return back()->withErrors(['invoice' => 'Invoice number already exists for another invoice.'])->withInput();
             }
 
             // Get LUT information
             $lut = CompanyLUT::where('company_id', $request->invoicedetails[0]['company'])->latest()->first();
 
             // Filter out empty rows (where all important fields are empty/zero)
-            $validInvoiceData = array_filter($request->invoicedata, function($row) {
+            $validInvoiceData = array_filter($request->invoicedata, function ($row) {
                 return !empty(trim($row[0] ?? '')) || // Description not empty
                     !empty(trim($row[1] ?? '')) || // HSN not empty
                     floatval($row[2] ?? 0) > 0 ||  // Quantity > 0
@@ -335,7 +347,6 @@ class GSTInvoiceController extends Controller
             DB::beginTransaction();
 
             // Update the main invoice record
-            $invoice = GSTInvoice::findOrFail($request->invoice_id);
             $invoice->update([
                 'invoice_number' => $request->invoicedetails[0]['invoice'],
                 'total_ammount' => floatval($request->invoicedetails[0]['totalTaxableValue']),
@@ -346,9 +357,11 @@ class GSTInvoiceController extends Controller
                 'customer_company_id' => $request->invoicedetails[0]['customer'],
                 'company_id' => $request->invoicedetails[0]['company'],
                 'lut_id' => $lut ? $lut->id : null,
+                'updated_at' => now(),
             ]);
 
-            // Delete existing invoice items
+            // Delete existing invoice items (this will be handled by the model's boot method)
+            // But let's be explicit about it
             GSTInvoiceItem::where('invoice_id', $invoice->id)->delete();
 
             // Create new invoice items with proper validation and calculations
@@ -384,7 +397,6 @@ class GSTInvoiceController extends Controller
                     'gst_percentage' => $gst_percentage,
                     'gst_amount' => round($gst_amount, 2),
                     'subtotal_amount' => round($subtotal_amount, 2),
-                    'taxable_value' => round($taxable_value, 2), // Add this if your table has this column
                 ]);
             }
 
@@ -394,15 +406,24 @@ class GSTInvoiceController extends Controller
             return redirect()->route('gst.invoice.list')
                 ->with('success', 'GST Invoice Updated Successfully with Invoice Number: ' . $request->invoicedetails[0]['invoice']);
 
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            DB::rollback();
+            return redirect()->route('gst.invoice.list')
+                ->with('error', 'Invoice not found.');
+
         } catch (\Exception $e) {
             // Rollback the transaction on error
             DB::rollback();
 
             // Log the error for debugging
-            \Log::error('GST Invoice Update Error: ' . $e->getMessage());
+            Log::error('GST Invoice Update Error: ' . $e->getMessage(), [
+                'invoice_id' => $invoice_id,
+                'request_data' => $request->all(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
 
             return back()->withErrors(['error' => 'An error occurred while updating the invoice. Please try again.'])
-                    ->withInput();
+                ->withInput();
         }
     }
 

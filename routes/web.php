@@ -151,7 +151,7 @@ Route::middleware('auth')->group(function () {
     Route::group(['prefix'=>'gst','as'=>'gst.'],function(){
         Route::get('customer-bill',[GSTInvoiceController::class,'gst_index'])->name('customer.bill');
         Route::get('customer-bill-edit',[GSTInvoiceController::class,'gst_edit'])->name('customer.bill.edit');
-        Route::post('customer-bill-update',[GSTInvoiceController::class,'gst_update'])->name('customer.bill.update');
+        Route::post('customer-bill-update/{invoice_id}',[GSTInvoiceController::class,'gst_update'])->name('customer.bill.update');
         Route::get('customer-detail-bill',[GSTInvoiceController::class,'gst_index_details'])->name('customer.detail.bill');
         Route::post('customer-store-bill',[GSTInvoiceController::class,'gst_store'])->name('customer.store.bill');
         Route::get('invoice-list',[GSTInvoiceController::class,'gst_invoice_list'])->name('invoice.list');
@@ -168,5 +168,6 @@ Route::middleware('auth')->group(function () {
 });
 Route::get('view-invoice',[CustomerBillController::class,'template'])->name('view.invoice');
 Route::get('performa/view-invoice',[CustomerBillController::class,'performa_template'])->name('performa.view.invoice');
+Route::get('gst/view-invoice',[GSTInvoiceController::class,'gst_template'])->name('gst.view.invoice');
 
 require __DIR__.'/auth.php';
