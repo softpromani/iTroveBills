@@ -40,6 +40,9 @@
                         Log in
                     </PrimaryButton>
                 </div>
+                <Link :href="route('register')" class="text-sm text-gray-600 underline hover:text-gray-900">
+                    Are you new customer ? Sign up here
+                </Link>
             </form>
         </div>
     </GuestLayout>
