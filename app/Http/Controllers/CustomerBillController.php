@@ -236,6 +236,7 @@ class CustomerBillController extends Controller
 
         // Get filter data
         $customers = SellerCustomers::select('id', 'customer_company_data')
+            ->where('seller_id', Auth::id())
             ->get()
             ->map(function($customer) {
                 $detail = json_decode($customer->customer_company_data, true);
