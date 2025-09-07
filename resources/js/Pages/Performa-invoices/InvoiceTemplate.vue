@@ -7,10 +7,10 @@
         <i class="fa fa-download" aria-hidden="true"></i>
     </button>
     <div class="container-fluid downloadbill">
-        <div class="row text-center text-center border-t  border-r border-black border-solid"><center>Performa Invoice</center></div>
+        <div class="row text-center text-center border-t  border-r border-black border-solid"><center>Proforma Invoice</center></div>
         <div class="row">
             <div class="border-t border-b border-l border-black border-solid col-2">
-                <img class="img" :src="props.invoice.company.logo ?? ''" alt="jpeg" />
+                <img class="img" :src="props.invoice.company.logo ?? ''" alt="Logo" />
             </div>
             <div class="border-t border-b border-r border-black border-solid col-10">
                 <h1 class="text-center text-7xl font">
@@ -210,13 +210,18 @@
                     A D CODE-{{ props.invoice.company.ad_code ?? "" }}
                 </p>
             </div>
-            <div class="font-bold border-b border-l border-r border-black border-solid col-6">
-                <img class="img" :src="props.invoice.company.sign ?? ''" alt="jpeg" style="height:80px;width:230px" />
+            <div class="font-bold border-b border-l border-r border-black border-solid col-3">
+                <img class="img" :src="props.invoice.company.sign ?? ''" alt="Sign" style="height:80px;width:230px" />
+            </div>
+              <div class="font-bold border-b border-l border-r border-black border-solid col-3">
+                <img class="img" :src="props.invoice.company.bank_qr ?? ''" alt="QR" style="height:80px;width:230px" />
             </div>
         </div>
         <div class="row">
-            <div class="col-2">
-                 <img class="img" :src="props.invoice.company.sign ?? ''" alt="jpeg" style="height:80px;width:230px" />
+            <div class="col-6 col-md-3 col-lg-2" v-for="(image,index) in props.invoice?.company?.brand_banner" :key="index">
+                <div class="brand-image-container">
+                    <img :src="image" alt="Brand Banner" class="img-fluid" style="height:80px;width:230px" />
+                </div>
             </div>
         </div>
     </div>

@@ -10,6 +10,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class CompanyController extends Controller
@@ -43,6 +44,7 @@ class CompanyController extends Controller
             'adcode'            => 'required',
             'logo'              => 'required|image|mimes:jpg,png,jpeg',
             'sign'              => 'required|image|mimes:jpg,png,jpeg',
+            'bank_qr'           => 'nullable',
             'brand_banner.*'    => 'nullable',
         ]);
 
@@ -64,9 +66,19 @@ class CompanyController extends Controller
             $upload_sign = 'company_file/sign/' . $signName;
         }
 
+        // Bank QR upload
+        $upload_bank_qr = null;
+        if ($request->hasFile('bank_qr')) {
+            $bank_qr = $request->file('bank_qr');
+            $bankQRName = time() . '.' . $bank_qr->getClientOriginalExtension();
+            // Save to storage/app/public/company_file/bank_qr/
+            $path = $bank_qr->storeAs('company_file/bank_qr', $bankQRName, 'public');
+            // Store web-accessible path (after running php artisan storage:link)
+            $upload_bank_qr = 'storage/' . $path;
+        }
+
         // New banners array
         $newBanners = [];
-
         // Handle Brand Banners
         if ($request->brand_banner) {
             // Upload new banners
@@ -99,6 +111,7 @@ class CompanyController extends Controller
             'status'          => Status::moduleStatusId('Company', 'active'),
             'logo'            => $upload_logo,
             'sign'            => $upload_sign,
+            'bank_qr'         => $upload_bank_qr,
             'brand_banner'    => $newBanners,
         ]);
 
@@ -227,6 +240,23 @@ class CompanyController extends Controller
             $signName = time() . '.' . $sign->getClientOriginalExtension();
             $sign->move(public_path('company_file/sign/'), $signName);
             $company->sign = 'company_file/sign/' . $signName;
+        }
+
+        // Handle Bank QR
+        if ($request->hasFile('bank_qr')) {
+            // Delete old file if exists
+            if ($company->bank_qr && Storage::disk('public')->exists(str_replace('storage/', '', $company->bank_qr))) {
+                Storage::disk('public')->delete(str_replace('storage/', '', $company->bank_qr));
+            }
+
+            $bank_qr = $request->file('bank_qr');
+            $bankQRName = time() . '.' . $bank_qr->getClientOriginalExtension();
+
+            // Save in storage/app/public/company_file/bank_qr/
+            $path = $bank_qr->storeAs('company_file/bank_qr', $bankQRName, 'public');
+
+            // Save web-accessible path in DB
+            $company->bank_qr = 'storage/' . $path;
         }
 
         // Update all fields

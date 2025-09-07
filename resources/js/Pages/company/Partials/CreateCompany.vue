@@ -16,6 +16,7 @@ const form = useForm({
     mobile: props.editdata.mobile ?? "",
     logo: props.editdata.logo ?? "",
     sign: props.editdata.sign ?? "",
+    bank_qr: props.editdata.bank_qr ?? "",
     address: props.editdata.address ?? "",
     city: props.editdata.city ?? "",
     pin: props.editdata.pin ?? "",
@@ -197,6 +198,16 @@ function submit() {
                         {{ form.progress.percentage }}%
                     </progress>
                     <img v-if="props.editdata" :src="form.sign" alt="" sizes="" srcset="" />
+                </div>
+
+                <div class="mt-3 col-md-6">
+                    <InputLabel for="bank_qr" value="Bank QR" />
+                    <input class="form-control" id="bank_qr" type="file" @input="form.bank_qr = $event.target.files[0]" />
+                    <InputError class="mt-2" :message="form.errors.bank_qr" />
+                    <progress v-if="form.progress" :value="form.progress.percentage" max="100">
+                        {{ form.progress.percentage }}%
+                    </progress>
+                    <img v-if="props.editdata" :src="form.bank_qr" alt="" sizes="" srcset="" />
                 </div>
 
                 <div class="mt-3 col-md-6">
