@@ -183,7 +183,7 @@ class CustomerBillController extends Controller
         }
     }
 
-   public function invoice_list(Request $request)
+    public function invoice_list(Request $request)
     {
         $invoicesQuery = auth()->user()->invoices();
 
@@ -204,25 +204,21 @@ class CustomerBillController extends Controller
                 ->pluck('id');
 
             $invoicesQuery->whereIn('customer_company_id', $customerIds);
-
-            // Option 2: If you want to search via seller_customers JSON
-            /*
-            $customerIds = SellerCustomers::where(
-                DB::raw("JSON_UNQUOTE(JSON_EXTRACT(customer_company_data, '$.name'))"),
-                'like',
-                '%' . $request->customer_name . '%'
-            )->pluck('customer_company_id');
-
-            $invoicesQuery->whereIn('customer_company_id', $customerIds);
-            */
         }
+
+        // Financial Year filter (default to current FY if not provided)
         if ($request->filled('financial_year')) {
             $financialYear = $request->financial_year;
-            $startDate = Carbon::createFromDate($financialYear, 4, 1)->startOfDay();
-            $endDate = Carbon::createFromDate($financialYear + 1, 3, 31)->endOfDay();
-
-            $invoicesQuery->whereBetween('invoice_date', [$startDate, $endDate]);
+        } else {
+            $currentMonth = now()->month;
+            $currentYear  = now()->year;
+            $financialYear = $currentMonth < 4 ? $currentYear - 1 : $currentYear;
         }
+
+        $startDate = Carbon::createFromDate($financialYear, 4, 1)->startOfDay();
+        $endDate   = Carbon::createFromDate($financialYear + 1, 3, 31)->endOfDay();
+
+        $invoicesQuery->whereBetween('invoice_date', [$startDate, $endDate]);
 
         if ($request->filled('payment_status')) {
             $invoicesQuery->whereHas('payment', function($q) use ($request) {
