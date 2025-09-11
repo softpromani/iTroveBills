@@ -281,12 +281,36 @@
                     A D CODE-{{ props.invoice.company.ad_code ?? "" }}
                 </p>
             </div>
-            <div class="font-bold border-b border-l border-r border-black border-solid col-3">
-                <img class="img" :src="`/${props.invoice.company.sign ?? '' }`" alt="Sign" style="height:80px;width:230px" />
-            </div>
-              <div class="font-bold border-b border-l border-r border-black border-solid col-3">
-                <img class="img" :src="`/${props.invoice.company.bank_qr ?? ''}`" alt="QR" style="height:80px;width:230px" />
-            </div>
+            <template v-if="props.invoice.company.bank_qr">
+                <div class="font-bold border-b border-l border-r border-black border-solid col-3">
+                    <img
+                    class="img"
+                    :src="`/${props.invoice.company.sign ?? ''}`"
+                    alt="Sign"
+                    style="height:80px;width:230px"
+                    />
+                </div>
+                <div class="font-bold border-b border-l border-r border-black border-solid col-3">
+                    <img
+                    class="img"
+                    :src="`/${props.invoice.company.bank_qr ?? ''}`"
+                    alt="QR"
+                    style="height:80px;width:230px"
+                    />
+                </div>
+                </template>
+                <div
+                v-else
+                class="font-bold border-b border-l border-r border-black border-solid col-6"
+                >
+                <img
+                    class="img"
+                    :src="`/${props.invoice.company.sign ?? ''}`"
+                    alt="Sign"
+                    style="height:80px;width:230px"
+                />
+                </div>
+
         </div>
         <div class="row">
             <div class="col-6 col-md-3 col-lg-2" v-for="(image,index) in props.invoice?.company?.brand_banner" :key="index">
