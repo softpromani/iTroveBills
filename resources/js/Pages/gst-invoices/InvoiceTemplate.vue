@@ -13,7 +13,7 @@
 
         <div class="row">
             <div class="border-t border-b border-l border-black border-solid col-2">
-                <img class="img" :src="props.invoice.company.logo ?? ''" alt="Logo" />
+                <img class="img" :src="`/${props.invoice.company.logo}`" alt="Logo" />
             </div>
             <div class="border-t border-b border-r border-black border-solid col-10">
                 <h1 class="text-center text-7xl font">
@@ -99,10 +99,10 @@
                 {{ props.invoice.vehicle_no ?? "" }}
             </div>
             <div class="font-bold border-b border-l border-black border-solid col-3">
-                <!-- ID/TPIN/TIN NO -->
+                ID/GSTIN
             </div>
             <div class="col-3 border border-black border-solid">
-                <!-- {{ props.invoice.customer.gstin ?? "No ID/TPIN/TIN NO" }} -->
+                {{ props.invoice.customer.gstin ?? "No ID/GSTIN" }}
             </div>
 
         </div>
@@ -282,16 +282,16 @@
                 </p>
             </div>
             <div class="font-bold border-b border-l border-r border-black border-solid col-3">
-                <img class="img" :src="props.invoice.company.sign ?? ''" alt="Sign" style="height:80px;width:230px" />
+                <img class="img" :src="`/${props.invoice.company.sign ?? '' }`" alt="Sign" style="height:80px;width:230px" />
             </div>
               <div class="font-bold border-b border-l border-r border-black border-solid col-3">
-                <img class="img" :src="props.invoice.company.bank_qr ?? ''" alt="QR" style="height:80px;width:230px" />
+                <img class="img" :src="`/${props.invoice.company.bank_qr ?? ''}`" alt="QR" style="height:80px;width:230px" />
             </div>
         </div>
         <div class="row">
             <div class="col-6 col-md-3 col-lg-2" v-for="(image,index) in props.invoice?.company?.brand_banner" :key="index">
                 <div class="brand-image-container">
-                    <img :src="image" alt="Brand Banner" class="img-fluid" style="height:80px;width:230px" />
+                    <img :src="`/${image}`" alt="Brand Banner" class="img-fluid" style="height:80px;width:230px" />
                 </div>
             </div>
         </div>
