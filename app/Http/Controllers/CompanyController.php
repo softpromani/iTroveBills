@@ -53,8 +53,8 @@ class CompanyController extends Controller
         if ($request->hasFile('logo')) {
             $logo = $request->file('logo');
             $logoName = time() . '.' . $logo->getClientOriginalExtension();
-            $logo->move(public_path('company_file/logo/'), $logoName);
-            $upload_logo = 'company_file/logo/' . $logoName;
+            $path = $logo->storeAs('company_file/logo', $logoName, 'public');
+            $upload_logo = 'storage/' . $path;
         }
 
         // Sign upload
@@ -62,8 +62,8 @@ class CompanyController extends Controller
         if ($request->hasFile('sign')) {
             $sign = $request->file('sign');
             $signName = time() . '.' . $sign->getClientOriginalExtension();
-            $sign->move(public_path('company_file/sign/'), $signName);
-            $upload_sign = 'company_file/sign/' . $signName;
+            $path = $sign->storeAs('company_file/sign', $signName, 'public');
+            $upload_sign = 'storage/' . $path;
         }
 
         // Bank QR upload
@@ -86,8 +86,8 @@ class CompanyController extends Controller
                 $bannerFile = $bannerFile['file'];
                 if ($bannerFile ) {
                     $bannerName = time() . '-' . rand(1000, 9999) . '.' . $bannerFile->getClientOriginalExtension();
-                    $bannerFile->move(public_path('company_file/inv_banner/'), $bannerName);
-                    $newBanners[] = 'company_file/inv_banner/' . $bannerName;
+                    $path = $bannerFile->storeAs('company_file/inv_banner', $bannerName, 'public');
+                    $newBanners[] = 'storage/' . $path;
                 }
             }
         }
@@ -199,9 +199,14 @@ class CompanyController extends Controller
             // Delete old banners if any
             if (!empty($existingBanners)) {
                 foreach ($existingBanners as $oldBanner) {
-                    $oldBannerPath = public_path($oldBanner);
-                    if (File::exists($oldBannerPath)) {
-                        File::delete($oldBannerPath);
+                    // Check if it's a storage path or legacy public path
+                    if (strpos($oldBanner, 'storage/') === 0) {
+                        $relativePath = str_replace('storage/', '', $oldBanner);
+                        if (Storage::disk('public')->exists($relativePath)) {
+                            Storage::disk('public')->delete($relativePath);
+                        }
+                    } elseif (File::exists(public_path($oldBanner))) {
+                         File::delete(public_path($oldBanner));
                     }
                 }
             }
@@ -211,8 +216,8 @@ class CompanyController extends Controller
                 $bannerFile = $bannerFile['file'];
                 if ($bannerFile ) {
                     $bannerName = time() . '-' . rand(1000, 9999) . '.' . $bannerFile->getClientOriginalExtension();
-                    $bannerFile->move(public_path('company_file/inv_banner/'), $bannerName);
-                    $newBanners[] = 'company_file/inv_banner/' . $bannerName;
+                    $path = $bannerFile->storeAs('company_file/inv_banner', $bannerName, 'public');
+                    $newBanners[] = 'storage/' . $path;
                 }
             }
         } else {
@@ -222,24 +227,36 @@ class CompanyController extends Controller
 
         // Handle Logo
         if ($request->hasFile('logo')) {
-            if ($company->logo && File::exists(public_path($company->logo))) {
-                File::delete(public_path($company->logo));
+            if ($company->logo) {
+                if (strpos($company->logo, 'storage/') === 0) {
+                    if(Storage::disk('public')->exists(str_replace('storage/', '', $company->logo))) {
+                        Storage::disk('public')->delete(str_replace('storage/', '', $company->logo));
+                    }
+                } elseif (File::exists(public_path($company->logo))) {
+                    File::delete(public_path($company->logo));
+                }
             }
             $logo = $request->file('logo');
             $logoName = time() . '.' . $logo->getClientOriginalExtension();
-            $logo->move(public_path('company_file/logo/'), $logoName);
-            $company->logo = 'company_file/logo/' . $logoName;
+            $path = $logo->storeAs('company_file/logo', $logoName, 'public');
+            $company->logo = 'storage/' . $path;
         }
 
         // Handle Sign
         if ($request->hasFile('sign')) {
-            if ($company->sign && File::exists(public_path($company->sign))) {
-                File::delete(public_path($company->sign));
+            if ($company->sign) {
+                if (strpos($company->sign, 'storage/') === 0) {
+                     if (Storage::disk('public')->exists(str_replace('storage/', '', $company->sign))) {
+                        Storage::disk('public')->delete(str_replace('storage/', '', $company->sign));
+                     }
+                } elseif (File::exists(public_path($company->sign))) {
+                    File::delete(public_path($company->sign));
+                }
             }
             $sign = $request->file('sign');
             $signName = time() . '.' . $sign->getClientOriginalExtension();
-            $sign->move(public_path('company_file/sign/'), $signName);
-            $company->sign = 'company_file/sign/' . $signName;
+            $path = $sign->storeAs('company_file/sign', $signName, 'public');
+            $company->sign = 'storage/' . $path;
         }
 
         // Handle Bank QR
