@@ -21,88 +21,16 @@ defineProps({
 
 // Mobile menu toggle
 const mobileMenuOpen = ref(false);
+
+import PublicHeader from '@/Components/PublicHeader.vue';
+import PublicFooter from '@/Components/PublicFooter.vue';
 </script>
 
 <template>
     <Head title="ITrove Billing Software - Professional Invoice & E-Bill Solutions" />
 
     <!-- Header -->
-    <header class="bg-white shadow-lg sticky top-0 z-50">
-        <div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
-            <div class="flex h-20 items-center justify-between">
-                <div class="flex-1 md:flex md:items-center md:gap-12">
-                    <a class="block text-teal-600" href="/">
-                        <span class="sr-only">Home</span>
-                        <img :src="'itimages/itlogo.png'" alt="ITrove Logo" class="mt-2 h-12 w-auto" />
-                    </a>
-                </div>
-
-                <div class="md:flex md:items-center md:gap-12">
-                    <!-- Desktop Navigation -->
-                    <nav aria-label="Global" class="hidden md:block">
-                        <ul class="flex items-center gap-8 text-sm font-medium">
-                            <li><a href="#features" class="text-gray-700 hover:text-purple-600 transition-colors">Features</a></li>
-                            <li><a href="#pricing" class="text-gray-700 hover:text-purple-600 transition-colors">Pricing</a></li>
-                            <li><a href="#testimonials" class="text-gray-700 hover:text-purple-600 transition-colors">Reviews</a></li>
-                            <li><a href="#contact" class="text-gray-700 hover:text-purple-600 transition-colors">Contact</a></li>
-                        </ul>
-                    </nav>
-
-                    <div class="flex items-center gap-4">
-                        <div class="sm:flex sm:gap-4">
-                            <Link
-                                v-if="$page.props.auth.user?.email"
-                                :href="route('dashboard')"
-                                class="rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:ring-4 focus:ring-purple-300 font-medium px-6 py-3 text-sm text-white transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                            >
-                                Dashboard
-                            </Link>
-                            <template v-else>
-                                <div class="flex gap-2">
-                                <Link
-                                    class="rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:ring-4 focus:ring-purple-300 font-medium px-6 py-3 text-sm text-white transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                                    :href="route('login')"
-                                >
-                                    Login
-                                </Link>
-                                    <Link
-                                        class="rounded-lg border-2 border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white font-medium px-6 py-3 text-sm transition-all duration-200"
-                                        :href="route('register')"
-                                    >
-                                        Register
-                                    </Link>
-                                </div>
-                            </template>
-                        </div>
-
-                        <!-- Mobile menu button -->
-                        <div class="block md:hidden">
-                            <button
-                                @click="mobileMenuOpen = !mobileMenuOpen"
-                                class="rounded bg-gray-100 p-2 text-gray-600 transition hover:text-gray-600/75"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Mobile Navigation -->
-            <div v-show="mobileMenuOpen" class="md:hidden border-t border-gray-200 bg-white">
-                <nav class="px-4 py-4">
-                    <ul class="space-y-4">
-                        <li><a href="#features" class="block text-gray-700 hover:text-purple-600">Features</a></li>
-                        <li><a href="#pricing" class="block text-gray-700 hover:text-purple-600">Pricing</a></li>
-                        <li><a href="#testimonials" class="block text-gray-700 hover:text-purple-600">Reviews</a></li>
-                        <li><a href="#contact" class="block text-gray-700 hover:text-purple-600">Contact</a></li>
-                    </ul>
-                </nav>
-            </div>
-        </div>
-    </header>
+    <PublicHeader :can-login="canLogin" :can-register="canRegister" />
 
     <!-- Hero Section -->
     <section class="relative overflow-hidden bg-gradient-to-br from-purple-900 via-purple-800 to-pink-700 min-h-screen flex items-center">
@@ -131,7 +59,7 @@ const mobileMenuOpen = ref(false);
                         <button class="bg-white text-purple-800 font-bold py-4 px-8 rounded-xl shadow-2xl hover:bg-gray-100 transition-all duration-300 transform hover:-translate-y-1">
                             Start Free Trial
                         </button>
-                        <button class="border-2 border-white text-white font-semibold py-4 px-8 rounded-xl hover:bg-white hover:text-purple-800 transition-all duration-300">
+                        <button class="border-2 border-white text-white font-semibold py-4 px-8 rounded-xl hover:bg-white hover:!text-purple-800 transition-all duration-300">
                             Watch Demo
                         </button>
                     </div>
@@ -580,7 +508,7 @@ const mobileMenuOpen = ref(false);
                 <button class="bg-white text-purple-800 font-bold py-4 px-8 rounded-xl shadow-lg hover:bg-gray-100 transition-all duration-300 transform hover:-translate-y-1">
                     Start 14-Day Free Trial
                 </button>
-                <button class="border-2 border-white text-white font-semibold py-4 px-8 rounded-xl hover:bg-white hover:text-purple-800 transition-all duration-300">
+                <button class="border-2 border-white text-white font-semibold py-4 px-8 rounded-xl hover:bg-white hover:!text-purple-800 transition-all duration-300">
                     Schedule Demo
                 </button>
             </div>
@@ -588,96 +516,7 @@ const mobileMenuOpen = ref(false);
     </section>
 
     <!-- Footer -->
-    <footer id="contact" class="bg-gray-900 text-white py-16">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <!-- Company Info -->
-                <div class="md:col-span-2">
-                    <div class="flex items-center mb-6">
-                        <img :src="'itimages/itlogo.png'" alt="ITrove Logo" class="h-12 w-auto mr-4" />
-                        <span class="text-2xl font-bold">ITrove Bills</span>
-                    </div>
-                    <p class="text-gray-300 mb-6 max-w-md">
-                        Empowering businesses with innovative billing solutions. Complete GST compliance,
-                        E-Way Bills, and E-Invoice generation made simple.
-                    </p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"></path>
-                            </svg>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"></path>
-                            </svg>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
-                                <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zm1.5-4.87h.01"></path>
-                            </svg>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <svg class="w-6 h-6" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="0" viewBox="0 0 24 24">
-                                <path stroke="none" d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"></path>
-                                <circle cx="4" cy="4" r="2" stroke="none"></circle>
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Quick Links -->
-                <div>
-                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
-                    <ul class="space-y-2">
-                        <li><a href="#features" class="text-gray-300 hover:text-white transition-colors">Features</a></li>
-                        <li><a href="#pricing" class="text-gray-300 hover:text-white transition-colors">Pricing</a></li>
-                        <li><a href="#testimonials" class="text-gray-300 hover:text-white transition-colors">Testimonials</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Blog</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Help Center</a></li>
-                    </ul>
-                </div>
-
-                <!-- Contact Info -->
-                <div>
-                    <h3 class="text-lg font-semibold mb-4">Contact Us</h3>
-                    <ul class="space-y-3">
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 mr-3 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                            </svg>
-                            <span class="text-gray-300">info@innovationtrove.in</span>
-                        </li>
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 mr-3 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                            </svg>
-                            <span class="text-gray-300">+91 9648061515 (India), +975 17126364 (Bhutan)</span>
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 mr-3 mt-1 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                            <span class="text-gray-300">Daragaon, Jaigaon, West Bengal, India</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-                <p class="text-gray-400 text-sm">
-                    © 2024 Innovation Trove LLP. All rights reserved.
-                </p>
-                <div class="flex space-x-6 mt-4 md:mt-0">
-                    <a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">Privacy Policy</a>
-                    <a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">Terms of Service</a>
-                    <a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">Cookie Policy</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <PublicFooter />
 </template>
 
 <style scoped>

@@ -39,6 +39,18 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+Route::get('/privacy-policy', function () {
+    return Inertia::render('PrivacyPolicy');
+})->name('privacy.policy');
+
+Route::get('/terms-of-service', function () {
+    return Inertia::render('TermsOfService');
+})->name('terms.service');
+
+Route::get('/cookie-policy', function () {
+    return Inertia::render('CookiePolicy');
+})->name('cookie.policy');
+
 Route::get('/dashboard', function () {
     $user = Auth::user();
 
