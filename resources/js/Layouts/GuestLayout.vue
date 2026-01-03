@@ -1,45 +1,42 @@
 <template>
     <!-- component -->
-    <div class="h-screen md:flex">
+    <div class="min-h-screen md:flex overflow-hidden">
         <FlashMessages/>
         <div
-            class="relative overflow-hidden md:flex w-1/2 bg-gradient-to-tr from-purple-800 to-pink-700 i justify-around items-center hidden"
+            class="relative overflow-hidden md:flex w-1/2 bg-gradient-to-tr from-purple-800 to-pink-700 justify-around items-center hidden px-12"
         >
-            <div>
-                <h1 class="text-white font-bold text-4xl font-sans">
+            <div class="z-10 w-full max-w-lg">
+                <h1 class="text-white font-bold text-5xl font-sans mb-6 tracking-tight">
                     ITroveBills
                 </h1>
-                <p class="text-white mt-1">
-                    Empowering businesses with innovative billing solutions,
-                </p>
-                <p class="text-white -mt-3">
-                    Innovation Trove delivers seamless and efficient invoicing experiences,
-                </p>
-                <p class="text-white -mt-3">
-                    ensuring financial precision and client satisfaction
-                </p>
+                <div class="space-y-4">
+                    <p class="text-white text-lg leading-relaxed opacity-90">
+                        Empowering businesses with innovative billing solutions.
+                    </p>
+                    <p class="text-white text-lg leading-relaxed opacity-90">
+                        Innovation Trove delivers seamless and efficient invoicing experiences,
+                    </p>
+                    <p class="text-white text-lg leading-relaxed font-semibold">
+                        ensuring financial precision and client satisfaction.
+                    </p>
+                </div>
                 <button
-                    type="submit"
-                    class="block w-28 bg-white shadow-lg text-indigo-800 mt-4 py-2 rounded-2xl font-bold mb-2"
+                    type="button"
+                    class="block w-32 bg-white shadow-xl text-indigo-800 mt-8 py-3 rounded-2xl font-bold hover:scale-105 transition-transform duration-200"
                 >
                     Read More
                 </button>
             </div>
-            <div
-                class="absolute -bottom-32 -left-40 w-80 h-80 border-4 rounded-full border-opacity-30 border-t-8"
-            ></div>
-            <div
-                class="absolute -bottom-40 -left-20 w-80 h-80 border-4 rounded-full border-opacity-30 border-t-8"
-            ></div>
-            <div
-                class="absolute -top-40 -right-0 w-80 h-80 border-4 rounded-full border-opacity-30 border-t-8"
-            ></div>
-            <div
-                class="absolute -top-20 -right-20 w-80 h-80 border-4 rounded-full border-opacity-30 border-t-8"
-            ></div>
+            <!-- Decorative Circles -->
+            <div class="absolute -bottom-32 -left-40 w-80 h-80 border-4 rounded-full border-opacity-30 border-t-8"></div>
+            <div class="absolute -bottom-40 -left-20 w-80 h-80 border-4 rounded-full border-opacity-30 border-t-8"></div>
+            <div class="absolute -top-40 -right-0 w-80 h-80 border-4 rounded-full border-opacity-30 border-t-8"></div>
+            <div class="absolute -top-20 -right-20 w-80 h-80 border-4 rounded-full border-opacity-30 border-t-8"></div>
         </div>
-        <div class="flex md:w-1/2 justify-center py-10 items-center bg-white">
-            <slot />
+        <div class="flex md:w-1/2 justify-center py-12 items-center bg-white px-6">
+            <div class="w-full max-w-md">
+                <slot />
+            </div>
         </div>
     </div>
 </template>
