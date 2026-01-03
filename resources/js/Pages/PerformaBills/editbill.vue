@@ -4,18 +4,18 @@
         <section class="container-fluid">
             <div class="row">
                 <div
-                    class="mt-2 -mb-2 bg-purple-700 rounded-md position-relative"
+                    class="mt-2 bg-purple-700 rounded-md position-relative py-2 px-3"
                 >
                     <h2
-                        class="font-medium text-center text-white uppercase font-weight-bolder"
+                        class="text-sm font-medium text-center text-white uppercase font-weight-bolder mb-0"
                     >
                         Itrove Bills
                     </h2>
                     <span
-                        class="text-white cursor-pointer top-2 right-2 position-absolute"
+                        class="text-white cursor-pointer top-2 right-3 position-absolute"
                         @click="toggleCard"
                     >
-                        <i class="fa-solid fa-bullseye"></i>
+                        <i class="fa-solid fa-bullseye fa-lg"></i>
                     </span>
                 </div>
                 <transition name="slide-fade">
@@ -157,6 +157,21 @@
                                         class="mt-2"
                                     />
                                 </div>
+                                <div class="mt-2 col-md-6">
+                                    <InputLabel
+                                        for="delivery_in_days"
+                                        value="Delivery In Days"
+                                    />
+                                    <TextInput
+                                        id="delivery_in_days"
+                                        type="text"
+                                        class="block w-full mt-1"
+                                        v-model="form.delivery_in_days"
+                                        placeholder="e.g. 5-7 Days"
+                                        autofocus
+                                        autocomplete="delivery_in_days"
+                                    />
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -196,6 +211,7 @@ const form = useForm({
     mobile:props.edit_data.customer.mobile,
     vehical_no: props.edit_data.vehicle_no,
     customer_name: props.edit_data.customer.company_name,
+    delivery_in_days: props.edit_data.delivery_in_days || '',
 });
 </script>
 <style>

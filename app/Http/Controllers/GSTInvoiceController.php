@@ -37,107 +37,88 @@ class GSTInvoiceController extends Controller
             ];
         });
 
-        if(isset($request)){
-            $selectedCustId = $request->customer_id;
-            return Inertia::render('GSTBills/index', compact('customer_list', 'company_list', 'selectedCustId'));
-        }
-        else{
+        if ($request->filled('company_id')) {
+            $company_id = is_array($request->company_id) ? $request->company_id['id'] : $request->company_id;
+            $customer_id = $request->filled('customer_id') ? (is_array($request->customer_id) ? $request->customer_id['id'] : $request->customer_id) : null;
+
+            // Financial year calculation
+            $today = new DateTime();
+            $currentYear = (int)$today->format('Y');
+            $currentMonth = (int)$today->format('m');
+
+            if ($currentMonth < 4) {
+                $financialYearStart = $currentYear - 1;
+                $financialYearEnd = $currentYear;
+            } else {
+                $financialYearStart = $currentYear;
+                $financialYearEnd = $currentYear + 1;
+            }
+
+            $financialYear = sprintf("%02d-%02d", substr($financialYearStart, -2), substr($financialYearEnd, -2));
+
+            $company_obj = Company::where('seller_id', Auth::id())->where('id', $company_id)->first();
+
+            // Check latest non-expired LUT
+            $latestLut = CompanyLUT::where('company_id', $company_id)
+                ->where('expiry_date', '>=', $today->format('Y-m-d'))
+                ->where('status', 3) // Active LUT
+                ->latest()
+                ->first();
+
+            $startingNumber = 0;
+            if ($latestLut && !empty($latestLut->starting_bill_count)) {
+                $startingNumber = (int)$latestLut->starting_bill_count;
+            }
+
+            // Get existing GST invoice numbers for this company & financial year
+            $existingInvoices = $company_obj->ThisYearGstInvoice()->pluck('invoice_number')->toArray();
+
+            // Extract numeric part from invoice numbers
+            $existingNumbers = [];
+            foreach ($existingInvoices as $inv) {
+                $parts = explode('/', $inv); // Format: SERIES-YY/000XX
+                if (count($parts) === 2) {
+                    $num = (int)$parts[1];
+                    $existingNumbers[] = $num;
+                }
+            }
+
+            // Determine next available invoice number
+            if (!empty($existingNumbers)) {
+                $maxExisting = max($existingNumbers);
+                $billCount = max($startingNumber, $maxExisting + 1);
+            } else {
+                $billCount = $startingNumber > 0 ? $startingNumber : ($company_obj->ThisYearGstInvoice()->count() ?? 0) + 1;
+            }
+
+            $inv_no = $company_obj->invoice_series . '-' . $financialYear . '/' . str_pad($billCount, 5, '0', STR_PAD_LEFT);
+
+            $customer_data = null;
+            if ($customer_id) {
+                $customer_data = SellerCustomers::where('seller_id', Auth::id())
+                    ->where('customer_company_id', $customer_id)
+                    ->first();
+            }
+
+            return Inertia::render('GSTBills/index', compact(
+                'customer_list',
+                'company_list',
+                'customer_data',
+                'inv_no'
+            ))->with([
+                'company' => $company_obj,
+                'company_id' => (int)$company_id,
+                'customer_id' => $customer_id ? (int)$customer_id : null
+            ]);
+
+        } else {
             return Inertia::render('GSTBills/index', compact('customer_list', 'company_list'));
         }
     }
 
     public function gst_index_details(Request $request)
     {
-        $request->validate([
-            'customer_id' => 'required',
-            'company_id' => 'required',
-        ]);
-
-        $company_id = $request->company_id['id'];
-        $customer_id = $request->customer_id['id'];
-
-        $customers = SellerCustomers::where('seller_id', Auth::id())->get();
-        $companies = Company::where('seller_id', Auth::id())->get();
-
-        $company_list = $companies->map(function ($company) {
-            return [
-                'id' => $company->id,
-                'name' => $company->company_name,
-            ];
-        });
-
-        $customer_list = $customers->map(function ($customer) {
-            return [
-                'id' => $customer->customer_company_id,
-                'name' => $customer->customer_detail['name'] . '/' . $customer->customer_detail['mobile'],
-            ];
-        });
-
-        // Financial year calculation
-        $today = new DateTime();
-        $currentYear = (int)$today->format('Y');
-        $currentMonth = (int)$today->format('m');
-
-        if ($currentMonth < 4) {
-            $financialYearStart = $currentYear - 1;
-            $financialYearEnd = $currentYear;
-        } else {
-            $financialYearStart = $currentYear;
-            $financialYearEnd = $currentYear + 1;
-        }
-
-        $financialYear = sprintf("%02d-%02d", substr($financialYearStart, -2), substr($financialYearEnd, -2));
-
-        $company = Company::where('seller_id', Auth::id())->where('id', $company_id)->first();
-
-        // Check latest non-expired LUT
-        $latestLut = CompanyLUT::where('company_id', $company_id)
-            ->where('expiry_date', '>=', $today->format('Y-m-d'))
-            ->where('status', 3) // Active LUT
-            ->latest()
-            ->first();
-
-        $startingNumber = 0;
-        if ($latestLut && !empty($latestLut->starting_bill_count)) {
-            $startingNumber = (int)$latestLut->starting_bill_count;
-        }
-
-        // Get existing Performa invoice numbers for this company & financial year
-        $existingInvoices = $company->ThisYearGstInvoice()->pluck('invoice_number')->toArray();
-
-        // Extract numeric part from invoice numbers
-        $existingNumbers = [];
-        foreach ($existingInvoices as $inv) {
-            $parts = explode('/', $inv); // Format: SERIES-YY/000XX
-            if (count($parts) === 2) {
-                $num = (int)$parts[1];
-                $existingNumbers[] = $num;
-            }
-        }
-
-        // Determine next available invoice number
-        if (!empty($existingNumbers)) {
-            $maxExisting = max($existingNumbers);
-            $billCount = max($startingNumber, $maxExisting + 1);
-        } else {
-            $billCount = $startingNumber > 0 ? $startingNumber : ($company->ThisYearGstInvoice()->count() ?? 0) + 1;
-        }
-
-        $inv_no = $company->invoice_series . '-' . $financialYear . '/' . str_pad($billCount, 5, '0', STR_PAD_LEFT);
-
-        $customer_data = SellerCustomers::where('seller_id', Auth::id())
-            ->where('customer_company_id', $customer_id)
-            ->first();
-
-        return Inertia::render('GSTBills/index', compact(
-            'customer_list',
-            'company_list',
-            'customer_data',
-            'inv_no',
-            'company_id',
-            'customer_id',
-            'company'
-        ));
+        return $this->gst_index($request);
     }
 
     public function gst_store(Request $request)
@@ -156,7 +137,7 @@ class GSTInvoiceController extends Controller
 
             'invoicedetails' => 'required|array',
             'invoicedetails.0.invoice' => 'required|string|max:100',
-            'invoicedetails.0.customer' => 'required|string',
+            'invoicedetails.0.customer' => 'nullable|string',
             'invoicedetails.0.company' => 'required|string',
             'invoicedetails.0.vehical_no' => 'required|string|max:50',
             'invoicedetails.0.totalWeight' => 'required|numeric|min:0',
@@ -166,20 +147,66 @@ class GSTInvoiceController extends Controller
         ], [
             'invoicedata.required' => 'Invoice items are required.',
             'invoicedetails.0.invoice.required' => 'Invoice number is required.',
-            'invoicedetails.0.customer.required' => 'Customer is required.',
             'invoicedetails.0.company.required' => 'Company is required.',
             'invoicedetails.0.vehical_no.required' => 'Vehicle number is required.',
         ]);
 
         try {
+            $details = $request->invoicedetails[0];
+            $customerId = $details['customer'] ?? null;
+            $companyId = $details['company'] ?? null;
+
+            if (empty($customerId)) {
+                $name = $details['customer_name'] ?? null;
+                if ($name) {
+                    $gst = $details['gst'] ?? null;
+                    $email = $details['email'] ?? '';
+                    $mobile = $details['mobile'] ?? '';
+                    $address = $details['address'] ?? '';
+                    
+                    $customerCompany = null;
+                    if ($gst) {
+                        $customerCompany = Company::where('gstin', $gst)->first();
+                    }
+                    
+                    if (!$customerCompany) {
+                        $customerCompany = Company::create([
+                            'company_name' => $name,
+                            'email' => $email,
+                            'mobile' => $mobile,
+                            'gstin' => $gst,
+                            'address' => $address,
+                            'pin' => '000000',
+                            'status' => Status::moduleStatusId('Company','registerd') ?? 1,
+                            'tax_type' => 'gst',
+                        ]);
+                    }
+                    
+                    SellerCustomers::firstOrCreate([
+                        'seller_id' => Auth::id(),
+                        'customer_company_id' => $customerCompany->id,
+                    ], [
+                        'customer_company_data' => json_encode([
+                            'name' => $name,
+                            'email' => $email,
+                            'mobile' => $mobile,
+                            'gst' => $gst,
+                            'address' => $address
+                        ])
+                    ]);
+                    
+                    $customerId = $customerCompany->id;
+                }
+            }
+
             // Check if invoice number already exists
-            $existingInvoice = GSTInvoice::where('invoice_number', $request->invoicedetails[0]['invoice'])->first();
+            $existingInvoice = GSTInvoice::where('invoice_number', $details['invoice'])->first();
             if ($existingInvoice) {
                 return back()->withErrors(['invoice' => 'Invoice number already exists.'])->withInput();
             }
 
             // Get LUT information
-            $lut = CompanyLUT::where('company_id', $request->invoicedetails[0]['company'])->latest()->first();
+            $lut = CompanyLUT::where('company_id', $companyId)->latest()->first();
 
             // Filter out empty rows (where all important fields are empty/zero)
             $validInvoiceData = array_filter($request->invoicedata, function($row) {
@@ -198,16 +225,16 @@ class GSTInvoiceController extends Controller
 
             // Create the main invoice record
             $invoice_data = GSTInvoice::create([
-                'invoice_number' => $request->invoicedetails[0]['invoice'],
+                'invoice_number' => $details['invoice'],
                 'invoice_date' => now(),
                 'payment_status' => Status::moduleStatusId('invoice_payment', 'unpaid'),
-                'total_ammount' => floatval($request->invoicedetails[0]['totalTaxableValue']),
-                'tax_amount' => floatval($request->invoicedetails[0]['totalGstAmount']),
-                'subtotal_amount' => floatval($request->invoicedetails[0]['grandTotal']),
-                'total_weight' => floatval($request->invoicedetails[0]['totalWeight']),
-                'vehicle_no' => $request->invoicedetails[0]['vehical_no'],
-                'customer_company_id' => $request->invoicedetails[0]['customer'],
-                'company_id' => $request->invoicedetails[0]['company'],
+                'total_ammount' => floatval($details['totalTaxableValue']),
+                'tax_amount' => floatval($details['totalGstAmount']),
+                'subtotal_amount' => floatval($details['grandTotal']),
+                'total_weight' => floatval($details['totalWeight']),
+                'vehicle_no' => $details['vehical_no'],
+                'customer_company_id' => $customerId,
+                'company_id' => $companyId,
                 'lut_id' => $lut ? $lut->id : null,
             ]);
 
@@ -429,7 +456,7 @@ class GSTInvoiceController extends Controller
 
     public function gst_invoice_list()
     {
-        $invoices = auth()->user()->gst_invoices;
+        $invoices = auth()->user()->gst_invoices()->orderBy('invoice_date', 'desc')->get();
         // $invoices->load('paymentStatus');
         $invoices->load('Customer');
         $invoices->load('Company');
@@ -441,19 +468,15 @@ class GSTInvoiceController extends Controller
     {
         try {
             $inv_id = Crypt::decrypt($request->invoice_id);
-            $invoice = GSTInvoice::find($inv_id);
-            $invoice->load('invoiceitems');
-            $invoice->load('Customer');
-            $invoice->load('lut');
-            $invoice->load('Company');
-        } catch (DecryptException $e) {
-            $inv_id = $request->invoice_id;
-            $invoice = GSTInvoice::find($inv_id);
-            $invoice->load('invoiceitems');
-            $invoice->load('Customer');
-            $invoice->load('Company');
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            $inv_id = $request->invoice_id; // fallback if already plain ID
         }
+
+        $invoice = GSTInvoice::with(['invoiceitems', 'Customer', 'Company', 'lut'])
+            ->findOrFail($inv_id);
+
         return inertia('gst-invoices/InvoiceTemplate', compact('invoice'));
     }
+
 
 }

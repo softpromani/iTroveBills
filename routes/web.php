@@ -117,7 +117,8 @@ Route::get('/dashboard', function () {
 Route::get('master_gst_auth',[MastergstController::class,'master_gst_auth'])->name('master.gst.auth');
 Route::middleware('auth')->group(function () {
     
-    Route::post('create-eway-bill',[MastergstController::class,'create_eway_bill'])->name('create.eway.bill');
+    Route::get('create-eway-bill',[MastergstController::class,'create_eway_bill'])->name('create.eway.bill');
+    Route::post('generate-eway-bill',[MastergstController::class,'generate_eway_bill'])->name('generate.eway.bill');
 
     Route::get('subscription', [SubscriptionPackController::class, 'index'])->name('subscription.index');
     Route::get('buy/subscription', [SubscriptionPackController::class, 'subscription'])->name('subscription.subscription');

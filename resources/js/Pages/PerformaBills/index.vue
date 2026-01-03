@@ -3,33 +3,44 @@
     <AuthenticatedLayout>
         <form
             @submit.prevent="getcustomerdetail"
-            method="post"
-            :class="company_list ? (props.customer_data ? 'hidden' : '') : ''"
+            method="get"
         >
             <div class="container p-4 card">
                 <div class="d-flex justify-content-evenly row">
-                    <Dropdown
-                        v-model="form.customer_id"
-                        :options="customer_list"
-                        filter
-                        optionLabel="name"
-                        placeholder="Select a Customer"
-                        class="h-12 mb-1 col-md-4"
-                    />
-                    <Dropdown
-                        v-model="form.company_id"
-                        :options="company_list"
-                        filter
-                        optionLabel="name"
-                        placeholder="Select a Company"
-                        class="h-12 mb-1 col-md-4"
-                    />
-                    <PrimaryButton
-                        :disabled="form.processing"
-                        class="h-12 col-md-2"
-                    >
-                        Search</PrimaryButton
-                    >
+                    <div class="row">
+                        <div class="col-md-5">
+                            <Dropdown
+                                v-model="form.company_id"
+                                :options="company_list"
+                                filter
+                                optionLabel="name"
+                                placeholder="Select a Company"
+                                class="mb-1 h-12 w-100"
+                                showClear
+                            />
+                            <InputError :message="form.errors.company_id" class="mt-1" />
+                        </div>
+                        <div class="col-md-5">
+                            <Dropdown
+                                v-model="form.customer_id"
+                                :options="customer_list"
+                                filter
+                                optionLabel="name"
+                                placeholder="Select a Customer"
+                                class="mb-1 h-12 w-100"
+                                showClear
+                            />
+                            <InputError :message="form.errors.customer_id" class="mt-1" />
+                        </div>
+                        <div class="col-md-2">
+                            <PrimaryButton
+                                :disabled="form.processing"
+                                class="h-12 w-100"
+                            >
+                                Search
+                            </PrimaryButton>
+                        </div>
+                    </div>
                 </div>
             </div>
         </form>
@@ -39,9 +50,8 @@
             :company="company_id"
             :customer="customer_id"
             :company_name="CompanyName"
-            :class="props.customer_data ? '' : 'hidden'"
         />
-        <div :class="props.customer_data ? '' : 'hidden'">
+        <div>
             <Editable />
         </div>
     </AuthenticatedLayout>
@@ -49,13 +59,14 @@
 
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head } from "@inertiajs/vue3";
-import { ref } from "vue";
+import { Head, useForm, router } from "@inertiajs/vue3";
+import { ref, watch, computed } from "vue";
 import Editable from "./Partials/Editable.vue";
 import CustomerDetailVue from "./Partials/CustomerDetail.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import Dropdown from "primevue/dropdown";
-import { Link, useForm, usePage } from "@inertiajs/vue3";
+import { Link, usePage } from "@inertiajs/vue3";
+import InputError from "@/Components/InputError.vue";
 const props = defineProps({
     customer_list: Array,
     company_list: Array,
@@ -65,19 +76,48 @@ const props = defineProps({
     customer_id: Number,
     company_id: Number,
 });
-const series = props.inv_no ? props.inv_no : "";
-const CompanyName = props.company ? props.company.company_name : "";
-const data = props.customer_data ? props.customer_data.customer_detail : "";
-const customer_id = props.customer_id ? props.customer_id: "";
-const company_id = props.company_id ? props.company_id : "";
+const series = computed(() => props.inv_no ? props.inv_no : "");
+const CompanyName = computed(() => props.company ? props.company.company_name : "");
+const data = computed(() => props.customer_data ? props.customer_data.customer_detail : null);
+
+// Initial form state - handle incoming props
 const form = useForm({
-    company_id: "",
-    customer_id: "",
+    company_id: props.company_id ? props.company_list.find(c => c.id === props.company_id) : null,
+    customer_id: props.customer_id ? props.customer_list.find(c => c.id === props.customer_id) : null,
 });
 
 function getcustomerdetail() {
-    form.get(route("performa.customer.detail.bill"), {
+    form.clearErrors();
+    if (!form.company_id) {
+        form.setError('company_id', 'Please select a company to proceed.');
+        return;
+    }
+
+    router.get(route("performa.customer.bill"), {
+        customer_id: form.customer_id ? form.customer_id.id : null,
+        company_id: form.company_id ? form.company_id.id : null,
+    }, {
+        preserveState: true,
         preserveScroll: true,
+        only: ['customer_data', 'inv_no', 'company', 'series', 'customer_id', 'company_id'] 
     });
 }
+
+watch(() => [form.customer_id, form.company_id], ([newCust, newComp]) => {
+    if (newComp) {
+        getcustomerdetail();
+    }
+});
+
+// Sync props back to form if they change externally (e.g. initial load or subsequent navigation)
+watch(() => props.company_id, (val) => {
+     if (val && (!form.company_id || form.company_id.id !== val)) {
+         form.company_id = props.company_list.find(c => c.id === val);
+    }
+});
+watch(() => props.customer_id, (val) => {
+     if (val && (!form.customer_id || form.customer_id.id !== val)) {
+         form.customer_id = props.customer_list.find(c => c.id === val);
+    }
+});
 </script>

@@ -4,15 +4,15 @@
         <section class="container-fluid">
             <div class="row">
                 <div
-                    class="mt-2 -mb-2 bg-purple-700 rounded-md position-relative"
+                    class="mt-2 bg-purple-700 rounded-md position-relative py-2 px-3"
                 >
                     <h2
-                        class="font-medium text-center text-white uppercase font-weight-bolder"
+                        class="text-sm font-medium text-center text-white uppercase font-weight-bolder mb-0"
                     >
                         Itrove Bills
                     </h2>
                     <span
-                        class="text-white cursor-pointer top-2 right-2 position-absolute"
+                        class="text-white cursor-pointer top-2 right-3 position-absolute"
                         @click="toggleCard"
                     >
                         <i class="fa-solid fa-bullseye"></i>

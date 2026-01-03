@@ -1,10 +1,10 @@
 <template>
-    <div class="mt-5 bg-purple-700 rounded-md position-relative">
-        <h2 class="font-medium text-center text-white font-weight-bolder">
+    <div class="mt-5 bg-purple-700 rounded-md position-relative py-2 px-3">
+        <h2 class="text-sm font-medium text-center text-white font-weight-bolder mb-0">
             INVOICE
         </h2>
         <span
-            class="text-white cursor-pointer top-2 right-2 position-absolute"
+            class="text-white cursor-pointer top-2 right-3 position-absolute"
             @click="toggleproductCard"
         >
             <i class="fa-solid fa-bullseye"></i>

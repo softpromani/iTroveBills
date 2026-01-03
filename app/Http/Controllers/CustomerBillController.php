@@ -24,43 +24,7 @@ class CustomerBillController extends Controller
     public function index(Request $request)
     {
         $customers = SellerCustomers::where('seller_id', Auth::id())->get();
-        $company = Company::where('seller_id', Auth::id())->get();
-        $company_list = $company->map(function ($company) {
-            return [
-                'id' => $company->id,
-                'name' => $company->company_name,
-            ];
-        });
-
-        $customer_list = $customers->map(function ($customer) {
-            return [
-                'id' => $customer->customer_company_id,
-                'name' => $customer->customer_detail['name'] . '/' . $customer->customer_detail['mobile'],
-            ];
-        });
-
-        if(isset($request)){
-            $selectedCustId = $request->customer_id;
-            return Inertia::render('Bills/index', compact('customer_list', 'company_list', 'selectedCustId'));
-        }
-        else{
-            return Inertia::render('Bills/index', compact('customer_list', 'company_list'));
-        }
-    }
-
-    public function index_details(Request $request)
-    {
-        $request->validate([
-            'customer_id' => 'required',
-            'company_id' => 'required',
-        ]);
-
-        $company_id = $request->company_id['id'];
-        $customer_id = $request->customer_id['id'];
-
-        $customers = SellerCustomers::where('seller_id', Auth::id())->get();
         $companies = Company::where('seller_id', Auth::id())->get();
-
         $company_list = $companies->map(function ($company) {
             return [
                 'id' => $company->id,
@@ -75,72 +39,94 @@ class CustomerBillController extends Controller
             ];
         });
 
-        // Financial year calculation
-        $today = new DateTime();
-        $currentYear = (int)$today->format('Y');
-        $currentMonth = (int)$today->format('m');
+        if ($request->filled('company_id')) {
 
-        if ($currentMonth < 4) {
-            $financialYearStart = $currentYear - 1;
-            $financialYearEnd = $currentYear;
-        } else {
-            $financialYearStart = $currentYear;
-            $financialYearEnd = $currentYear + 1;
-        }
+            // Handle both object (from dropdown sometimes) and primitive values
+            $company_id_val = is_array($request->company_id) ? $request->company_id['id'] : $request->company_id;
+            $customer_id_val = $request->filled('customer_id') ? (is_array($request->customer_id) ? $request->customer_id['id'] : $request->customer_id) : null;
 
-        $financialYear = sprintf("%02d-%02d", substr($financialYearStart, -2), substr($financialYearEnd, -2));
+            // Financial year calculation
+            $today = new DateTime();
+            $currentYear = (int)$today->format('Y');
+            $currentMonth = (int)$today->format('m');
 
-        $company = Company::where('seller_id', Auth::id())->where('id', $company_id)->first();
-
-        // Check latest non-expired LUT
-        $latestLut = CompanyLut::where('company_id', $company_id)
-            ->where('expiry_date', '>=', $today->format('Y-m-d'))
-            ->where('status', 3) // Active LUT
-            ->latest()
-            ->first();
-
-        // Determine starting invoice number
-        $startingNumber = 0;
-        if ($latestLut && !empty($latestLut->starting_bill_count)) {
-            $startingNumber = (int)$latestLut->starting_bill_count;
-        }
-
-        // Get existing invoice numbers for this company & financial year
-        $existingInvoices = $company->ThisYearInvoice()->pluck('invoice_number')->toArray();
-
-        // Extract numeric part from invoice numbers
-        $existingNumbers = [];
-        foreach ($existingInvoices as $inv) {
-            $parts = explode('/', $inv); // Format: SERIES-YY/000XX
-            if (count($parts) === 2) {
-                $num = (int)$parts[1];
-                $existingNumbers[] = $num;
+            if ($currentMonth < 4) {
+                $financialYearStart = $currentYear - 1;
+                $financialYearEnd = $currentYear;
+            } else {
+                $financialYearStart = $currentYear;
+                $financialYearEnd = $currentYear + 1;
             }
-        }
 
-        // Determine next available number
-        if (!empty($existingNumbers)) {
-            $maxExisting = max($existingNumbers);
-            $billCount = max($startingNumber, $maxExisting + 1);
+            $financialYear = sprintf("%02d-%02d", substr($financialYearStart, -2), substr($financialYearEnd, -2));
+
+            $company_obj = Company::where('seller_id', Auth::id())->where('id', $company_id_val)->first();
+
+            // Check latest non-expired LUT
+            $latestLut = CompanyLut::where('company_id', $company_id_val)
+                ->where('expiry_date', '>=', $today->format('Y-m-d'))
+                ->where('status', 3) // Active LUT
+                ->latest()
+                ->first();
+
+            // Determine starting invoice number
+            $startingNumber = 0;
+            if ($latestLut && !empty($latestLut->starting_bill_count)) {
+                $startingNumber = (int)$latestLut->starting_bill_count;
+            }
+
+            // Get existing invoice numbers for this company & financial year
+            $existingInvoices = $company_obj->ThisYearInvoice()->pluck('invoice_number')->toArray();
+
+            // Extract numeric part from invoice numbers
+            $existingNumbers = [];
+            foreach ($existingInvoices as $inv) {
+                $parts = explode('/', $inv); // Format: SERIES-YY/000XX
+                if (count($parts) === 2) {
+                    $num = (int)$parts[1];
+                    $existingNumbers[] = $num;
+                }
+            }
+
+            // Determine next available number
+            if (!empty($existingNumbers)) {
+                $maxExisting = max($existingNumbers);
+                $billCount = max($startingNumber, $maxExisting + 1);
+            } else {
+                $billCount = $startingNumber > 0 ? $startingNumber : ($company_obj->ThisYearInvoice()->count() ?? 0) + 1;
+            }
+
+            $inv_no = $company_obj->invoice_series . '-' . $financialYear . '/' . str_pad($billCount, 5, '0', STR_PAD_LEFT);
+
+            $customer_data = null;
+            if ($customer_id_val) {
+                $customer_data = SellerCustomers::where('seller_id', Auth::id())
+                    ->where('customer_company_id', $customer_id_val)
+                    ->first();
+            }
+
+            // Pass 'company' as 'company' to match view props (the index_details used 'company', index used 'company_list')
+            // The view index.vue expects 'company' prop which seems to be the selected company object relative to details?
+            // index.vue: const CompanyName = props.company ? props.company.company_name : "";
+            
+            return Inertia::render('Bills/index', compact(
+                'customer_list',
+                'company_list',
+                'customer_data',
+                'inv_no'
+            ))->with([
+                'company' => $company_obj,
+                'company_id' => (int)$company_id_val,
+                'customer_id' => $customer_id_val ? (int)$customer_id_val : null
+            ]);
         } else {
-            $billCount = $startingNumber > 0 ? $startingNumber : ($company->ThisYearInvoice()->count() ?? 0) + 1;
+            return Inertia::render('Bills/index', compact('customer_list', 'company_list'));
         }
+    }
 
-        $inv_no = $company->invoice_series . '-' . $financialYear . '/' . str_pad($billCount, 5, '0', STR_PAD_LEFT);
-
-        $customer_data = SellerCustomers::where('seller_id', Auth::id())
-            ->where('customer_company_id', $customer_id)
-            ->first();
-
-        return Inertia::render('Bills/index', compact(
-            'customer_list',
-            'company_list',
-            'customer_data',
-            'inv_no',
-            'company_id',
-            'customer_id',
-            'company'
-        ));
+    public function index_details(Request $request)
+    {
+        return $this->index($request);
     }
 
     public function store(Request $request)
@@ -153,16 +139,68 @@ class CustomerBillController extends Controller
             'invoicedetails.*.totalTaxableValue' => 'required|numeric',
         ]);
         if ($valid) {
-            $lut = CompanyLUT::where('company_id', $request->invoicedetails[0]['company'])->latest()->first();
+            $details = $request->invoicedetails[0];
+            $customerId = $details['customer'] ?? null;
+            $companyId = $details['company'] ?? null;
+
+            if (empty($customerId)) {
+                // Logic to create new customer
+                $name = $details['name'] ?? null;
+                
+                // Only create if name is provided
+                if ($name) {
+                    $gst = $details['gst'] ?? null; // GST might be empty
+                    $email = $details['email'] ?? '';
+                    $mobile = $details['mobile'] ?? '';
+                    $address = $details['address'] ?? '';
+                    
+                    // Try to find existing company by GST if provided
+                    $customerCompany = null;
+                    if ($gst) {
+                        $customerCompany = Company::where('gstin', $gst)->first();
+                    }
+                    
+                    if (!$customerCompany) {
+                        $customerCompany = Company::create([
+                            'company_name' => $name,
+                            'email' => $email,
+                            'mobile' => $mobile,
+                            'gstin' => $gst,
+                            'address' => $address,
+                            'pin' => '000000', // Default
+                            'status' => Status::moduleStatusId('Company','registerd') ?? 1,
+                            'tax_type' => 'gst', // Default
+                        ]);
+                    }
+                    
+                    // Create SellerCustomer link
+                    $sellerCustomer = SellerCustomers::firstOrCreate([
+                        'seller_id' => Auth::id(),
+                        'customer_company_id' => $customerCompany->id,
+                    ], [
+                        'customer_company_data' => json_encode([
+                            'name' => $name,
+                            'email' => $email,
+                            'mobile' => $mobile,
+                            'gst' => $gst,
+                            'address' => $address
+                        ])
+                    ]);
+                    
+                    $customerId = $customerCompany->id;
+                }
+            }
+
+            $lut = CompanyLUT::where('company_id', $companyId)->latest()->first();
             $invoice_data = Invoice::create([
-                'invoice_number' => $request->invoicedetails[0]['invoice'],
+                'invoice_number' => $details['invoice'],
                 'invoice_date' => now(),
                 'payment_status' => Status::moduleStatusId('invoice_payment', 'unpaid'),
-                'total_ammount' => $request->invoicedetails[0]['totalTaxableValue'],
-                'total_weight' => $request->invoicedetails[0]['totalWeight'],
-                'vehicle_no' => $request->invoicedetails[0]['vehical_no'],
-                'customer_company_id' => $request->invoicedetails[0]['customer'],
-                'company_id' => $request->invoicedetails[0]['company'],
+                'total_ammount' => $details['totalTaxableValue'],
+                'total_weight' => $details['totalWeight'],
+                'vehicle_no' => $details['vehical_no'],
+                'customer_company_id' => $customerId,
+                'company_id' => $companyId,
                 'lut_id' => isset($lut) ? $lut->id : Null,
             ]);
 
@@ -227,7 +265,7 @@ class CustomerBillController extends Controller
         }
 
         // Get the filtered invoices
-        $invoices = $invoicesQuery->get();
+        $invoices = $invoicesQuery->orderBy('invoice_date', 'desc')->get();
         $invoices->load('paymentStatus', 'Customer', 'Company', 'payment');
 
         // Get filter data
@@ -372,106 +410,88 @@ class CustomerBillController extends Controller
             ];
         });
 
-        if(isset($request)){
-            $selectedCustId = $request->customer_id;
-            return Inertia::render('PerformaBills/index', compact('customer_list', 'company_list', 'selectedCustId'));
-        }
-        else{
+        if ($request->filled('company_id')) {
+
+            $company_id = is_array($request->company_id) ? $request->company_id['id'] : $request->company_id;
+            $customer_id = $request->filled('customer_id') ? (is_array($request->customer_id) ? $request->customer_id['id'] : $request->customer_id) : null;
+
+            // Financial year calculation
+            $today = new DateTime();
+            $currentYear = (int)$today->format('Y');
+            $currentMonth = (int)$today->format('m');
+
+            if ($currentMonth < 4) {
+                $financialYearStart = $currentYear - 1;
+                $financialYearEnd = $currentYear;
+            } else {
+                $financialYearStart = $currentYear;
+                $financialYearEnd = $currentYear + 1;
+            }
+
+            $financialYear = sprintf("%02d-%02d", substr($financialYearStart, -2), substr($financialYearEnd, -2));
+
+            $company_obj = Company::where('seller_id', Auth::id())->where('id', $company_id)->first();
+
+            // Check latest non-expired LUT
+            $latestLut = CompanyLut::where('company_id', $company_id)
+                ->where('expiry_date', '>=', $today->format('Y-m-d'))
+                ->where('status', 3) // Active LUT
+                ->latest()
+                ->first();
+
+            $startingNumber = 0;
+            if ($latestLut && !empty($latestLut->starting_bill_count)) {
+                $startingNumber = (int)$latestLut->starting_bill_count;
+            }
+
+            // Get existing Performa invoice numbers for this company & financial year
+            $existingInvoices = $company_obj->ThisYearPerformaInvoice()->pluck('invoice_number')->toArray();
+
+            // Extract numeric part from invoice numbers
+            $existingNumbers = [];
+            foreach ($existingInvoices as $inv) {
+                $parts = explode('/', $inv); // Format: SERIES-YY/000XX
+                if (count($parts) === 2) {
+                    $num = (int)$parts[1];
+                    $existingNumbers[] = $num;
+                }
+            }
+
+            // Determine next available invoice number
+            if (!empty($existingNumbers)) {
+                $maxExisting = max($existingNumbers);
+                $billCount = max($startingNumber, $maxExisting + 1);
+            } else {
+                $billCount = $startingNumber > 0 ? $startingNumber : ($company_obj->ThisYearPerformaInvoice()->count() ?? 0) + 1;
+            }
+
+            $inv_no = $company_obj->invoice_series . '-' . $financialYear . '/' . str_pad($billCount, 5, '0', STR_PAD_LEFT);
+
+            $customer_data = null;
+            if ($customer_id) {
+                $customer_data = SellerCustomers::where('seller_id', Auth::id())
+                    ->where('customer_company_id', $customer_id)
+                    ->first();
+            }
+
+            return Inertia::render('PerformaBills/index', compact(
+                'customer_list',
+                'company_list',
+                'customer_data',
+                'inv_no'
+            ))->with([
+                'company' => $company_obj,
+                'company_id' => (int)$company_id,
+                'customer_id' => $customer_id ? (int)$customer_id : null
+            ]);
+            
+        } else {
             return Inertia::render('PerformaBills/index', compact('customer_list', 'company_list'));
         }
     }
     public function performa_index_details(Request $request)
     {
-        $request->validate([
-            'customer_id' => 'required',
-            'company_id' => 'required',
-        ]);
-
-        $company_id = $request->company_id['id'];
-        $customer_id = $request->customer_id['id'];
-
-        $customers = SellerCustomers::where('seller_id', Auth::id())->get();
-        $companies = Company::where('seller_id', Auth::id())->get();
-
-        $company_list = $companies->map(function ($company) {
-            return [
-                'id' => $company->id,
-                'name' => $company->company_name,
-            ];
-        });
-
-        $customer_list = $customers->map(function ($customer) {
-            return [
-                'id' => $customer->customer_company_id,
-                'name' => $customer->customer_detail['name'] . '/' . $customer->customer_detail['mobile'],
-            ];
-        });
-
-        // Financial year calculation
-        $today = new DateTime();
-        $currentYear = (int)$today->format('Y');
-        $currentMonth = (int)$today->format('m');
-
-        if ($currentMonth < 4) {
-            $financialYearStart = $currentYear - 1;
-            $financialYearEnd = $currentYear;
-        } else {
-            $financialYearStart = $currentYear;
-            $financialYearEnd = $currentYear + 1;
-        }
-
-        $financialYear = sprintf("%02d-%02d", substr($financialYearStart, -2), substr($financialYearEnd, -2));
-
-        $company = Company::where('seller_id', Auth::id())->where('id', $company_id)->first();
-
-        // Check latest non-expired LUT
-        $latestLut = CompanyLut::where('company_id', $company_id)
-            ->where('expiry_date', '>=', $today->format('Y-m-d'))
-            ->where('status', 3) // Active LUT
-            ->latest()
-            ->first();
-
-        $startingNumber = 0;
-        if ($latestLut && !empty($latestLut->starting_bill_count)) {
-            $startingNumber = (int)$latestLut->starting_bill_count;
-        }
-
-        // Get existing Performa invoice numbers for this company & financial year
-        $existingInvoices = $company->ThisYearPerformaInvoice()->pluck('invoice_number')->toArray();
-
-        // Extract numeric part from invoice numbers
-        $existingNumbers = [];
-        foreach ($existingInvoices as $inv) {
-            $parts = explode('/', $inv); // Format: SERIES-YY/000XX
-            if (count($parts) === 2) {
-                $num = (int)$parts[1];
-                $existingNumbers[] = $num;
-            }
-        }
-
-        // Determine next available invoice number
-        if (!empty($existingNumbers)) {
-            $maxExisting = max($existingNumbers);
-            $billCount = max($startingNumber, $maxExisting + 1);
-        } else {
-            $billCount = $startingNumber > 0 ? $startingNumber : ($company->ThisYearPerformaInvoice()->count() ?? 0) + 1;
-        }
-
-        $inv_no = $company->invoice_series . '-' . $financialYear . '/' . str_pad($billCount, 5, '0', STR_PAD_LEFT);
-
-        $customer_data = SellerCustomers::where('seller_id', Auth::id())
-            ->where('customer_company_id', $customer_id)
-            ->first();
-
-        return Inertia::render('PerformaBills/index', compact(
-            'customer_list',
-            'company_list',
-            'customer_data',
-            'inv_no',
-            'company_id',
-            'customer_id',
-            'company'
-        ));
+        return $this->performa_index($request);
     }
 
     public function performa_store(Request $request)
@@ -484,16 +504,64 @@ class CustomerBillController extends Controller
             'invoicedetails.*.totalTaxableValue' => 'required|numeric',
         ]);
         if ($valid) {
-            $lut = CompanyLUT::where('company_id', $request->invoicedetails[0]['company'])->latest()->first();
+            $details = $request->invoicedetails[0];
+            $customerId = $details['customer'] ?? null;
+            $companyId = $details['company'] ?? null;
+
+            if (empty($customerId)) {
+                $name = $details['customer_name'] ?? null;
+                if ($name) {
+                    $gst = $details['gst'] ?? null;
+                    $email = $details['email'] ?? '';
+                    $mobile = $details['mobile'] ?? '';
+                    $address = $details['address'] ?? '';
+                    
+                    $customerCompany = null;
+                    if ($gst) {
+                        $customerCompany = Company::where('gstin', $gst)->first();
+                    }
+                    
+                    if (!$customerCompany) {
+                        $customerCompany = Company::create([
+                            'company_name' => $name,
+                            'email' => $email,
+                            'mobile' => $mobile,
+                            'gstin' => $gst,
+                            'address' => $address,
+                            'pin' => '000000',
+                            'status' => Status::moduleStatusId('Company','registerd') ?? 1,
+                            'tax_type' => 'gst',
+                        ]);
+                    }
+                    
+                    SellerCustomers::firstOrCreate([
+                        'seller_id' => Auth::id(),
+                        'customer_company_id' => $customerCompany->id,
+                    ], [
+                        'customer_company_data' => json_encode([
+                            'name' => $name,
+                            'email' => $email,
+                            'mobile' => $mobile,
+                            'gst' => $gst,
+                            'address' => $address
+                        ])
+                    ]);
+                    
+                    $customerId = $customerCompany->id;
+                }
+            }
+
+            $lut = CompanyLUT::where('company_id', $companyId)->latest()->first();
             $invoice_data = PerformaInvoice::create([
-                'invoice_number' => $request->invoicedetails[0]['invoice'],
+                'invoice_number' => $details['invoice'],
                 'invoice_date' => now(),
                 'payment_status' => Status::moduleStatusId('invoice_payment', 'unpaid'),
-                'total_ammount' => $request->invoicedetails[0]['totalTaxableValue'],
-                'total_weight' => $request->invoicedetails[0]['totalWeight'],
-                'vehicle_no' => $request->invoicedetails[0]['vehical_no'],
-                'customer_company_id' => $request->invoicedetails[0]['customer'],
-                'company_id' => $request->invoicedetails[0]['company'],
+                'total_ammount' => $details['totalTaxableValue'],
+                'total_weight' => $details['totalWeight'],
+                'vehicle_no' => $details['vehical_no'],
+                'delivery_in_days' => $details['delivery_in_days'] ?? null,
+                'customer_company_id' => $customerId,
+                'company_id' => $companyId,
                 'lut_id' => isset($lut) ? $lut->id : Null,
             ]);
 
@@ -540,6 +608,7 @@ class CustomerBillController extends Controller
                 'total_ammount' => $request->invoicedetails[0]['totalTaxableValue'],
                 'total_weight' => $request->invoicedetails[0]['totalWeight'],
                 'vehicle_no' => $request->invoicedetails[0]['vehical_no'],
+                'delivery_in_days' => $request->invoicedetails[0]['delivery_in_days'] ?? null,
             ]);
 
             foreach ($request->invoicedata as $key => $data) {
@@ -561,7 +630,7 @@ class CustomerBillController extends Controller
 
     public function performa_invoice_list()
     {
-        $invoices = auth()->user()->performa_invoices;
+        $invoices = auth()->user()->performa_invoices()->orderBy('invoice_date', 'desc')->get();
         // $invoices->load('paymentStatus');
         $invoices->load('Customer');
         $invoices->load('Company');

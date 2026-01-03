@@ -1,19 +1,19 @@
 <template>
-    <div class="mt-5 bg-purple-700 rounded-md position-relative">
-        <h2 class="font-medium text-center text-white font-weight-bolder">
+    <div class="mt-5 bg-purple-700 rounded-md position-relative py-2 px-3">
+        <h2 class="text-sm font-medium text-center text-white font-weight-bolder mb-0">
             INVOICE
         </h2>
         <span
-            class="text-white cursor-pointer top-2 right-2 position-absolute"
+            class="text-white cursor-pointer top-2 right-3 position-absolute"
             @click="toggleproductCard"
         >
-            <i class="fa-solid fa-bullseye"></i>
+            <i class="fa-solid fa-bullseye fa-lg"></i>
         </span>
     </div>
 
     <transition name="slide-fade">
         <div v-if="showproductCard">
-            <div class="-mt-4 rounded-lg shadow table-responsive">
+            <div class="rounded-lg shadow table-responsive">
                 <table class="table table-bordered">
                     <thead class="table-dark">
                         <tr>
@@ -299,10 +299,12 @@ const calculateTotalWeight = () => {
 const updatebill = () => {
     const invoiceNoValue = document.getElementById("invoice_no")?.value || "";
     const vehical_no = document.getElementById("vehical_no")?.value || "";
+    const delivery_in_days = document.getElementById("delivery_in_days")?.value || "";
 
     invoicedetails.value[0] = {
         invoice: invoiceNoValue,
         vehical_no: vehical_no,
+        delivery_in_days: delivery_in_days,
         totalWeight: calculateTotalWeight(),
         totalTaxableValue: calculateTotalTaxableValue(),
     };

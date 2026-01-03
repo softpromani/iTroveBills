@@ -4,98 +4,211 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Request;
+use App\Models\Invoice;
+use App\Models\GSTInvoice;
+use App\Models\EwayBill;
+use App\Models\EwayBillItem;
+use App\Models\Company;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Exception;
+use Illuminate\Support\Facades\DB;
 
 class MastergstController extends Controller
 {
-    public function master_gst_auth()
+    public function create_eway_bill(Request $request)
     {
-        $response = Http::withHeaders([
-            'Accept' => 'application/json',
-            'ip_address' => '66.249.75.99',
-            'client_id' => 'f596e958-7675-428f-b102-783fb191fabe',
-            'client_secret' => '37764526-c022-4116-b8d8-73ff4c3900b6',
-            'gstin' => '05AAACH6188F1ZM',
-        ])->get('https://api.mastergst.com/ewaybillapi/v1.03/authenticate', [
-            'email' => 'kshivambaranwal@gmail.com',
-            'username' => '05AAACH6188F1ZM',
-            'password' => 'abc123@@',
+        $invoice_id = $request->invoice_id;
+        if (!$invoice_id) {
+            return back()->with('error', 'Invoice ID is required');
+        }
+
+        // Try to find in regular Invoice or GSTInvoice
+        $invoice = GSTInvoice::with(['Company', 'Customer', 'invoiceitems'])->find($invoice_id);
+        $type = 'gst';
+
+        if (!$invoice) {
+            $invoice = Invoice::with(['Company', 'Customer', 'invoiceitems'])->find($invoice_id);
+            $type = 'regular';
+        }
+
+        if ($invoice) {
+            // Normalize items for the view
+            $invoice->items = $invoice->invoiceitems;
+        }
+
+        if (!$invoice) {
+            return back()->with('error', 'Invoice not found');
+        }
+
+        return Inertia::render('invoices/CreateEwayBill', [
+            'invoice' => $invoice,
+            'invoice_type' => $type
         ]);
-
-        // Access response data
-        $responseData = $response->json();
-
     }
 
-    public function create_eway_bill(){
+    public function generate_eway_bill(Request $request)
+    {
+        $request->validate([
+            'invoice_id' => 'required',
+            'transDistance' => 'required|numeric',
+            'transMode' => 'required',
+            'vehicleNo' => 'required_if:transMode,1,2,3',
+            'supplyType' => 'required',
+            'subSupplyType' => 'required',
+        ]);
+
+        $invoice_id = $request->invoice_id;
+        $invoice = GSTInvoice::with(['Company', 'Customer', 'invoiceitems'])->find($invoice_id);
+        
+        if (!$invoice) {
+            $invoice = Invoice::with(['Company', 'Customer', 'invoiceitems'])->find($invoice_id);
+        }
+
+        if ($invoice) {
+            $invoice->items = $invoice->invoiceitems;
+        }
+
+        if (!$invoice) {
+            return response()->json(['status' => 0, 'message' => 'Invoice not found'], 404);
+        }
+
+        $fromGstin = $invoice->Company->gstin;
+        $toGstin = $invoice->Customer->gstin;
+
+        $fromStateCode = (int)substr($fromGstin, 0, 2);
+        $toStateCode = (int)substr($toGstin, 0, 2);
+        
+        $isInterState = ($fromStateCode !== $toStateCode);
+
+        // Prepare Item List
+        $itemList = [];
+        $totalCgst = 0;
+        $totalSgst = 0;
+        $totalIgst = 0;
+
+        foreach ($invoice->items as $item) {
+            $taxableAmount = (float)($item->subtotal_amount ?? ($item->rate * $item->quantity));
+            $gstRate = (float)($item->gst_percentage ?? 0);
+            
+            $cgstRate = 0;
+            $sgstRate = 0;
+            $igstRate = 0;
+
+            if ($isInterState) {
+                $igstRate = $gstRate;
+                $totalIgst += ($taxableAmount * $igstRate / 100);
+            } else {
+                $cgstRate = $gstRate / 2;
+                $sgstRate = $gstRate / 2;
+                $totalCgst += ($taxableAmount * $cgstRate / 100);
+                $totalSgst += ($taxableAmount * $sgstRate / 100);
+            }
+
+            $itemList[] = [
+                "productName" => $item->desc_product,
+                "productDesc" => $item->desc_product,
+                "hsnCode" => (int)preg_replace('/[^0-9]/', '', $item->hsn_code),
+                "quantity" => (float)$item->quantity,
+                "qtyUnit" => $item->unit ?? 'BOX',
+                "taxableAmount" => $taxableAmount,
+                "sgstRate" => $sgstRate,
+                "cgstRate" => $cgstRate,
+                "igstRate" => $igstRate,
+                "cessRate" => 0
+            ];
+        }
+
         $data = [
-            "supplyType" => "O",
-            "subSupplyType" => "1",
-            "subSupplyDesc" => " ",
+            "supplyType" => $request->supplyType,
+            "subSupplyType" => $request->subSupplyType,
+            "subSupplyDesc" => $request->subSupplyDesc ?? "",
             "docType" => "INV",
-            "docNo" => "ebill/06/2020",
-            "docDate" => "05/02/2020",
-            "fromGstin" => "05AAACH6188F1ZM",
-            "fromTrdName" => "welton",
-            "fromAddr1" => "2ND CROSS NO 59  19  A",
-            "fromAddr2" => "GROUND FLOOR OSBORNE ROAD",
-            "fromPlace" => "FRAZER TOWN",
-            "actFromStateCode" => 5,
-            "fromPincode" => 263652,
-            "fromStateCode" => 5,
-            "toGstin" => "02EHFPS5910D2Z0",
-            "toTrdName" => "sthuthya",
-            "toAddr1" => "Shree Nilaya",
-            "toAddr2" => "Dasarahosahalli",
-            "toPlace" => "Beml Nagar",
-            "toPincode" => 176036,
-            "actToStateCode" => 2,
-            "toStateCode" => 2,
-            "transactionType" => 4,
-            "dispatchFromGSTIN" => "29AAAAA1303P1ZV",
-            "dispatchFromTradeName" => "ABC Traders",
-            "shipToGSTIN" => "29ALSPR1722R1Z3",
-            "shipToTradeName" => "XYZ Traders",
-            "totalValue" => 56099,
-            "cgstValue" => 0,
-            "sgstValue" => 0,
-            "igstValue" => 300.67,
-            "cessValue" => 400.56,
-            "cessNonAdvolValue" => 400,
-            "totInvValue" => 68358,
-            "transMode" => "1",
-            "transDistance" => "656",
-            "transporterName" => "",
-            "transporterId" => "05AAACG0904A1ZL",
-            "transDocNo" => "12",
-            "transDocDate" => "",
-            "vehicleNo" => "APR3214",
-            "vehicleType" => "R",
-            "itemList" => [
-                [
-                    "productName" => "Wheat",
-                    "productDesc" => "Wheat",
-                    "hsnCode" => 1001,
-                    "quantity" => 4,
-                    "qtyUnit" => "BOX",
-                    "taxableAmount" => 56099,
-                    "sgstRate" => 0,
-                    "cgstRate" => 0,
-                    "igstRate" => 3,
-                    "cessRate" => 0
-                ]
-            ]
+            "docNo" => $invoice->invoice_number,
+            "docDate" => date('d/m/Y', strtotime($invoice->invoice_date)),
+            "fromGstin" => $fromGstin,
+            "fromTrdName" => $invoice->Company->company_name,
+            "fromAddr1" => $invoice->Company->address,
+            "fromAddr2" => "",
+            "fromPlace" => $invoice->Company->city ?? "Default Place",
+            "actFromStateCode" => $fromStateCode,
+            "fromPincode" => (int)$invoice->Company->pin,
+            "fromStateCode" => $fromStateCode,
+            "toGstin" => $toGstin,
+            "toTrdName" => $invoice->Customer->company_name,
+            "toAddr1" => $invoice->Customer->address,
+            "toAddr2" => "",
+            "toPlace" => $invoice->Customer->city ?? "Default Place",
+            "toPincode" => (int)$invoice->Customer->pin,
+            "actToStateCode" => $toStateCode,
+            "toStateCode" => $toStateCode,
+            "transactionType" => (int)$request->transactionType ?? 1,
+            "totalValue" => (float)$invoice->total_ammount,
+            "cgstValue" => round($totalCgst, 2),
+            "sgstValue" => round($totalSgst, 2),
+            "igstValue" => round($totalIgst, 2),
+            "cessValue" => 0,
+            "totInvValue" => round((float)$invoice->total_ammount + $totalCgst + $totalSgst + $totalIgst, 2),
+            "transMode" => $request->transMode,
+            "transDistance" => $request->transDistance,
+            "transporterName" => $request->transporterName ?? "",
+            "transporterId" => $request->transporterId ?? "",
+            "transDocNo" => $request->transDocNo ?? "",
+            "transDocDate" => $request->transDocDate ?? "",
+            "vehicleNo" => $request->vehicleNo,
+            "vehicleType" => $request->vehicleType ?? "R",
+            "itemList" => $itemList
         ];
 
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json',
-            'Accept' => 'application/json',
-            'ip_address' => '66.249.75.99',
-            'client_id' => 'f596e958-7675-428f-b102-783fb191fabe',
-            'client_secret' => '37764526-c022-4116-b8d8-73ff4c3900b6',
-            'gstin' => '05AAACH6188F1ZM',
-        ])->post('https://api.mastergst.com/ewaybillapi/v1.03/ewayapi/genewaybill?email=kshivambaranwal%40gmail.com', $data);
+        try {
+            $config = config('gst_portal');
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+                'ip_address' => $config['ip_address'],
+                'client_id' => $config['client_id'],
+                'client_secret' => $config['client_secret'],
+                'gstin' => $invoice->Company->gstin,
+            ])->post($config['gst_base_url'] . '/ewayapi/v1.03/ewayapi/genewaybill?email=' . urlencode($config['email']), $data);
 
-        // Access response data
-        $responseData = $response->json();
+            $responseData = $response->json();
+
+            if (isset($responseData['status_cd']) && $responseData['status_cd'] == "1") {
+                // Store in EwayBill table
+                DB::transaction(function() use ($invoice, $responseData, $itemList) {
+                    $ewb = EwayBill::create([
+                        'status' => 'active',
+                        'doc_no' => $invoice->invoice_number,
+                        'doc_date' => $invoice->invoice_date,
+                        'ewb_eway_bill_no' => $responseData['data']['ewayBillNo'],
+                        'ewb_created_at' => date('Y-m-d H:i:s', strtotime(str_replace('/', '-', $responseData['data']['ewayBillDate']))),
+                        'json_data' => json_encode($responseData)
+                    ]);
+
+                    foreach ($itemList as $item) {
+                        EwayBillItem::create([
+                            'eway_bill_id' => $ewb->id,
+                            'product_name' => $item['productName'],
+                            'hsn_code' => $item['hsnCode'],
+                            'quantity' => $item['quantity'],
+                            'qty_unit' => $item['qtyUnit'],
+                            'taxable_amount' => $item['taxableAmount'],
+                            'cgst_rate' => $item['cgstRate'],
+                            'sgst_rate' => $item['sgstRate'],
+                            'igst_rate' => $item['igstRate'],
+                        ]);
+                    }
+                });
+
+                return response()->json(['status' => 1, 'message' => 'E-Way Bill Generated Successfully: ' . $responseData['data']['ewayBillNo']]);
+            } else {
+                return response()->json(['status' => 0, 'message' => $responseData['error']['message'] ?? 'Failed to generate E-Way Bill'], 400);
+            }
+
+        } catch (Exception $e) {
+            return response()->json(['status' => 0, 'message' => 'Error: ' . $e->getMessage()], 500);
+        }
     }
 }

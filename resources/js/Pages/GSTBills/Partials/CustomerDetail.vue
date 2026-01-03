@@ -4,7 +4,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import TextInput from "@/Components/TextInput.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import { Link, useForm, usePage } from "@inertiajs/vue3";
-import { ref } from "vue";
+import { ref, watch, computed } from "vue";
 const currentDate = ref("");
 const showCard = ref(true);
 const updateCurrentDate = () => {
@@ -22,34 +22,53 @@ const props = defineProps({
     company: Number,
     company_name:String
 });
-const bill_data = props.billing_user_detail ?? "";
-const series_data = props.series?? "";
 const form = useForm({
-    invoice_no: series_data ?? "",
-    date: currentDate,
-    gst: bill_data.gst ?? "",
-    email: bill_data.email ?? "",
-    address: bill_data.address ?? "",
-    mobile: bill_data.mobile ?? "",
-    customer_name: bill_data.name ?? "",
+    invoice_no: props.series ?? "",
+    date: currentDate.value,
+    gst: props.billing_user_detail?.gst ?? "",
+    email: props.billing_user_detail?.email ?? "",
+    address: props.billing_user_detail?.address ?? "",
+    mobile: props.billing_user_detail?.mobile ?? "",
+    customer_name: props.billing_user_detail?.name ?? "",
     customer: props.customer ?? "",
     company: props.company ?? "",
 });
+
+// Watch for prop changes to update form
+watch(() => props.series, (val) => form.invoice_no = val);
+watch(() => props.company, (val) => form.company = val);
+watch(() => props.customer, (val) => form.customer = val);
+watch(() => props.billing_user_detail, (val) => {
+    if (val) {
+        form.gst = val.gst ?? "";
+        form.email = val.email ?? "";
+        form.address = val.address ?? "";
+        form.mobile = val.mobile ?? "";
+        form.customer_name = val.name ?? "";
+    } else {
+        // Clear fields if no customer selected
+        form.gst = "";
+        form.email = "";
+        form.address = "";
+        form.mobile = "";
+        form.customer_name = "";
+    }
+}, { deep: true });
 </script>
 <template>
     <section class="container-fluid">
         <div class="row">
-            <div class="mt-2 -mb-2 bg-purple-700 rounded-md position-relative">
+            <div class="mt-2 bg-purple-700 rounded-md position-relative py-2 px-3">
                 <h2
-                    class="font-medium text-center text-white uppercase font-weight-bolder"
+                    class="text-sm font-medium text-center text-white uppercase font-weight-bolder mb-0"
                 >
                {{ props.company_name ?? "Itrove Bills"}}
                 </h2>
                 <span
-                    class="text-white cursor-pointer top-2 right-2 position-absolute"
+                    class="text-white cursor-pointer top-2 right-3 position-absolute"
                     @click="toggleCard"
                 >
-                    <i class="fa-solid fa-bullseye"></i>
+                    <i class="fa-solid fa-bullseye fa-lg"></i>
                 </span>
             </div>
             <transition name="slide-fade">
@@ -86,8 +105,6 @@ const form = useForm({
                                     hidden
                                     class="block w-full mt-1"
                                     v-model="form.customer"
-                                    required
-                                    autofocus
                                 />
 
                                 <InputError
@@ -121,7 +138,6 @@ const form = useForm({
                                 <TextInput
                                     id="customer_name"
                                     type="text"
-                                    disabled
                                     class="block w-full mt-1"
                                     v-model="form.customer_name"
                                     required
@@ -140,7 +156,6 @@ const form = useForm({
                                     id="mobile"
                                     type="text"
                                     class="block w-full mt-1"
-                                    disabled
                                     v-model="form.mobile"
                                     required
                                     autofocus
@@ -158,7 +173,6 @@ const form = useForm({
                                     id="address"
                                     type="text"
                                     class="block w-full mt-1"
-                                    disabled
                                     v-model="form.address"
                                     required
                                     autofocus
@@ -175,7 +189,6 @@ const form = useForm({
                                 <TextInput
                                     id="email"
                                     type="text"
-                                    disabled
                                     class="block w-full mt-1"
                                     v-model="form.email"
                                     required
@@ -196,7 +209,6 @@ const form = useForm({
                                 <TextInput
                                     id="gst"
                                     type="text"
-                                    disabled
                                     class="block w-full mt-1"
                                     v-model="form.gst"
                                     required

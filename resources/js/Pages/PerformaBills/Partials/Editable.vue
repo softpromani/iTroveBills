@@ -1,16 +1,16 @@
 <template>
-    <div class="mt-5 bg-purple-700 rounded-md position-relative">
-        <h2 class="font-medium text-center text-white font-weight-bolder">
+    <div class="mt-5 bg-purple-700 rounded-md position-relative py-2 px-3">
+        <h2 class="text-sm font-medium text-center text-white font-weight-bolder mb-0">
             INVOICE
         </h2>
-        <span class="text-white cursor-pointer top-2 right-2 position-absolute" @click="toggleproductCard">
-            <i class="fa-solid fa-bullseye"></i>
+        <span class="text-white cursor-pointer top-2 right-3 position-absolute" @click="toggleproductCard">
+            <i class="fa-solid fa-bullseye fa-lg"></i>
         </span>
     </div>
 
     <transition name="slide-fade">
         <div v-if="showproductCard">
-            <div class="-mt-4 rounded-lg shadow table-responsive">
+            <div class="rounded-lg shadow table-responsive">
                 <table class="table table-bordered">
                     <thead class="table-dark">
                         <tr>
@@ -273,14 +273,29 @@ const submitForm = () => {
     const customer = document.getElementById("customer")?.value || "";
     const company = document.getElementById("company")?.value || "";
     const vehical_no = document.getElementById("vehical_no")?.value || "";
+    const delivery_in_days = document.getElementById("delivery_in_days")?.value || "";
+
+    // Fields for potential new customer creation
+    const customer_name = document.getElementById("customer_name")?.value || "";
+    const mobile = document.getElementById("mobile")?.value || "";
+    const address = document.getElementById("address")?.value || "";
+    const email = document.getElementById("email")?.value || "";
+    const gst = document.getElementById("gst")?.value || "";
 
     invoicedetails.value[0] = {
         invoice: invoiceNoValue,
         customer: customer,
         company: company,
         vehical_no: vehical_no,
+        delivery_in_days: delivery_in_days,
         totalWeight: calculateTotalWeight(),
         totalTaxableValue: calculateTotalTaxableValue(),
+        // Pass manual details for new customer creation
+        customer_name: customer_name,
+        mobile: mobile,
+        address: address,
+        email: email,
+        gst: gst
     };
 
     form.post(

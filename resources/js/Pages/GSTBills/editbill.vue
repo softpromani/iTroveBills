@@ -2,12 +2,12 @@
     <Head title="Company" />
     <AuthenticatedLayout>
         <section class="container-fluid">
-            <div class="mt-2 -mb-2 bg-purple-700 rounded-md position-relative">
-                <h2 class="font-medium text-center text-white uppercase font-weight-bolder">
+            <div class="mt-2 bg-purple-700 rounded-md position-relative py-2 px-3">
+                <h2 class="text-sm font-medium text-center text-white uppercase font-weight-bolder mb-0">
                     ITrove Bills
                 </h2>
-                <span class="text-white cursor-pointer top-2 right-2 position-absolute" @click="toggleCard">
-                    <i class="fa-solid fa-bullseye"></i>
+                <span class="text-white cursor-pointer top-2 right-3 position-absolute" @click="toggleCard">
+                    <i class="fa-solid fa-bullseye fa-lg"></i>
                 </span>
             </div>
             <transition name="slide-fade">

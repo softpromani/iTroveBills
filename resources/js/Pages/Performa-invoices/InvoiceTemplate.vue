@@ -243,6 +243,11 @@
 
         </div>
         <div class="row">
+           <div class="pl-2 border-b border-l border-r border-black border-solid col-12">
+               Note : We will deliver the specific items in {{ props.invoice.delivery_in_days ?? "..." }} days
+           </div>
+        </div>
+        <div class="row">
             <div class="col-6 col-md-3 col-lg-2" v-for="(image,index) in props.invoice?.company?.brand_banner" :key="index">
                 <div class="brand-image-container">
                     <img :src="`/${image}`" alt="Brand Banner" class="img-fluid" style="height:80px;width:230px" />
