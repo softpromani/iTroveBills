@@ -74,7 +74,7 @@
                         <div class="font-weight-bold details-title">{{ props.invoice.customer.company_name }}</div>
                         <div class="address-box details-text">
                             {{ props.invoice.customer.address }}<br>
-                            ID/TPIN/TIN NO: <strong>{{ props.invoice.customer.gstin ?? "No ID/TPIN/TIN NO" }}</strong><br>
+                            GST/TPIN/TIN NO: <strong>{{ props.invoice.customer.gstin ?? "No ID/TPIN/TIN NO" }}</strong><br>
                             State Name: {{ getStateName(props.invoice.customer.gstin) }}, Code: {{ props.invoice.customer.gstin?.substring(0, 2) }}<br/>
                             Phone: <strong>{{ props.invoice.customer.mobile }}</strong>
                         </div>
