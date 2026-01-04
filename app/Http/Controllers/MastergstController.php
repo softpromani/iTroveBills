@@ -114,21 +114,37 @@ class MastergstController extends Controller
         }
 
         $fromGstin = $invoice->Company->gstin;
-        $toGstin = $invoice->Customer->gstin;
+        $toGstin = strtoupper(trim($invoice->Customer->gstin));
 
-        // Strict GSTIN Validation before proceeding
+        // Strict GSTIN Validation for Seller
         if (strlen($fromGstin) !== 15) {
-            return response()->json(['status' => 0, 'message' => "Invalid Seller GSTIN ($fromGstin). A valid GSTIN must be exactly 15 characters. Dummy data like 'HGH767' will be rejected by the government portal."], 400);
+            return response()->json(['status' => 0, 'message' => "Invalid Seller GSTIN ($fromGstin). A valid GSTIN must be exactly 15 characters."], 400);
         }
-        if (strlen($toGstin) !== 15) {
-            return response()->json(['status' => 0, 'message' => "Invalid Buyer GSTIN ($toGstin). A valid GSTIN must be exactly 15 characters or 'URP' for unregistered consumers."], 400);
+
+        // Relaxed Validation for Buyer (Allow URP)
+        if (strlen($toGstin) !== 15 && $toGstin !== 'URP') {
+            // Log for debugging but proceed as URP
+            Log::info("Treating non-standard Buyer ID '$toGstin' as URP for Invoice #{$invoice->invoice_number}");
+            $toGstin = 'URP';
         }
 
         $fromStateCode = (int)substr($fromGstin, 0, 2);
-        $toStateCode = (int)substr($toGstin, 0, 2);
+        
+        // Derive ToStateCode from GSTIN if 15 chars, otherwise from Pincode
+        if (strlen($toGstin) === 15) {
+            $toStateCode = (int)substr($toGstin, 0, 2);
+        } else {
+            // Fallback: Derive from Pincode (first 2 digits)
+            $toPincode = preg_replace('/[^0-9]/', '', $request->toPincode ?: $invoice->Customer->pin);
+            $toStateCode = $this->deriveStateCodeFromPincode($toPincode);
+            
+            if (!$toStateCode) {
+                 return response()->json(['status' => 0, 'message' => "Could not determine State Code for Unregistered Buyer. Please ensure a valid 6-digit Pincode is provided."], 400);
+            }
+        }
         
         if ($fromStateCode === 0 || $toStateCode === 0) {
-            return response()->json(['status' => 0, 'message' => "Invalid State Code derived from GSTIN. The first 2 digits of the GSTIN must be a valid state code (01-37)."], 400);
+            return response()->json(['status' => 0, 'message' => "Invalid State Code ($fromStateCode -> $toStateCode). Please check Seller GSTIN and Buyer Pincode."], 400);
         }
 
         $isInterState = ($fromStateCode !== $toStateCode);
@@ -339,5 +355,51 @@ class MastergstController extends Controller
             Log::error('MasterGST exception:', ['message' => $e->getMessage()]);
             return response()->json(['status' => 0, 'message' => 'Error: ' . $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * Helper to map Indian Pincode prefixes to GST State Codes
+     * This is a simplified mapping covering major states.
+     */
+    private function deriveStateCodeFromPincode($pincode) 
+    {
+        if (strlen($pincode) < 2) return null;
+        $p = (int)substr($pincode, 0, 2);
+        $pp = (int)substr($pincode, 0, 3);
+
+        // General mapping based on first 2/3 digits
+        if ($p == 11) return 7; // Delhi
+        if ($p >= 12 && $p <= 13) return 6; // Haryana
+        if ($p >= 14 && $p <= 16) return 3; // Punjab
+        if ($pp == 160) return 4; // Chandigarh
+        if ($p == 17) return 2; // HP
+        if ($p >= 18 && $p <= 19) return 1; // J&K
+        if ($p >= 20 && $p <= 28) return 9; // UP
+        if ($p >= 30 && $p <= 34) return 8; // Rajasthan
+        if ($p >= 36 && $p <= 39) return 24; // Gujarat
+        if ($p >= 40 && $p <= 44) return 27; // Maharashtra
+        if ($pp == 403) return 30; // Goa
+        if ($p >= 45 && $p <= 48) return 23; // MP
+        if ($p == 49) return 22; // Chhattisgarh
+        if ($p >= 50 && $p <= 53) {
+            if ($p == 50) return 36; // Telangana
+            return 37; // AP
+        }
+        if ($p >= 56 && $p <= 59) return 29; // Karnataka
+        if ($p >= 60 && $p <= 64) return 33; // TN
+        if ($p >= 67 && $p <= 69) return 32; // Kerala
+        if ($p >= 70 && $p <= 74) return 19; // West Bengal
+        if ($pp == 737) return 11; // Sikkim
+        if ($pp == 744) return 35; // A&N
+        if ($p >= 75 && $p <= 77) return 21; // Odisha
+        if ($p >= 78 && $p <= 79) return 18; // Assam
+        if ($pp >= 790 && $pp <= 792) return 12; // Arunachal
+        if ($pp == 793 || $pp == 794) return 17; // Meghalaya
+        if ($pp == 795 || $pp == 796) return 14; // Manipur
+        if ($pp == 799) return 16; // Tripura
+        if ($p >= 80 && $p <= 85) return 10; // Bihar
+        if ($p >= 81 && $p <= 83) return 20; // Jharkhand
+
+        return null;
     }
 }

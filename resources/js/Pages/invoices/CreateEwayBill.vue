@@ -32,7 +32,14 @@
                             <div class="mb-3">
                                 <label class="text-muted small d-block mb-1">Buyer</label>
                                 <div class="font-weight-bold">{{ invoice.customer?.company_name }}</div>
-                                <div class="small text-muted">{{ invoice.customer?.gstin }}</div>
+                                <div class="small d-flex align-items-center">
+                                    <span :class="isGstinValid(invoice.customer?.gstin) ? 'text-muted' : 'text-danger font-weight-bold'">
+                                        {{ invoice.customer?.gstin || 'No GSTIN' }}
+                                    </span>
+                                    <span v-if="!isGstinValid(invoice.customer?.gstin)" class="ml-2 badge badge-danger" style="font-size: 10px;" title="This GSTIN is invalid and will be treated as Unregistered Person (URP)">
+                                        <i class="fa fa-info-circle mr-1"></i> Treated as URP
+                                    </span>
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label class="text-muted small d-block mb-1">Total Amount</label>
@@ -259,6 +266,11 @@ const submit = () => {
 const formatDate = (date) => {
     if (!date) return '';
     return new Date(date).toLocaleDateString('en-IN');
+};
+
+const isGstinValid = (gstin) => {
+    if (!gstin) return false;
+    return gstin.trim().length === 15;
 };
 
 const formatAmount = (amount) => {

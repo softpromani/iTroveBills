@@ -27,7 +27,9 @@
                 <!-- Seller Details (Left) -->
                 <div class="col-6 border-right border-dark p-2 min-vh-15">
                     <div class="d-flex align-items-start mb-2">
-                        <img v-if="props.invoice.company.logo" :src="props.invoice.company.logo" class="seller-logo mr-3" alt="Logo" />
+                        <div v-if="data.company.logo" class="logo-container mr-3">
+                            <img :src="`/${data.company.logo}`" class="seller-logo" alt="Logo" />
+                        </div>
                         <div>
                             <h5 class="company-name mb-1 font-weight-bold">{{ props.invoice.company.company_name }}</h5>
                             <div class="small address-box">
@@ -378,8 +380,9 @@ onMounted(() => {
 .invoice-wrapper { background-color: #f0f2f5; min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 .invoice-container { max-width: 850px; color: #000; font-size: 13px; }
 .border-2 { border-width: 2px !important; }
-.company-name { font-size: 1.25rem; text-transform: uppercase; color: #1a1a1a; }
-.seller-logo { width: 70px; height: auto; object-fit: contain; }
+.company-name { font-size: 1.15rem; text-transform: uppercase; color: #1a1a1a; line-height: 1.2; }
+.logo-container { width: 70px; flex-shrink: 0; display: flex; align-items: start; justify-content: center; }
+.seller-logo { max-width: 100%; max-height: 70px; height: auto; object-fit: contain; }
 .meta-label { font-size: 0.65rem; color: #444; text-transform: uppercase; margin-bottom: 0px; font-weight: 600; }
 .meta-value { font-size: 0.85rem; }
 .min-vh-12 { min-height: 100px; }
