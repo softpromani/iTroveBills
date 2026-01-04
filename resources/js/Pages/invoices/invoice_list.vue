@@ -219,7 +219,7 @@
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link class="dropdown-item" :href="route('create.eway.bill')" method="get" :data="{ invoice_id: invoice.id }">
+                                            <Link class="dropdown-item" :href="route('create.eway.bill')" method="get" :data="{ invoice_id: invoice.id, type: 'regular' }">
                                                 <i class="fa fa-envelope-square" aria-hidden="true" style="color: rgb(245, 180, 0);"></i>
                                                 Generate E-Way Bill
                                             </Link>

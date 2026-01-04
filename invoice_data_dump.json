@@ -1,0 +1,74 @@
+{
+    "invoice_items_columns": [
+        "id",
+        "invoice_id",
+        "desc_product",
+        "hsn_code",
+        "unit",
+        "quantity",
+        "weight",
+        "rate",
+        "created_at",
+        "updated_at"
+    ],
+    "invoices_columns": [
+        "id",
+        "invoice_number",
+        "invoice_date",
+        "total_ammount",
+        "paid_ammount",
+        "payment_status",
+        "total_weight",
+        "vehicle_no",
+        "no_packets",
+        "customer_company_id",
+        "company_id",
+        "lut_id",
+        "bill_data",
+        "created_at",
+        "updated_at"
+    ],
+    "invoice_7": {
+        "id": 7,
+        "invoice_number": "ITROVE-25-26\/00036",
+        "invoice_date": "2026-01-02",
+        "total_ammount": "1736.00",
+        "paid_ammount": "0.00",
+        "payment_status": 15,
+        "total_weight": "1024.00",
+        "vehicle_no": "GD5645dfg",
+        "no_packets": null,
+        "customer_company_id": 3,
+        "company_id": 1,
+        "lut_id": "3",
+        "bill_data": null,
+        "created_at": "2026-01-02T18:47:00.000000Z",
+        "updated_at": "2026-01-03T05:39:57.000000Z",
+        "invoiceitems": [
+            {
+                "id": 24,
+                "invoice_id": 7,
+                "desc_product": "sdf",
+                "hsn_code": "01051900",
+                "unit": "4",
+                "quantity": 4,
+                "weight": "44.00",
+                "rate": "434.00",
+                "created_at": "2026-01-03T05:39:57.000000Z",
+                "updated_at": "2026-01-03T05:39:57.000000Z"
+            },
+            {
+                "id": 25,
+                "invoice_id": 7,
+                "desc_product": "gh",
+                "hsn_code": "020890",
+                "unit": "hj",
+                "quantity": 8,
+                "weight": "980.00",
+                "rate": "0.00",
+                "created_at": "2026-01-03T05:39:57.000000Z",
+                "updated_at": "2026-01-03T05:39:57.000000Z"
+            }
+        ]
+    }
+}

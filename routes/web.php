@@ -7,6 +7,7 @@ use App\Http\Controllers\GSTInvoiceController;
 use App\Http\Controllers\HsnSacMasterController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\MastergstController;
+use App\Http\Controllers\MasterGstConfigController;
 use App\Http\Controllers\PaymentRequestController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
@@ -141,6 +142,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/edit-customer', [CustomerController::class, 'edit_customer'])->name('company.customer.edit');
     Route::post('/update-customer/{id}', [CustomerController::class, 'update_customer'])->name('company.customer.update');
     Route::get('search-customer/{searchdata}',[CustomerController::class,'search_seller_customer'])->name('search.seller.customer');
+    
+    Route::get('/master-gst-settings', [MasterGstConfigController::class, 'index'])->name('mastergst.settings.index');
+    Route::post('/master-gst-settings', [MasterGstConfigController::class, 'store'])->name('mastergst.settings.store');
+
     Route::get('customer-bill',[CustomerBillController::class,'index'])->name('customer.bill');
     Route::get('customer-bill-edit',[CustomerBillController::class,'edit'])->name('customer.bill.edit');
     Route::post('customer-bill-update',[CustomerBillController::class,'update'])->name('customer.bill.update');

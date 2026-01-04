@@ -104,7 +104,19 @@
                                                         color: rgb(245, 180, 0);
                                                     "
                                                 ></i>
-                                                Mail</Link
+                                                Generate E-Way Bill</Link
+                                            >
+                                        </li>
+                                        <li>
+                                            <Link class="dropdown-item"
+                                            :href="route('create.eway.bill')"
+                                                method="get"
+                                                :data="{ invoice_id: invoice.id, type: linkType }"
+                                                ><i
+                                                    class="fa fa-truck text-primary"
+                                                    aria-hidden="true"
+                                                ></i>
+                                                Generate E-Way Bill</Link
                                             >
                                         </li>
                                     </ul>
@@ -172,6 +184,7 @@ import Swal from 'sweetalert2';
 const props = defineProps({
   invoices: Object,
 });
+const linkType = 'gst';
 const form = useForm({});
 
 // Reactive variables for modal and form fields

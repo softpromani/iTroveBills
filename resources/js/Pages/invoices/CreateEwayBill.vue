@@ -13,7 +13,12 @@
                             <h5 class="text-secondary mb-4 border-bottom pb-2">Invoice Details</h5>
                             <div class="mb-3">
                                 <label class="text-muted small d-block mb-1">Invoice Number</label>
-                                <div class="font-weight-bold">{{ invoice.invoice_number }}</div>
+                                <div class="font-weight-bold d-flex align-items-center">
+                                    {{ invoice.invoice_number }}
+                                    <span v-if="invoice.invoice_number.length > 16" class="ml-2 badge badge-warning" style="font-size: 10px;" title="NIC portal allows max 16 chars. This will be automatically shortened.">
+                                        <i class="fa fa-exclamation-triangle"></i> >16 Chars
+                                    </span>
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label class="text-muted small d-block mb-1">Invoice Date</label>
@@ -62,6 +67,19 @@
                             <form @submit.prevent="submit">
                                 <h5 class="text-secondary mb-4 border-bottom pb-2">Transport & Supply Details</h5>
                                 
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="font-weight-bold">From Pincode (Seller)</label>
+                                        <input type="text" v-model="form.fromPincode" class="form-control" placeholder="6-digit Pincode" maxlength="6" required />
+                                        <InputError :message="form.errors.fromPincode" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="font-weight-bold">To Pincode (Buyer)</label>
+                                        <input type="text" v-model="form.toPincode" class="form-control" placeholder="6-digit Pincode" maxlength="6" required />
+                                        <InputError :message="form.errors.toPincode" />
+                                    </div>
+                                </div>
+
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="font-weight-bold">Supply Type</label>
@@ -174,6 +192,8 @@ const form = useForm({
     supplyType: 'O',
     subSupplyType: '1',
     subSupplyDesc: '',
+    fromPincode: props.invoice.company?.pin || '',
+    toPincode: props.invoice.customer?.pin || '',
     transMode: '1',
     transDistance: '',
     vehicleNo: props.invoice.vehicle_no || '',
@@ -182,10 +202,20 @@ const form = useForm({
     transporterId: '',
     transDocNo: '',
     transDocDate: '',
-    transactionType: 1
+    transactionType: 1,
+    invoice_type: props.invoice_type
 });
 
 const submit = () => {
+    if (form.transDistance > 4000) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Distance',
+            text: 'Distance cannot exceed 4000 KM for a single E-Way Bill.'
+        });
+        return;
+    }
+
     Swal.fire({
         title: 'Generating E-Way Bill...',
         text: 'Please wait while we connect to the portal',
@@ -212,10 +242,12 @@ const submit = () => {
         .catch(error => {
             Swal.close();
             const message = error.response?.data?.message || 'Something went wrong while generating the E-Way Bill';
+            const details = error.response?.data?.details?.error?.message || '';
+            
             Swal.fire({
                 icon: 'error',
                 title: 'Generation Failed',
-                text: message
+                html: `<div>${message}</div>${details ? `<div class="mt-2 small text-danger"><b>API Detail:</b> ${details}</div>` : ''}`
             });
             
             if (error.response?.data?.errors) {
