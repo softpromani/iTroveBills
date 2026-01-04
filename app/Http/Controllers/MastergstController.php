@@ -238,27 +238,27 @@ class MastergstController extends Controller
 
         $data = [
             "supplyType" => $request->supplyType,
-            "subSupplyType" => $request->subSupplyType,
-            "subSupplyDesc" => substr($request->subSupplyDesc ?? "", 0, 20),
+            "subSupplyType" => (int)$request->subSupplyType,
+            "subSupplyDesc" => $request->subSupplyType == "10" ? substr($request->subSupplyDesc ?? "Others", 0, 20) : "",
             "docType" => "INV",
             "docNo" => $docNo,
             "docDate" => date('d/m/Y', strtotime($invoice->invoice_date)),
             "fromGstin" => $fromGstin,
             "fromTrdName" => substr($invoice->Company->company_name, 0, 100),
-            "fromAddr1" => substr($invoice->Company->address, 0, 100),
+            "fromAddr1" => substr($invoice->Company->address ?? "Address", 0, 100),
             "fromAddr2" => "",
             "fromPlace" => substr($invoice->Company->city ?: "Default Place", 0, 50),
-            "actFromStateCode" => $fromStateCode,
-            "fromPincode" => (int)$fromPincode, // Send as int to NIC, but validate as string
-            "fromStateCode" => $fromStateCode,
+            "actFromStateCode" => (int)$fromStateCode,
+            "fromPincode" => (int)$fromPincode,
+            "fromStateCode" => (int)$fromStateCode,
             "toGstin" => $toGstin,
             "toTrdName" => substr($invoice->Customer->company_name, 0, 100),
-            "toAddr1" => substr($invoice->Customer->address, 0, 100),
+            "toAddr1" => substr($invoice->Customer->address ?? "Address", 0, 100),
             "toAddr2" => "",
             "toPlace" => substr($invoice->Customer->city ?: "Default Place", 0, 50),
-            "toPincode" => (int)$toPincode, // Send as int to NIC
-            "actToStateCode" => $toStateCode,
-            "toStateCode" => $toStateCode,
+            "toPincode" => (int)$toPincode,
+            "actToStateCode" => (int)$toStateCode,
+            "toStateCode" => (int)$toStateCode,
             "transactionType" => (int)($request->transactionType ?? 1),
             "totalValue" => round($calculatedTotalTaxableValue, 2),
             "cgstValue" => round($calculatedTotalCgst, 2),
@@ -267,7 +267,7 @@ class MastergstController extends Controller
             "cessValue" => 0,
             "totInvValue" => round($calculatedTotalTaxableValue + $calculatedTotalCgst + $calculatedTotalSgst + $calculatedTotalIgst, 2),
             "transMode" => (int)$request->transMode,
-            "transDistance" => $transDistance,
+            "transDistance" => (int)$transDistance,
             "transporterName" => substr($request->transporterName ?? "", 0, 100),
             "transporterId" => $transporterId,
             "transDocNo" => substr($request->transDocNo ?? "", 0, 15),
@@ -292,14 +292,7 @@ class MastergstController extends Controller
             $apiUrl = rtrim($config->gst_base_url, '/') . '/ewayapi/v1.03/ewayapi/genewaybill?email=' . urlencode($config->email);
             
             // Log the request for debugging
-            Log::info('MasterGST E-Way Bill Request:', [
-                'url' => $apiUrl,
-                'data' => $data,
-                'headers' => [
-                    'ip_address' => $config->ip_address,
-                    'gstin' => $config->gstin ?? $invoice->Company->gstin
-                ]
-            ]);
+            Log::error('DEBUG E-WAY BILL REQUEST PAYLOAD:', ['data' => $data]);
 
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
@@ -313,12 +306,12 @@ class MastergstController extends Controller
             $responseData = $response->json();
             
             // Log the response
-            Log::info('MasterGST E-Way Bill Response:', ['response' => $responseData]);
+            Log::error('DEBUG E-WAY BILL RESPONSE:', ['response' => $responseData]);
 
             if (isset($responseData['status_cd']) && $responseData['status_cd'] == "1") {
                 // ... same storage logic ...
                 DB::transaction(function() use ($invoice, $responseData, $itemList) {
-                    $ewb = EwayBill::create([
+                    $ewb = \App\Models\EwayBill::create([
                         'status' => 'active',
                         'doc_no' => $invoice->invoice_number,
                         'doc_date' => $invoice->invoice_date,
@@ -328,7 +321,7 @@ class MastergstController extends Controller
                     ]);
 
                     foreach ($itemList as $item) {
-                        EwayBillItem::create([
+                        \App\Models\EwayBillItem::create([
                             'eway_bill_id' => $ewb->id,
                             'product_name' => $item['productName'],
                             'hsn_code' => $item['hsnCode'],
@@ -347,12 +340,12 @@ class MastergstController extends Controller
                 return response()->json([
                     'status' => 0, 
                     'message' => $responseData['error']['message'] ?? 'Failed to generate E-Way Bill',
-                    'details' => $responseData // Include details for the user to see if possible
+                    'details' => $responseData 
                 ], 400);
             }
 
-        } catch (Exception $e) {
-            Log::error('MasterGST exception:', ['message' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            Log::error('MasterGST exception:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json(['status' => 0, 'message' => 'Error: ' . $e->getMessage()], 500);
         }
     }
@@ -364,7 +357,8 @@ class MastergstController extends Controller
     private function deriveStateCodeFromPincode($pincode) 
     {
         if (strlen($pincode) < 2) return null;
-        $p = (int)substr($pincode, 0, 2);
+        $prefix = substr($pincode, 0, 2);
+        $p = (int)$prefix;
         $pp = (int)substr($pincode, 0, 3);
 
         // General mapping based on first 2/3 digits

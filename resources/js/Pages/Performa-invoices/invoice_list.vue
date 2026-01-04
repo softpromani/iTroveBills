@@ -92,33 +92,6 @@
                                                 Print</Link
                                             >
                                         </li>
-                                        <li>
-                                            <Link class="dropdown-item"
-                                            :href="route('performa.bill.sendmail')"
-                                                method="post"
-                                                :data="{ invoice_id: invoice.id }"
-                                                ><i
-                                                    class="fa fa-envelope-square"
-                                                    aria-hidden="true"
-                                                    style="
-                                                        color: rgb(245, 180, 0);
-                                                    "
-                                                ></i>
-                                                Generate E-Way Bill</Link
-                                            >
-                                        </li>
-                                        <li>
-                                            <Link class="dropdown-item"
-                                            :href="route('create.eway.bill')"
-                                                method="get"
-                                                :data="{ invoice_id: invoice.id, type: linkType }"
-                                                ><i
-                                                    class="fa fa-truck text-primary"
-                                                    aria-hidden="true"
-                                                ></i>
-                                                Generate E-Way Bill</Link
-                                            >
-                                        </li>
                                     </ul>
                                 </div>
                             </td>
