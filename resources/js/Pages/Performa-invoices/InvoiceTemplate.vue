@@ -69,24 +69,14 @@
             <div class="row no-gutters border-bottom border-dark">
                 <!-- Consignee / Buyer Details (Left) -->
                 <div class="col-6 border-right border-dark">
-                    <div class="p-2 border-bottom border-dark min-vh-12 border-print">
-                        <label class="meta-label">Consignee (Ship to)</label>
-                        <div class="font-weight-bold details-title">{{ props.invoice.customer.company_name }}</div>
-                        <div class="address-box details-text">
-                            {{ props.invoice.customer.address }}<br>
-                            ID/TPIN/TIN NO: <strong>{{ props.invoice.customer.gstin ?? "No ID/TPIN/TIN NO" }}</strong><br>
-                            Phone: <strong>{{ props.invoice.customer.mobile }}</strong><br>
-                            State Name: {{ getStateName(props.invoice.customer.gstin) }}, Code: {{ props.invoice.customer.gstin?.substring(0, 2) }}
-                        </div>
-                    </div>
                     <div class="p-2 min-vh-12">
-                        <label class="meta-label">Buyer (Bill to)</label>
+                        <label class="meta-label">Buyer (Bill & Ship to)</label>
                         <div class="font-weight-bold details-title">{{ props.invoice.customer.company_name }}</div>
                         <div class="address-box details-text">
                             {{ props.invoice.customer.address }}<br>
                             ID/TPIN/TIN NO: <strong>{{ props.invoice.customer.gstin ?? "No ID/TPIN/TIN NO" }}</strong><br>
-                            Phone: <strong>{{ props.invoice.customer.mobile }}</strong><br>
-                            State Name: {{ getStateName(props.invoice.customer.gstin) }}, Code: {{ props.invoice.customer.gstin?.substring(0, 2) }}
+                            State Name: {{ getStateName(props.invoice.customer.gstin) }}, Code: {{ props.invoice.customer.gstin?.substring(0, 2) }}<br/>
+                            Phone: <strong>{{ props.invoice.customer.mobile }}</strong>
                         </div>
                     </div>
                 </div>
@@ -194,7 +184,7 @@
                          <div class="col-12 font-weight-bold mb-1 border-bottom border-dark border-dotted pb-1">Company's Bank Details</div>
                             <div class="col-4">Bank Name</div><div class="col-8">: <strong>{{ props.invoice.company.bank_name || '-' }}</strong></div>
                             <div class="col-4">A/c No.</div><div class="col-8">: <strong>{{ props.invoice.company.bank_account_no || '-' }}</strong></div>
-                            <div class="col-4">Branch & IFSC Code</div><div class="col-8">: {{ props.invoice.company.branch_name || 'Main' }} & <strong>{{ props.invoice.company.bank_ifsc || '-' }}</strong></div>
+                            <div class="col-4">Branch & IFSC Code</div><div class="col-8">: {{ props.invoice.company.bank_branch || 'Main' }} & <strong>{{ props.invoice.company.bank_ifsc || '-' }}</strong></div>
                     </div>
                     <div class="mb-1 text-danger">Note: We will deliver the specific items in <strong>{{ props.invoice.delivery_in_days || "..." }}</strong> days.</div>
                     <div class="mb-1"><u>Declaration:</u></div>
