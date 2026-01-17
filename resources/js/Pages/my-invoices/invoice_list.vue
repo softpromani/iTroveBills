@@ -35,7 +35,6 @@
                             <th class="col-1">Total Amount</th>
                             <th class="col-1">Paid Amount</th>
                             <th class="col-2">Payment Status</th>
-                            <th class="col-1">Company</th>
                             <th class="col-1">Action</th>
                         </tr>
                     </thead>
@@ -61,7 +60,7 @@
                                   {{ invoice.payment.status }}
                                 </span>
                             </td>
-                            <td>{{ invoice.company.company_name ?? "" }}</td>
+
                             <td>
                                 <div class="dropdown">
                                     <span

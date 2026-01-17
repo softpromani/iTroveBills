@@ -21,7 +21,20 @@ class PerformaInvoice extends Model
             $invoice->invoiceitems()->delete();
         });
 
-      
+        static::created(function($invoice) {
+            $invoice->payment()->create(['total_amount' => $invoice->total_ammount]);
+        });
+
+        static::updated(function($invoice) {
+            $attributes = ['paymentable_id' => $invoice->id, 'paymentable_type' => get_class($invoice)];
+            $values = ['total_amount' => $invoice->total_ammount];
+            $invoice->payment()->updateOrCreate($attributes, $values);
+        });
+    }
+
+    public function payment()
+    {
+        return $this->morphOne(Payment::class, 'paymentable');
     }
     public function Company()
     {

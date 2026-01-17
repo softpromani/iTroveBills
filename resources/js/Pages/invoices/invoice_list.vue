@@ -159,13 +159,12 @@
                             <th class="col-1">Vehicle No</th>
                             <th class="col-1">No. Packets</th>
                             <th class="col-1">Customer</th>
-                            <th class="col-1">Company</th>
                             <th class="col-1">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-if="!invoiceList || invoiceList.length === 0">
-                            <td colspan="11" class="text-center py-4">
+                            <td colspan="10" class="text-center py-4">
                                 <div class="text-gray-500">
                                     <i class="fa fa-inbox fa-3x mb-3"></i>
                                     <p>No invoices found matching your criteria</p>
@@ -193,7 +192,7 @@
                             <td>{{ invoice.vehicle_no || "N/A" }}</td>
                             <td>{{ invoice.no_packets || "NO PACK" }}</td>
                             <td>{{invoice.customer.company_name || "N/A" }}</td>
-                            <td>{{ invoice.company?.company_name || "N?A" }}</td>
+
                             <td>
                                 <div class="dropdown">
                                     <span class="p-2" style="font-size: 15px; cursor: pointer" data-bs-toggle="dropdown" aria-expanded="false">
@@ -285,6 +284,10 @@
                                 <label for="vehicle_no">Vehicle Number</label>
                                 <input type="text" class="form-control" id="vehicle_no" v-model="vehicle_no" required>
                             </div>
+                            <div class="form-group mb-3">
+                                <label for="dispatched_through">Dispatched Through</label>
+                                <input type="text" class="form-control" id="dispatched_through" v-model="dispatched_through">
+                            </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" @click="closeModal">Close</button>
                                 <button type="submit" class="btn btn-primary">Save changes</button>
@@ -301,7 +304,7 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Pay Bill</h5>
+                        <h5 class="modal-title">Pay Bill - {{ invoiceNumber }}</h5>
                         <button type="button" class="close" @click="closePayBillModal">
                             <span>&times;</span>
                         </button>
@@ -387,7 +390,9 @@ const showModal = ref(false);
 const PayBillModal = ref(false);
 const no_packets = ref('');
 const vehicle_no = ref('');
+const dispatched_through = ref('');
 const invoiceId = ref(null);
+const invoiceNumber = ref('');
 const reference_no = ref('');
 const payment_method_id = ref('');
 const amount = ref('');
@@ -523,12 +528,14 @@ const formatAmount = (amount) => {
 const openModal = (id) => {
     showModal.value = true;
     invoiceId.value = id;
+    const type = 'regular';
 
-    axios.get(`/api/fetch-invoice/${id}`)
+    axios.get(`/api/fetch-invoice/${id}/${type}`)
         .then(response => {
             const invoiceData = response.data;
             no_packets.value = invoiceData.no_packets || '';
             vehicle_no.value = invoiceData.vehicle_no || '';
+            dispatched_through.value = invoiceData.dispatched_through || '';
         })
         .catch(error => {
             console.error('Error fetching invoice:', error);
@@ -545,6 +552,7 @@ const closeModal = () => {
     showModal.value = false;
     no_packets.value = '';
     vehicle_no.value = '';
+    dispatched_through.value = '';
     invoiceId.value = null;
 };
 
@@ -552,7 +560,9 @@ const submitForm = () => {
     axios.post(`/api/update-invoice-package`, {
         no_packets: no_packets.value,
         vehicle_no: vehicle_no.value,
-        invoice_id: invoiceId.value
+        dispatched_through: dispatched_through.value,
+        invoice_id: invoiceId.value,
+        type: 'regular'
     })
     .then(response => {
         Swal.fire({
@@ -579,6 +589,12 @@ const submitForm = () => {
 const openPayBillModal = (id) => {
     PayBillModal.value = true;
     invoiceId.value = id;
+    const type = 'regular';
+
+    axios.get(`/api/fetch-invoice/${id}/${type}`)
+        .then(response => {
+            invoiceNumber.value = response.data.invoice_number;
+        });
 
     axios.get(`/api/fetch-payment-types`)
         .then(response => {
@@ -597,6 +613,7 @@ const openPayBillModal = (id) => {
 
 const closePayBillModal = () => {
     PayBillModal.value = false;
+    invoiceNumber.value = '';
     payment_method_id.value = '';
     reference_no.value = '';
     amount.value = '';
@@ -610,7 +627,8 @@ const submitPayBillForm = () => {
         reference_no: reference_no.value,
         amount: amount.value,
         remark: remark.value,
-        invoice_id: invoiceId.value
+        invoice_id: invoiceId.value,
+        type: 'regular'
     })
     .then(response => {
         if(response.data.status == 1) {

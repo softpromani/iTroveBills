@@ -106,7 +106,7 @@
                     <div class="row no-gutters border-dark h-25">
                         <div class="col-6 border-right border-dark p-2">
                             <label class="meta-label">Dispatched through</label>
-                            <div class="meta-value">Yes</div>
+                            <div class="meta-value">{{ props.invoice.dispatched_through || "-" }}</div>
                         </div>
                         <div class="col-6 p-2">
                             <label class="meta-label">Vehicle No.</label>

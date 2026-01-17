@@ -8,27 +8,40 @@ use Illuminate\Http\Request;
 
 class InvoiceController extends Controller
 {
-    function fetchInvoice($invoice_id)
+    function fetchInvoice($invoice_id, $type = 'regular')
     {
-        $data = Invoice::find($invoice_id);
-        if($data)
-        {
-            return $data;
+        if ($type === 'gst') {
+            $data = \App\Models\GSTInvoice::find($invoice_id);
+        } elseif ($type === 'proforma') {
+            $data = \App\Models\PerformaInvoice::find($invoice_id);
+        } else {
+            $data = Invoice::find($invoice_id);
         }
-        else
-        {
-            return Null;
-        }
+
+        return $data;
     }
 
     function updateInvoicePackage(Request $request)
     {
-        $data = Invoice::find($request->invoice_id);
+        $invoice_id = $request->invoice_id;
+        $type = $request->type ?? 'regular';
+
+        if ($type === 'gst') {
+            $model = \App\Models\GSTInvoice::class;
+        } elseif ($type === 'proforma') {
+            $model = \App\Models\PerformaInvoice::class;
+        } else {
+            $model = Invoice::class;
+        }
+
+        $data = $model::find($invoice_id);
+
         if($data)
         {
-            $update = Invoice::where('id', $request->invoice_id)->update([
+            $model::where('id', $invoice_id)->update([
                 'vehicle_no' => $request->vehicle_no,
-                'no_packets' => $request->no_packets
+                'no_packets' => $request->no_packets,
+                'dispatched_through' => $request->dispatched_through
             ]);
 
             return response()->json(['status' => 1]);

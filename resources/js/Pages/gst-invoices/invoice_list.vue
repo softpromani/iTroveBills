@@ -36,7 +36,6 @@
                             <th class="col-1">Vehicle No</th>
                             <th class="col-1">No. Packets</th>
                             <th class="col-1">Customer</th>
-                            <th class="col-1">Company</th>
                             <th class="col-1">Action</th>
                         </tr>
                     </thead>
@@ -52,7 +51,7 @@
                             <td>{{ invoice.vehicle_no ?? "" }}</td>
                             <td>{{ invoice.no_packets ?? "NO PACK" }}</td>
                             <td>{{ invoice.customer.company_name ?? "" }}</td>
-                            <td>{{ invoice.company.company_name ?? "" }}</td>
+
                             <td>
                                 <div class="dropdown">
                                     <span
@@ -92,6 +91,24 @@
                                                 Print</Link
                                             >
                                         </li>
+                                        <li>
+                                            <Link class="dropdown-item" :href="route('gst.bill.sendmail')" method="post" :data="{ invoice_id: invoice.id }">
+                                                <i class="fa fa-envelope-square" aria-hidden="true" style="color: rgb(245, 180, 0);"></i>
+                                                Mail
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <a @click.prevent="openModal(invoice.id)" class="dropdown-item" href="#">
+                                              <i class="fa fa-car" aria-hidden="true" style="color: rgb(245, 180, 0);"></i>
+                                              Package Update
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a @click.prevent="openPayBillModal(invoice.id)" class="dropdown-item" href="#">
+                                              <i class="fa fa-inr" aria-hidden="true" style="color: rgb(245, 180, 0);"></i>
+                                              Pay Bill
+                                            </a>
+                                        </li>
                                     </ul>
                                 </div>
                             </td>
@@ -126,6 +143,10 @@
                     <label for="vehicle_no">Vehicle Number</label>
                     <input type="text" class="form-control" id="vehicle_no" v-model="vehicle_no" required>
                 </div>
+                <div class="form-group mb-3">
+                    <label for="dispatched_through">Dispatched Through</label>
+                    <input type="text" class="form-control" id="dispatched_through" v-model="dispatched_through">
+                </div>
                 <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" @click="closeModal">Close</button>
                 <button type="submit" class="btn btn-primary">Save changes</button>
@@ -138,6 +159,55 @@
 
     <!-- Modal Backdrop -->
     <div v-if="showModal" class="modal-backdrop fade show"></div>
+
+    <!-- Pay Bill Modal -->
+    <div v-if="PayBillModal" class="modal fade show" style="display: block;" aria-modal="true" role="dialog">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title">Pay Bill - {{ invoiceNumber }}</h5>
+            <button type="button" class="close" @click="closePayBillModal">
+                <span>&times;</span>
+            </button>
+            </div>
+            <div class="modal-body">
+            <form @submit.prevent="submitPayBillForm">
+                <fieldset class="mb-3">
+                    <legend class="col-form-label pt-0">Payment Method</legend>
+                    <div v-for="(type, index) in paymentTypes" :key="index" class="form-check form-check-inline">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          :id="type.name"
+                          :value="type.id"
+                          v-model="payment_method_id"
+                        >
+                        <label class="form-check-label" :for="type.name">{{ type.name }}</label>
+                    </div>
+                  </fieldset>
+
+                  <div class="form-group mb-3">
+                    <label for="reference_no">Reference Number</label>
+                    <input type="text" class="form-control" id="reference_no" v-model="reference_no" required>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="amount">Amount</label>
+                    <input type="number" class="form-control" id="amount" v-model="amount" required>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="remark">Remark (if any)</label>
+                    <textarea class="form-control" id="remark" v-model="remark"></textarea>
+                  </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @click="closePayBillModal">Close</button>
+                <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+            </div>
+        </div>
+        </div>
+    </div>
+    <div v-if="PayBillModal" class="modal-backdrop fade show"></div>
     </AuthenticatedLayout>
 </template>
 
@@ -162,22 +232,32 @@ const form = useForm({});
 
 // Reactive variables for modal and form fields
 const showModal = ref(false);
+const PayBillModal = ref(false);
 const no_packets = ref('');
 const vehicle_no = ref('');
+const dispatched_through = ref('');
 const invoiceId = ref(null);
+const invoiceNumber = ref('');
+const reference_no = ref('');
+const payment_method_id = ref('');
+const amount = ref('');
+const remark = ref('');
+const paymentTypes = ref([]);
 const invoices = ref(props.invoices); // Reactive invoices array
 
 // Method to open the modal and fetch invoice data
 const openModal = (id) => {
   showModal.value = true;
   invoiceId.value = id;
+  const type = 'gst';
 
   // Fetch invoice details for the selected invoice ID
-  axios.get(`/api/fetch-invoice/${id}`)
+  axios.get(`/api/fetch-invoice/${id}/${type}`)
     .then(response => {
       const invoiceData = response.data;
       no_packets.value = invoiceData.no_packets || '';
       vehicle_no.value = invoiceData.vehicle_no || '';
+      dispatched_through.value = invoiceData.dispatched_through || '';
       invoiceId.value = invoiceData.id || '';
     })
     .catch(error => {
@@ -190,6 +270,7 @@ const closeModal = () => {
   showModal.value = false;
   no_packets.value = '';
   vehicle_no.value = '';
+  dispatched_through.value = '';
 };
 
 // Method to submit the form and update the invoice
@@ -197,7 +278,9 @@ const submitForm = () => {
   axios.post(`/api/update-invoice-package`, {
     no_packets: no_packets.value,
     vehicle_no: vehicle_no.value,
-    invoice_id: invoiceId.value
+    dispatched_through: dispatched_through.value,
+    invoice_id: invoiceId.value,
+    type: 'gst'
   })
   .then(response => {
     console.log('Package updated successfully:', response.data);
@@ -230,10 +313,74 @@ const submitForm = () => {
 };
 
 
-// Method to open the modal and fetch invoice data
+const openPayBillModal = (id) => {
+    PayBillModal.value = true;
+    invoiceId.value = id;
+    const type = 'gst';
 
+    axios.get(`/api/fetch-invoice/${id}/${type}`)
+        .then(response => {
+            invoiceNumber.value = response.data.invoice_number;
+        });
 
-// Method to submit the form and update the invoice
+    axios.get(`/api/fetch-payment-types`)
+        .then(response => {
+            paymentTypes.value = response.data;
+        })
+        .catch(error => {
+            console.error('Error fetching payment types:', error);
+        });
+};
+
+const closePayBillModal = () => {
+    PayBillModal.value = false;
+    invoiceNumber.value = '';
+    payment_method_id.value = '';
+    reference_no.value = '';
+    amount.value = '';
+    remark.value = '';
+    invoiceId.value = null;
+};
+
+const submitPayBillForm = () => {
+    axios.post(`/api/pay-bill`, {
+        payment_method_id: payment_method_id.value,
+        reference_no: reference_no.value,
+        amount: amount.value,
+        remark: remark.value,
+        invoice_id: invoiceId.value,
+        type: 'gst'
+    })
+    .then(response => {
+        if(response.data.status == 1) {
+            Swal.fire({
+                title: 'Success!',
+                text: response.data.message,
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire({
+                title: 'Info!',
+                text: response.data.message,
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
+        }
+        closePayBillModal();
+    })
+    .catch(error => {
+        console.error('Error paying bill:', error);
+        Swal.fire({
+            title: 'Error!',
+            text: 'There was an error paying the bill.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+    });
+};
 
 </script>
 

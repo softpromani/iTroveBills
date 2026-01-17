@@ -21,7 +21,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('fetch-invoice/{id}', [InvoiceController::class, 'fetchInvoice']);
+Route::get('fetch-invoice/{id}/{type?}', [InvoiceController::class, 'fetchInvoice']);
 Route::post('update-invoice-package', [InvoiceController::class, 'updateInvoicePackage']);
 
 //Fetch payment types

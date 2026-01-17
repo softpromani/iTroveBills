@@ -372,13 +372,35 @@ class CustomerBillController extends Controller
 
     public function payBill(Request $request)
     {
-        $invoice = Invoice::find($request->invoice_id);
+        $id = $request->invoice_id;
+        $type = $request->type;
+        $invoice = null;
+
+        if ($type === 'gst') {
+            $invoice = \App\Models\GSTInvoice::find($id);
+        } elseif ($type === 'proforma') {
+            $invoice = PerformaInvoice::find($id);
+        } elseif ($type === 'regular') {
+            $invoice = Invoice::find($id);
+        } else {
+            // Fallback to previous logic if type is not provided
+            $invoice = Invoice::find($id) 
+                       ?? \App\Models\GSTInvoice::find($id) 
+                       ?? PerformaInvoice::find($id);
+        }
+
         if($invoice)
         {
+            // Ensure payment record exists
+            if (!$invoice->payment) {
+                $invoice->payment()->create(['total_amount' => $invoice->total_ammount]);
+                $invoice->refresh();
+            }
+
             $invoice->payment->payment_history()->create([
                 'payment_type_id' => $request->payment_method_id,
                 'amount' => $request->amount,
-                'reference_no' => $request->reference,
+                'reference_no' => $request->reference_no,
                 'remark' => $request->remark,
                 'status' => 'paid'
             ]);
