@@ -38,22 +38,22 @@ jobs:
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          cat << 'EOF' > ~/.ssh/id_rsa
+          ${{ secrets.SSH_PRIVATE_KEY }}
+          EOF
           chmod 600 ~/.ssh/id_rsa
-          eval $(ssh-agent -s)
-          ssh-add ~/.ssh/id_rsa
+          # Ensure no Windows line endings and a clean file
+          sed -i 's/\r$//' ~/.ssh/id_rsa
           ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV
-          echo "SSH_AGENT_PID=$SSH_AGENT_PID" >> $GITHUB_ENV
 
       # 🔹 Upload only Vite build folder
       - name: Upload built assets (Vite)
         run: |
-          rsync -avz -e "ssh -p ${{ secrets.SSH_PORT }}" public/build/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.PROJECT_PATH }}/public/build/
+          rsync -avz -e "ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" public/build/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.PROJECT_PATH }}/public/build/
 
       - name: Deploy via SSH
         run: |
-          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
             set -e
             cd ${{ secrets.PROJECT_PATH }}
 
