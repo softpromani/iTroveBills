@@ -258,8 +258,8 @@
                 <div v-if="subscription" class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold">Subscription Status</h3>
-                        <div :class="getSubscriptionStatusClass(subscription.status)">
-                            <span class="text-xs font-medium">{{ getSubscriptionStatusText(subscription.status) }}</span>
+                        <div class="bg-green-400 rounded-full px-2 py-1">
+                            <span class="text-xs font-medium">Active</span>
                         </div>
                     </div>
 
@@ -273,20 +273,6 @@
                         {{ getSubscriptionExpiryText(subscription) }}
                     </p>
 
-                    <!-- Amount -->
-                    <p class="text-xs opacity-75 mb-3" v-if="subscription.order_ammount">
-                        ₹{{ formatCurrency(subscription.order_ammount) }} / {{ subscription.sellerSubscription?.month || 1 }} month(s)
-                    </p>
-
-                    <!-- Actions -->
-                    <div class="flex gap-2">
-                        <Link :href="route('subscription.index')" class="inline-block text-xs bg-white bg-opacity-20 hover:bg-opacity-30 rounded px-3 py-1 transition-all">
-                            Manage Plan
-                        </Link>
-                        <Link v-if="isSubscriptionExpiring(subscription)" :href="route('subscription.index')" class="inline-block text-xs bg-yellow-500 bg-opacity-80 hover:bg-opacity-100 rounded px-3 py-1 transition-all">
-                            Renew Now
-                        </Link>
-                    </div>
                 </div>
 
                 <!-- No Subscription State -->

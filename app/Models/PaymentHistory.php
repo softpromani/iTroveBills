@@ -17,8 +17,18 @@ class PaymentHistory extends Model
 
         // Listen for the created event
         static::created(function ($pay) {
-            $pay->payment->increment('paid_amount',$pay->amount);
-            ($pay->payment->paid_amount==$pay->payment->total_amount)?$pay->payment()->update(['status'=>'paid']):$pay->payment()->update(['status'=>'partial-paid']);
+            $payment = $pay->payment;
+            $payment->increment('paid_amount', $pay->amount);
+            $payment->refresh();
+            
+            $status = 'partial-paid';
+            if ($payment->paid_amount >= $payment->total_amount) {
+                $status = 'paid';
+            } elseif ($payment->paid_amount <= 0) {
+                $status = 'due';
+            }
+            
+            $payment->update(['status' => $status]);
         });
     }
 

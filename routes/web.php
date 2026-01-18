@@ -57,10 +57,15 @@ Route::get('/dashboard', function () {
 
     $companyIds = $user->companies()->pluck('id');
 
+    $types = [
+        \App\Models\Invoice::class,
+        \App\Models\GSTInvoice::class
+    ];
+
     $stats = [
         'totalRevenue' => Payment::whereHasMorph(
                                 'paymentable',
-                                [\App\Models\Invoice::class],
+                                $types,
                                 function ($q) use ($companyIds) {
                                     $q->whereIn('company_id', $companyIds);
                                 })
@@ -68,7 +73,7 @@ Route::get('/dashboard', function () {
 
         'totalPaid' => Payment::whereHasMorph(
                                 'paymentable',
-                                [\App\Models\Invoice::class],
+                                $types,
                                 function ($q) use ($companyIds) {
                                     $q->whereIn('company_id', $companyIds);
                                 })
@@ -76,12 +81,12 @@ Route::get('/dashboard', function () {
 
         'totalDue' => Payment::whereHasMorph(
                                 'paymentable',
-                                [\App\Models\Invoice::class],
+                                $types,
                                 function ($q) use ($companyIds) {
                                     $q->whereIn('company_id', $companyIds);
                                 })
-                                ->selectRaw('SUM(total_amount - paid_amount) as due')
-                                ->value('due'),
+                                ->selectRaw('SUM(CASE WHEN total_amount > paid_amount THEN total_amount - paid_amount ELSE 0 END) as due')
+                                ->value('due') ?? 0,
 
         'totalCustomers' => Invoice::whereIn('company_id', $companyIds)
                                     ->distinct('customer_company_id')
