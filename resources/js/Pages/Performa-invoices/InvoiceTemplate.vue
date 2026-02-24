@@ -188,7 +188,7 @@
                     </div>
                     <div class="mb-1 text-danger">Note: We will deliver the specific items in <strong>{{ props.invoice.delivery_in_days || "..." }}</strong> days.</div>
                     <div class="mb-1"><u>Declaration:</u></div>
-                    <div class="text-justify line-height-tight text-muted">
+                    <div class="text-justify line-height-tight">
                         We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.
                         Interest @ 18% p.a. will be charged if payment is not made within the due date.
                         Subject to {{ props.invoice.company.city || "Local" }} Jurisdiction.
@@ -206,7 +206,7 @@
             </div>
         </div>
 
-        <div class="text-center small text-muted mt-2 no-print font-weight-bold">
+        <div class="text-center small mt-2 no-print font-weight-bold">
             This is a Computer Generated Proforma Invoice.
         </div>
     </div>
@@ -305,7 +305,7 @@ onMounted(() => {
 .invoice-wrapper { background-color: #f0f2f5; min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 .invoice-container { max-width: 850px; color: #000; font-size: 13px; margin-bottom: 20px; }
 .border-2 { border-width: 2px !important; }
-.company-name { font-size: 1.5rem; text-transform: uppercase; color: #1a1a1a; line-height: 1.2; }
+.company-name { font-size: 1.5rem; text-transform: uppercase; color: #000; line-height: 1.2; }
 .amount-words { font-size: 12px; font-weight: 800; }
 .total-bold { font-weight: 800 !important; }
 .invoice-title { font-size: 1.8rem; letter-spacing: 2px; font-weight: 900 !important; }
@@ -313,7 +313,7 @@ onMounted(() => {
 .details-text { font-size: 14px; line-height: 1.4; }
 .logo-container { width: 70px; flex-shrink: 0; display: flex; align-items: start; justify-content: center; padding-left: 5px; }
 .seller-logo { max-width: 100%; max-height: 70px; height: auto; object-fit: contain; }
-.meta-label { font-size: 0.75rem; color: #444; text-transform: uppercase; margin-bottom: 2px; font-weight: 700; }
+.meta-label { font-size: 0.75rem; color: #000; text-transform: uppercase; margin-bottom: 2px; font-weight: 700; }
 .meta-value { font-size: 0.95rem; }
 .min-vh-12 { min-height: 110px; overflow: hidden; }
 .min-vh-15 { min-height: 140px; }
@@ -337,5 +337,6 @@ onMounted(() => {
     .border-dark { border-color: black !important; }
     .row-border-bottom, .row-border-top, .border-bottom, .border-top, .border-right, .border-left { border-color: black !important; border-style: solid !important; }
     .border-print { border-bottom: 1px solid black !important; }
+    * { color: #000 !important; }
 }
 </style>
