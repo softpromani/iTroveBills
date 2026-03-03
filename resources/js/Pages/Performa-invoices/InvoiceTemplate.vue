@@ -64,7 +64,7 @@
                     </div>
                 </div>
             </div>
-
+ 
             <!-- Middle Section: Buyer / Consignee / Dispatch -->
             <div class="row no-gutters border-bottom border-dark">
                 <!-- Consignee / Buyer Details (Left) -->
