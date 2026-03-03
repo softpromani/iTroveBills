@@ -77,7 +77,8 @@ Route::get('/dashboard', function () {
                                 function ($q) use ($companyIds) {
                                     $q->whereIn('company_id', $companyIds);
                                 })
-                                ->sum('paid_amount'),
+                                ->selectRaw('SUM(CASE WHEN paid_amount > total_amount THEN total_amount ELSE paid_amount END) as paid')
+                                ->value('paid') ?? 0,
 
         'totalDue' => Payment::whereHasMorph(
                                 'paymentable',
