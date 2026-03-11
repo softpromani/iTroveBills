@@ -1,4 +1,5 @@
 <template>
+
     <Head title="Proforma Invoice" />
     <div class="no-print p-3 bg-light border-bottom sticky-top d-flex align-items-center justify-content-center">
         <button @click="printInvoice" class="btn btn-dark mx-2">
@@ -32,7 +33,8 @@
                             <div class="address-box details-text">
                                 {{ props.invoice.company.address }}<br>
                                 GSTIN/UIN: <strong>{{ props.invoice.company.gstin }}</strong><br>
-                                State Name: {{ getStateName(props.invoice.company.gstin) }}, Code: {{ props.invoice.company.gstin?.substring(0, 2) }}<br>
+                                State Name: {{ getStateName(props.invoice.company.gstin) }}, Code: {{
+                                    props.invoice.company.gstin?.substring(0, 2) }}<br>
                                 E-Mail: {{ props.invoice.company.email }}<br>
                                 Phone: {{ props.invoice.company.mobile }}
                             </div>
@@ -64,7 +66,7 @@
                     </div>
                 </div>
             </div>
- 
+
             <!-- Middle Section: Buyer / Consignee / Dispatch -->
             <div class="row no-gutters border-bottom border-dark">
                 <!-- Consignee / Buyer Details (Left) -->
@@ -74,8 +76,10 @@
                         <div class="font-weight-bold details-title">{{ props.invoice.customer.company_name }}</div>
                         <div class="address-box details-text">
                             {{ props.invoice.customer.address }}<br>
-                            GST/TPIN/TIN NO: <strong>{{ props.invoice.customer.gstin ?? "No ID/TPIN/TIN NO" }}</strong><br>
-                            State Name: {{ getStateName(props.invoice.customer.gstin) }}, Code: {{ props.invoice.customer.gstin?.substring(0, 2) }}<br/>
+                            GST/TPIN/TIN NO: <strong>{{ props.invoice.customer.gstin ?? "No ID/TPIN/TIN NO"
+                                }}</strong><br>
+                            State Name: {{ getStateName(props.invoice.customer.gstin) }}, Code: {{
+                                props.invoice.customer.gstin?.substring(0, 2) }}<br />
                             Phone: <strong>{{ props.invoice.customer.mobile }}</strong>
                         </div>
                     </div>
@@ -125,9 +129,9 @@
                             <th class="border-right border-dark text-left">Description of Goods</th>
                             <th width="90" class="border-right border-dark">HSN/SAC</th>
                             <th width="70" class="border-right border-dark">Quantity</th>
-                            <th width="90" class="border-right border-dark">Rate</th>
                             <th width="60" class="border-right border-dark">Unit</th>
                             <th width="80" class="border-right border-dark">Weight</th>
+                            <th width="90" class="border-right border-dark">Rate</th>
                             <th width="110">Amount</th>
                         </tr>
                     </thead>
@@ -139,11 +143,11 @@
                             </td>
                             <td class="text-center border-right border-dark">{{ item.hsn_code }}</td>
                             <td class="text-right border-right border-dark">
-                                <strong>{{ item.quantity }}</strong> {{ item.unit || 'PCS' }}
+                                <strong>{{ item.quantity }}</strong>
                             </td>
-                            <td class="text-right border-right border-dark">{{ formatCurrency(item.rate) }}</td>
                             <td class="text-center border-right border-dark">{{ item.unit || 'PCS' }}</td>
                             <td class="text-center border-right border-dark">{{ item.weight }}</td>
+                            <td class="text-right border-right border-dark">{{ formatCurrency(item.rate) }}</td>
                             <td class="text-right font-weight-bold">
                                 {{ formatCurrency(item.rate * item.quantity) }}
                             </td>
@@ -154,8 +158,8 @@
                             <td class="text-right border-right border-dark" colspan="3">Total</td>
                             <td class="text-right border-right border-dark">{{ calculateTotalQty() }}</td>
                             <td class="border-right border-dark"></td>
-                            <td class="border-right border-dark"></td>
                             <td class="text-right border-right border-dark">{{ props.invoice.total_weight ?? "" }}</td>
+                            <td class="border-right border-dark"></td>
                             <td class="text-right">₹ {{ formatAmount(props.invoice.total_ammount) }}</td>
                         </tr>
                     </tfoot>
@@ -181,15 +185,22 @@
                 <!-- Declaration (Left) -->
                 <div class="col-7 border-right border-dark p-3 x-small">
                     <div class="row no-gutters mb-3">
-                         <div class="col-12 font-weight-bold mb-1 border-bottom border-dark border-dotted pb-1">Company's Bank Details</div>
-                            <div class="col-4">Bank Name</div><div class="col-8">: <strong>{{ props.invoice.company.bank_name || '-' }}</strong></div>
-                            <div class="col-4">A/c No.</div><div class="col-8">: <strong>{{ props.invoice.company.bank_account_no || '-' }}</strong></div>
-                            <div class="col-4">Branch & IFSC Code</div><div class="col-8">: {{ props.invoice.company.bank_branch || 'Main' }} & <strong>{{ props.invoice.company.bank_ifsc || '-' }}</strong></div>
+                        <div class="col-12 font-weight-bold mb-1 border-bottom border-dark border-dotted pb-1">Company's
+                            Bank Details</div>
+                        <div class="col-4">Bank Name</div>
+                        <div class="col-8">: <strong>{{ props.invoice.company.bank_name || '-' }}</strong></div>
+                        <div class="col-4">A/c No.</div>
+                        <div class="col-8">: <strong>{{ props.invoice.company.bank_account_no || '-' }}</strong></div>
+                        <div class="col-4">Branch & IFSC Code</div>
+                        <div class="col-8">: {{ props.invoice.company.bank_branch || 'Main' }} & <strong>{{
+                            props.invoice.company.bank_ifsc || '-' }}</strong></div>
                     </div>
-                    <div class="mb-1 text-danger">Note: We will deliver the specific items in <strong>{{ props.invoice.delivery_in_days || "..." }}</strong> days.</div>
+                    <div class="mb-1 text-danger">Note: We will deliver the specific items in <strong>{{
+                        props.invoice.delivery_in_days || "..." }}</strong> days.</div>
                     <div class="mb-1"><u>Declaration:</u></div>
                     <div class="text-justify line-height-tight">
-                        We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.
+                        We declare that this invoice shows the actual price of the goods described and that all
+                        particulars are true and correct.
                         Interest @ 18% p.a. will be charged if payment is not made within the due date.
                         Subject to {{ props.invoice.company.city || "Local" }} Jurisdiction.
                     </div>
@@ -199,9 +210,11 @@
                 <div class="col-5 p-2 text-right d-flex flex-column justify-content-between min-vh-15">
                     <div class="small font-weight-bold text-center">for {{ props.invoice.company.company_name }}</div>
                     <div class="signature-space">
-                        <img v-if="props.invoice.company.sign" :src="`/${props.invoice.company.sign}`" class="sign-img" alt="Authorized Signatory" />
+                        <img v-if="props.invoice.company.sign" :src="`/${props.invoice.company.sign}`" class="sign-img"
+                            alt="Authorized Signatory" />
                     </div>
-                    <div class="small font-weight-bold text-center border-top border-dark pt-1">Authorized Signatory</div>
+                    <div class="small font-weight-bold text-center border-top border-dark pt-1">Authorized Signatory
+                    </div>
                 </div>
             </div>
         </div>
@@ -302,41 +315,196 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.invoice-wrapper { background-color: #f0f2f5; min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-.invoice-container { max-width: 850px; color: #000; font-size: 13px; margin-bottom: 20px; }
-.border-2 { border-width: 2px !important; }
-.company-name { font-size: 1.5rem; text-transform: uppercase; color: #000; line-height: 1.2; }
-.amount-words { font-size: 12px; font-weight: 800; }
-.total-bold { font-weight: 800 !important; }
-.invoice-title { font-size: 1.8rem; letter-spacing: 2px; font-weight: 900 !important; }
-.details-title { font-size: 1.1rem; margin-top: 2px; }
-.details-text { font-size: 14px; line-height: 1.4; }
-.logo-container { width: 70px; flex-shrink: 0; display: flex; align-items: start; justify-content: center; padding-left: 5px; }
-.seller-logo { max-width: 100%; max-height: 70px; height: auto; object-fit: contain; }
-.meta-label { font-size: 0.75rem; color: #000; text-transform: uppercase; margin-bottom: 2px; font-weight: 700; }
-.meta-value { font-size: 0.95rem; }
-.min-vh-12 { min-height: 110px; overflow: hidden; }
-.min-vh-15 { min-height: 140px; }
-.address-box { line-height: 1.4; word-break: break-word; overflow-wrap: break-word; }
-.item-table { table-layout: fixed; width: 100%; border-collapse: collapse; border-bottom: 2px solid #000; }
-.item-table th, .item-table td { padding: 4px 6px; font-size: 13px; line-height: 1.2; }
-.item-row { height: 30px; vertical-align: top; }
-.row-border-bottom { border-bottom: 2px solid #000; }
-.row-border-top { border-top: 2px solid #000; }
-.tax-summary-table th, .tax-summary-table td { padding: 2px 5px; font-size: 11px; }
-.x-small { font-size: 11px !important; line-height: 1.3; }
-.italic { font-style: italic; }
-.sign-img { max-height: 50px; width: auto; }
-.signature-space { flex-grow: 1; display: flex; align-items: center; justify-content: center; }
-.border-dotted { border-style: dotted !important; }
+.invoice-wrapper {
+    background-color: #f0f2f5;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.invoice-container {
+    max-width: 850px;
+    color: #000;
+    font-size: 13px;
+    margin-bottom: 20px;
+}
+
+.border-2 {
+    border-width: 2px !important;
+}
+
+.company-name {
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    color: #000;
+    line-height: 1.2;
+}
+
+.amount-words {
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.total-bold {
+    font-weight: 800 !important;
+}
+
+.invoice-title {
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    font-weight: 900 !important;
+}
+
+.details-title {
+    font-size: 1.1rem;
+    margin-top: 2px;
+}
+
+.details-text {
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.logo-container {
+    width: 70px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: start;
+    justify-content: center;
+    padding-left: 5px;
+}
+
+.seller-logo {
+    max-width: 100%;
+    max-height: 70px;
+    height: auto;
+    object-fit: contain;
+}
+
+.meta-label {
+    font-size: 0.75rem;
+    color: #000;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    font-weight: 700;
+}
+
+.meta-value {
+    font-size: 0.95rem;
+}
+
+.min-vh-12 {
+    min-height: 110px;
+    overflow: hidden;
+}
+
+.min-vh-15 {
+    min-height: 140px;
+}
+
+.address-box {
+    line-height: 1.4;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+.item-table {
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse;
+    border-bottom: 2px solid #000;
+}
+
+.item-table th,
+.item-table td {
+    padding: 4px 6px;
+    font-size: 13px;
+    line-height: 1.2;
+}
+
+.item-row {
+    height: 30px;
+    vertical-align: top;
+}
+
+.row-border-bottom {
+    border-bottom: 2px solid #000;
+}
+
+.row-border-top {
+    border-top: 2px solid #000;
+}
+
+.tax-summary-table th,
+.tax-summary-table td {
+    padding: 2px 5px;
+    font-size: 11px;
+}
+
+.x-small {
+    font-size: 11px !important;
+    line-height: 1.3;
+}
+
+.italic {
+    font-style: italic;
+}
+
+.sign-img {
+    max-height: 50px;
+    width: auto;
+}
+
+.signature-space {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.border-dotted {
+    border-style: dotted !important;
+}
 
 @media print {
-    .no-print { display: none !important; }
-    body, .invoice-wrapper { background: white !important; padding: 0 !important; }
-    .invoice-container { width: 100% !important; max-width: none !important; border: 2px solid black !important; box-shadow: none !important; margin: 0 !important; font-size: 11px; }
-    .border-dark { border-color: black !important; }
-    .row-border-bottom, .row-border-top, .border-bottom, .border-top, .border-right, .border-left { border-color: black !important; border-style: solid !important; }
-    .border-print { border-bottom: 1px solid black !important; }
-    * { color: #000 !important; }
+    .no-print {
+        display: none !important;
+    }
+
+    body,
+    .invoice-wrapper {
+        background: white !important;
+        padding: 0 !important;
+    }
+
+    .invoice-container {
+        width: 100% !important;
+        max-width: none !important;
+        border: 2px solid black !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        font-size: 11px;
+    }
+
+    .border-dark {
+        border-color: black !important;
+    }
+
+    .row-border-bottom,
+    .row-border-top,
+    .border-bottom,
+    .border-top,
+    .border-right,
+    .border-left {
+        border-color: black !important;
+        border-style: solid !important;
+    }
+
+    .border-print {
+        border-bottom: 1px solid black !important;
+    }
+
+    * {
+        color: #000 !important;
+    }
 }
 </style>
