@@ -77,7 +77,7 @@
                         <div class="address-box details-text">
                             {{ props.invoice.customer.address }}<br>
                             GST/TPIN/TIN NO: <strong>{{ props.invoice.customer.gstin ?? "No ID/TPIN/TIN NO"
-                                }}</strong><br>
+                            }}</strong><br>
                             State Name: {{ getStateName(props.invoice.customer.gstin) }}, Code: {{
                                 props.invoice.customer.gstin?.substring(0, 2) }}<br />
                             Phone: <strong>{{ props.invoice.customer.mobile }}</strong>
@@ -207,7 +207,7 @@
                         <tr class="font-weight-bold text-center bg-light">
                             <td class="border-dark text-right">Total</td>
                             <td class="border-dark text-right font-weight-bold">{{ formatAmount(calculateTotalTaxable())
-                                }}</td>
+                            }}</td>
                             <td class="border-dark"></td>
                             <td class="border-dark text-right font-weight-bold">{{ formatAmount(calculateTotalTax()) }}
                             </td>
@@ -220,7 +220,7 @@
 
             <div class="p-2 border-top border-dark x-small text-uppercase">
                 <div class="mb-0"><span class="font-weight-bold">Tax Amount (in words) :</span> <strong>INR {{
-                        taxAmountInWords }} Only</strong></div>
+                    taxAmountInWords }} Only</strong></div>
             </div>
 
             <!-- Declaration and Signature -->
@@ -375,7 +375,7 @@ onMounted(() => {
 .invoice-container {
     max-width: 850px;
     color: #000;
-    font-size: 13px;
+    font-size: 15px;
     margin-bottom: 20px;
 }
 
@@ -384,14 +384,14 @@ onMounted(() => {
 }
 
 .company-name {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     text-transform: uppercase;
     color: #000;
     line-height: 1.2;
 }
 
 .amount-words {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 800;
 }
 
@@ -406,12 +406,12 @@ onMounted(() => {
 }
 
 .details-title {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     margin-top: 2px;
 }
 
 .details-text {
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.4;
 }
 
@@ -432,7 +432,7 @@ onMounted(() => {
 }
 
 .meta-label {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     color: #000;
     text-transform: uppercase;
     margin-bottom: 2px;
@@ -440,7 +440,7 @@ onMounted(() => {
 }
 
 .meta-value {
-    font-size: 0.95rem;
+    font-size: 1.05rem;
 }
 
 .min-vh-12 {
@@ -468,7 +468,7 @@ onMounted(() => {
 .item-table th,
 .item-table td {
     padding: 4px 6px;
-    font-size: 13px;
+    font-size: 15px;
     line-height: 1.2;
 }
 
@@ -488,11 +488,11 @@ onMounted(() => {
 .tax-summary-table th,
 .tax-summary-table td {
     padding: 1px 4px !important;
-    font-size: 9px !important;
+    font-size: 11px !important;
 }
 
 .x-small {
-    font-size: 11px !important;
+    font-size: 13px !important;
     line-height: 1.3;
 }
 
@@ -533,7 +533,7 @@ onMounted(() => {
         border: 2px solid black !important;
         box-shadow: none !important;
         margin: 0 !important;
-        font-size: 11px;
+        font-size: 13px;
     }
 
     .border-dark {
