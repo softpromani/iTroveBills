@@ -77,7 +77,7 @@
                         <div class="address-box details-text">
                             {{ props.invoice.customer.address }}<br>
                             GST/TPIN/TIN NO: <strong>{{ props.invoice.customer.gstin ?? "No ID/TPIN/TIN NO"
-                            }}</strong><br>
+                                }}</strong><br>
                             State Name: {{ getStateName(props.invoice.customer.gstin) }}, Code: {{
                                 props.invoice.customer.gstin?.substring(0, 2) }}<br />
                             Phone: <strong>{{ props.invoice.customer.mobile }}</strong>
@@ -207,7 +207,7 @@
                         <tr class="font-weight-bold text-center bg-light">
                             <td class="border-dark text-right">Total</td>
                             <td class="border-dark text-right font-weight-bold">{{ formatAmount(calculateTotalTaxable())
-                            }}</td>
+                                }}</td>
                             <td class="border-dark"></td>
                             <td class="border-dark text-right font-weight-bold">{{ formatAmount(calculateTotalTax()) }}
                             </td>
@@ -227,7 +227,7 @@
             <div class="row no-gutters border-top border-dark">
                 <!-- Declaration (Left) -->
                 <div class="col-7 border-right border-dark p-3 x-small">
-                    <div class="row no-gutters mb-3">
+                    <div class="row no-gutters mb-3 bank-details">
                         <div class="col-12 font-weight-bold mb-1 border-bottom border-dark border-dotted pb-1">Company's
                             Bank Details</div>
                         <div class="col-4">Bank Name</div>
@@ -514,6 +514,10 @@ onMounted(() => {
 
 .border-dotted {
     border-style: dotted !important;
+}
+
+.bank-details {
+    font-size: 16px !important;
 }
 
 @media print {
