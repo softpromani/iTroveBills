@@ -57,38 +57,47 @@ Route::get('/dashboard', function () {
 
     $companyIds = $user->companies()->pluck('id');
 
-    $types = [
-        \App\Models\Invoice::class,
-        \App\Models\GSTInvoice::class
-    ];
+    $currentMonth = now()->month;
+    $currentYear  = now()->year;
+    $financialYear = $currentMonth < 4 ? $currentYear - 1 : $currentYear;
+    $startDate = \Carbon\Carbon::createFromDate($financialYear, 4, 1)->startOfDay();
+    $endDate   = \Carbon\Carbon::createFromDate($financialYear + 1, 3, 31)->endOfDay();
+
+    $invoicesRevenue = \App\Models\Invoice::whereIn('company_id', $companyIds)
+        ->whereBetween('invoice_date', [$startDate, $endDate])
+        ->sum('total_ammount');
+
+    $gstRevenue = \App\Models\GSTInvoice::whereIn('company_id', $companyIds)
+        ->whereBetween('invoice_date', [$startDate, $endDate])
+        ->sum('total_ammount');
+
+    $totalRevenue = $invoicesRevenue + $gstRevenue;
+
+    $invoicesPaid = Payment::where('paymentable_type', \App\Models\Invoice::class)
+        ->whereIn('paymentable_id', function($q) use ($companyIds, $startDate, $endDate) {
+            $q->select('id')->from('invoices')
+              ->whereIn('company_id', $companyIds)
+              ->whereBetween('invoice_date', [$startDate, $endDate]);
+        })
+        ->selectRaw('SUM(CASE WHEN paid_amount > total_amount THEN total_amount ELSE paid_amount END) as paid')
+        ->value('paid') ?? 0;
+
+    $gstPaid = Payment::where('paymentable_type', \App\Models\GSTInvoice::class)
+        ->whereIn('paymentable_id', function($q) use ($companyIds, $startDate, $endDate) {
+            $q->select('id')->from('g_s_t_invoices')
+              ->whereIn('company_id', $companyIds)
+              ->whereBetween('invoice_date', [$startDate, $endDate]);
+        })
+        ->selectRaw('SUM(CASE WHEN paid_amount > total_amount THEN total_amount ELSE paid_amount END) as paid')
+        ->value('paid') ?? 0;
+
+    $totalPaid = $invoicesPaid + $gstPaid;
+    $totalDue = $totalRevenue - $totalPaid;
 
     $stats = [
-        'totalRevenue' => Payment::whereHasMorph(
-                                'paymentable',
-                                $types,
-                                function ($q) use ($companyIds) {
-                                    $q->whereIn('company_id', $companyIds);
-                                })
-                                ->sum('total_amount'),
-
-        'totalPaid' => Payment::whereHasMorph(
-                                'paymentable',
-                                $types,
-                                function ($q) use ($companyIds) {
-                                    $q->whereIn('company_id', $companyIds);
-                                })
-                                ->selectRaw('SUM(CASE WHEN paid_amount > total_amount THEN total_amount ELSE paid_amount END) as paid')
-                                ->value('paid') ?? 0,
-
-        'totalDue' => Payment::whereHasMorph(
-                                'paymentable',
-                                $types,
-                                function ($q) use ($companyIds) {
-                                    $q->whereIn('company_id', $companyIds);
-                                })
-                                ->selectRaw('SUM(CASE WHEN total_amount > paid_amount THEN total_amount - paid_amount ELSE 0 END) as due')
-                                ->value('due') ?? 0,
-
+        'totalRevenue' => $totalRevenue,
+        'totalPaid' => $totalPaid,
+        'totalDue' => $totalDue,
         'totalCustomers' => Invoice::whereIn('company_id', $companyIds)
                                     ->distinct('customer_company_id')
                                     ->count('customer_company_id'),
