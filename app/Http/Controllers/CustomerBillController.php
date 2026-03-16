@@ -265,7 +265,7 @@ class CustomerBillController extends Controller
         }
 
         // Get the filtered invoices
-        $invoices = $invoicesQuery->orderBy('invoice_date', 'desc')->get();
+        $invoices = $invoicesQuery->orderBy('created_at', 'desc')->get();
         $invoices->load('paymentStatus', 'Customer', 'Company', 'payment');
 
         // Get filter data
@@ -652,7 +652,7 @@ class CustomerBillController extends Controller
 
     public function performa_invoice_list()
     {
-        $invoices = auth()->user()->performa_invoices()->orderBy('invoice_date', 'desc')->get();
+        $invoices = auth()->user()->performa_invoices()->orderBy('created_at', 'desc')->get();
         // $invoices->load('paymentStatus');
         $invoices->load('Customer');
         $invoices->load('Company');

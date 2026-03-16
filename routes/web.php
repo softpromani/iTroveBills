@@ -107,7 +107,7 @@ Route::get('/dashboard', function () {
                         $q->latest('created_at')->take(1); // get latest payment record
                         }])
                         ->whereIn('company_id', $companyIds)
-                        ->latest('invoice_date')
+                        ->latest('created_at')
                         ->take(5)
                         ->get()
                         ->map(function ($invoice) {

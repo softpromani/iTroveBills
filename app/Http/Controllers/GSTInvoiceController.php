@@ -456,7 +456,7 @@ class GSTInvoiceController extends Controller
 
     public function gst_invoice_list()
     {
-        $invoices = auth()->user()->gst_invoices()->orderBy('invoice_date', 'desc')->get();
+        $invoices = auth()->user()->gst_invoices()->orderBy('created_at', 'desc')->get();
         // $invoices->load('paymentStatus');
         $invoices->load('Customer');
         $invoices->load('Company');
