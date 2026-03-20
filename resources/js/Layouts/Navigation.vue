@@ -242,6 +242,56 @@
             <a
                 class="flex items-center px-6 py-2 mt-4 text-gray-100 no-underline dropdown-toggle"
                 href="#"
+                @click="showingLedgerMenu = !showingLedgerMenu"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true">
+                <title>Ledger</title>
+                <!-- Book/Ledger icon -->
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                </svg>
+
+                <span class="mx-3">Ledger</span>
+            </a>
+            <transition
+                enter-to-class="transition-all duration-300 ease-in-out"
+                enter-from-class="opacity-25 max-h-0"
+                leave-from-class="opacity-100 max-h-xl"
+                leave-to-class="opacity-0 max-h-0"
+            >
+                <div v-show="showingLedgerMenu">
+                    <ul
+                        class="p-2 mx-4 mt-2 space-y-2 overflow-hidden text-sm font-medium text-white bg-gray-700 bg-opacity-50 rounded-md shadow-inner"
+                        aria-label="submenu"
+                    >
+                        <li class="px-2 py-1 transition-colors duration-150">
+                            <Link
+                                class="text-white no-underline first-letter:w-full"
+                                :href="route('ledgers.create')"
+                                >Create Ledger</Link
+                            >
+                        </li>
+                        <li class="px-2 py-1 transition-colors duration-150">
+                            <Link
+                                class="text-white no-underline first-letter:w-full"
+                                :href="route('ledgers.index')"
+                                >View Ledgers</Link
+                            >
+                        </li>
+                    </ul>
+                </div>
+            </transition>
+            <a
+                class="flex items-center px-6 py-2 mt-4 text-gray-100 no-underline dropdown-toggle"
+                href="#"
                 @click="showingInvoices = !showingInvoices"
             >
                 <svg xmlns="http://www.w3.org/2000/svg"
@@ -666,6 +716,7 @@ export default {
         let showingInvoices = ref(false);
         let showingProformaInvoices = ref(false);
         let showingGSTInvoices = ref(false);
+        let showingLedgerMenu = ref(false);
 
         return {
             showingTwoLevelMenu,
@@ -673,7 +724,8 @@ export default {
             showingCustomerMenu,
             showingInvoices,
             showingProformaInvoices,
-            showingGSTInvoices
+            showingGSTInvoices,
+            showingLedgerMenu
         };
     },
 

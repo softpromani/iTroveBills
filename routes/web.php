@@ -4,6 +4,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CustomerBillController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\GSTInvoiceController;
+use App\Http\Controllers\LedgerController;
 use App\Http\Controllers\HsnSacMasterController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\MastergstController;
@@ -196,6 +197,9 @@ Route::middleware('auth')->group(function () {
     Route::get('old-payments-feed',[CustomerBillController::class,'Fetch_bill_create_payment_for_old_data']);
     //Customer My Bill Route
     Route::get('my-bill', [CustomerBillController::class, 'myBill'])->name('customer.mybill');
+
+    // Ledger routes
+    Route::resource('ledgers', LedgerController::class);
 
     // routes/web.php
     Route::get('/hsn/search', [HsnSacMasterController::class, 'search'])->name('hsn.search');
