@@ -32,83 +32,86 @@ class LedgerReportController extends Controller
     {
         $request->validate([
             'seller_customer_id' => 'required|exists:seller_customers,id',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
         $seller_customer = SellerCustomers::findOrFail($request->seller_customer_id);
         $customer_company_id = $seller_customer->customer_company_id;
         $customer_data = $seller_customer->customer_detail;
         
-        $start_date = Carbon::parse($request->start_date);
-        $end_date = Carbon::parse($request->end_date);
+        $start_date = $request->start_date ? Carbon::parse($request->start_date) : null;
+        $end_date = $request->end_date ? Carbon::parse($request->end_date) : Carbon::now();
 
         // 1. Calculate Opening Balance (Transactions before start_date)
-        $inv_debit_before = Invoice::where('customer_company_id', $customer_company_id)
-            ->where('invoice_date', '<', $start_date)
-            ->sum('total_ammount');
+        $opening_balance = 0;
+        if ($start_date) {
+            $inv_debit_before = Invoice::where('customer_company_id', $customer_company_id)
+                ->where('invoice_date', '<', $start_date)
+                ->sum('total_ammount');
 
-        $gst_inv_debit_before = GSTInvoice::where('customer_company_id', $customer_company_id)
-            ->where('invoice_date', '<', $start_date)
-            ->sum('total_ammount');
+            $gst_inv_debit_before = GSTInvoice::where('customer_company_id', $customer_company_id)
+                ->where('invoice_date', '<', $start_date)
+                ->sum('total_ammount');
 
-        $ledger_debit_before = Ledger::where('seller_customer_id', $request->seller_customer_id)
-            ->where('date', '<', $start_date)
-            ->where('type', 'debit')
-            ->sum('amount');
+            $ledger_debit_before = Ledger::where('seller_customer_id', $request->seller_customer_id)
+                ->where('date', '<', $start_date)
+                ->where('type', 'debit')
+                ->sum('amount');
 
-        $ledger_credit_before = Ledger::where('seller_customer_id', $request->seller_customer_id)
-            ->where('date', '<', $start_date)
-            ->where('type', 'credit')
-            ->sum('amount');
+            $ledger_credit_before = Ledger::where('seller_customer_id', $request->seller_customer_id)
+                ->where('date', '<', $start_date)
+                ->where('type', 'credit')
+                ->sum('amount');
 
-        $opening_balance = ($inv_debit_before + $gst_inv_debit_before + $ledger_debit_before) - $ledger_credit_before;
+            $opening_balance = ($inv_debit_before + $gst_inv_debit_before + $ledger_debit_before) - $ledger_credit_before;
+        }
 
         // 2. Fetch Transactions within range
-        $invoices = Invoice::where('customer_company_id', $customer_company_id)
-            ->whereBetween('invoice_date', [$start_date, $end_date])
-            ->get()
-            ->map(function($item) {
-                return [
-                    'date' => $item->invoice_date,
-                    'particulars' => 'SALE',
-                    'vch_type' => 'Sales',
-                    'vch_no' => $item->invoice_number,
-                    'debit' => (float)$item->total_ammount,
-                    'credit' => 0,
-                    'timestamp' => Carbon::parse($item->invoice_date)->timestamp
-                ];
-            });
+        $query_invoices = Invoice::where('customer_company_id', $customer_company_id)
+            ->where('invoice_date', '<=', $end_date);
+        if ($start_date) $query_invoices->where('invoice_date', '>=', $start_date);
+        $invoices = $query_invoices->get()->map(function($item) {
+            return [
+                'date' => $item->invoice_date,
+                'particulars' => 'SALE',
+                'vch_type' => 'Sales',
+                'vch_no' => $item->invoice_number,
+                'debit' => (float)$item->total_ammount,
+                'credit' => 0,
+                'timestamp' => Carbon::parse($item->invoice_date)->timestamp
+            ];
+        });
 
-        $gst_invoices = GSTInvoice::where('customer_company_id', $customer_company_id)
-            ->whereBetween('invoice_date', [$start_date, $end_date])
-            ->get()
-            ->map(function($item) {
-                return [
-                    'date' => $item->invoice_date,
-                    'particulars' => 'SALE',
-                    'vch_type' => 'GST Sales',
-                    'vch_no' => $item->invoice_number,
-                    'debit' => (float)$item->total_ammount,
-                    'credit' => 0,
-                    'timestamp' => Carbon::parse($item->invoice_date)->timestamp
-                ];
-            });
+        $query_gst = GSTInvoice::where('customer_company_id', $customer_company_id)
+            ->where('invoice_date', '<=', $end_date);
+        if ($start_date) $query_gst->where('invoice_date', '>=', $start_date);
+        $gst_invoices = $query_gst->get()->map(function($item) {
+            return [
+                'date' => $item->invoice_date,
+                'particulars' => 'SALE',
+                'vch_type' => 'GST Sales',
+                'vch_no' => $item->invoice_number,
+                'debit' => (float)$item->total_ammount,
+                'credit' => 0,
+                'timestamp' => Carbon::parse($item->invoice_date)->timestamp
+            ];
+        });
 
-        $ledgers = Ledger::where('seller_customer_id', $request->seller_customer_id)
-            ->whereBetween('date', [$start_date, $end_date])
-            ->get()
-            ->map(function($item) {
-                return [
-                    'date' => $item->date,
-                    'particulars' => $item->description ?: ($item->type === 'debit' ? 'Debit Adjustment' : 'Payment Received'),
-                    'vch_type' => $item->payment_type === 'cash' ? 'Cash' : 'Bank/Transfer',
-                    'vch_no' => $item->id,
-                    'debit' => $item->type === 'debit' ? (float)$item->amount : 0,
-                    'credit' => $item->type === 'credit' ? (float)$item->amount : 0,
-                    'timestamp' => Carbon::parse($item->date)->timestamp
-                ];
-            });
+        $query_ledger = Ledger::where('seller_customer_id', $request->seller_customer_id)
+            ->where('date', '<=', $end_date);
+        if ($start_date) $query_ledger->where('date', '>=', $start_date);
+        $ledgers = $query_ledger->get()->map(function($item) {
+            return [
+                'date' => $item->date,
+                'particulars' => $item->description ?: ($item->type === 'debit' ? 'Debit Adjustment' : 'Payment Received'),
+                'vch_type' => $item->payment_type === 'cash' ? 'Cash' : 'Bank/Transfer',
+                'vch_no' => $item->id,
+                'debit' => $item->type === 'debit' ? (float)$item->amount : 0,
+                'credit' => $item->type === 'credit' ? (float)$item->amount : 0,
+                'timestamp' => Carbon::parse($item->date)->timestamp
+            ];
+        });
 
         // Combine and Sort
         $transactions = $invoices->concat($gst_invoices)->concat($ledgers)

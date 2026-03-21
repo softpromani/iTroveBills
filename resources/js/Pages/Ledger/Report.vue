@@ -22,11 +22,11 @@
                 </div>
                 <div>
                     <InputLabel for="start_date" value="Start Date" />
-                    <TextInput id="start_date" type="date" v-model="form.start_date" class="mt-1 block w-full" required />
+                    <TextInput id="start_date" type="date" v-model="form.start_date" class="mt-1 block w-full" />
                 </div>
                 <div>
                     <InputLabel for="end_date" value="End Date" />
-                    <TextInput id="end_date" type="date" v-model="form.end_date" class="mt-1 block w-full" required />
+                    <TextInput id="end_date" type="date" v-model="form.end_date" class="mt-1 block w-full" />
                 </div>
                 <div class="flex gap-2">
                     <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
@@ -58,7 +58,12 @@
                 <h2 class="text-xl font-bold uppercase">{{ report_data.customer?.name || 'Customer' }}</h2>
                 <p class="text-sm">Ledger Account</p>
                 <p class="text-sm uppercase">{{ report_data.customer?.address || '' }}</p>
-                <p class="mt-4 font-semibold">{{ formatDate(report_data.start_date) }} to {{ formatDate(report_data.end_date) }}</p>
+                <p class="mt-4 font-semibold">
+                    <span v-if="report_data.start_date">{{ formatDate(report_data.start_date) }}</span>
+                    <span v-else>Up to</span>
+                    to 
+                    {{ formatDate(report_data.end_date) }}
+                </p>
             </div>
 
             <!-- Table -->
