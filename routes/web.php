@@ -5,6 +5,7 @@ use App\Http\Controllers\CustomerBillController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\GSTInvoiceController;
 use App\Http\Controllers\LedgerController;
+use App\Http\Controllers\LedgerReportController;
 use App\Http\Controllers\HsnSacMasterController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\MastergstController;
@@ -200,6 +201,8 @@ Route::middleware('auth')->group(function () {
 
     // Ledger routes
     Route::resource('ledgers', LedgerController::class);
+    Route::get('ledger-report', [LedgerReportController::class, 'index'])->name('ledger.report.index');
+    Route::get('ledger-report/generate', [LedgerReportController::class, 'generate'])->name('ledger.report.generate');
 
     // routes/web.php
     Route::get('/hsn/search', [HsnSacMasterController::class, 'search'])->name('hsn.search');

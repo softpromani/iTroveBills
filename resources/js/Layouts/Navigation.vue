@@ -286,6 +286,13 @@
                                 >View Ledgers</Link
                             >
                         </li>
+                        <li class="px-2 py-1 transition-colors duration-150">
+                            <Link
+                                class="text-white no-underline first-letter:w-full"
+                                :href="route('ledger.report.index')"
+                                >Ledger Report</Link
+                            >
+                        </li>
                     </ul>
                 </div>
             </transition>
