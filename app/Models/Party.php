@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Ledger extends Model
+class Party extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -17,13 +17,8 @@ class Ledger extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function sellerCustomer()
+    public function ledgers()
     {
-        return $this->belongsTo(SellerCustomers::class, 'seller_customer_id');
-    }
-
-    public function party()
-    {
-        return $this->belongsTo(Party::class);
+        return $this->hasMany(Ledger::class);
     }
 }

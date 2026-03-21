@@ -239,6 +239,58 @@
                     </ul>
                 </div>
             </transition>
+            <!-- Parties Menu -->
+            <a
+                class="flex items-center px-6 py-2 mt-4 text-gray-100 no-underline dropdown-toggle"
+                href="#"
+                @click="showingPartyMenu = !showingPartyMenu"
+            >
+                <svg
+                    class="w-6 h-6"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
+                </svg>
+
+                <span class="mx-3">Parties</span>
+            </a>
+            <transition
+                enter-to-class="transition-all duration-300 ease-in-out"
+                enter-from-class="opacity-25 max-h-0"
+                leave-from-class="opacity-100 max-h-xl"
+                leave-to-class="opacity-0 max-h-0"
+            >
+                <div v-show="showingPartyMenu">
+                    <ul
+                        class="p-2 mx-4 mt-2 space-y-2 overflow-hidden text-sm font-medium text-white bg-gray-700 bg-opacity-50 rounded-md shadow-inner"
+                        aria-label="submenu"
+                    >
+                        <li class="px-2 py-1 transition-colors duration-150">
+                            <Link
+                                class="text-white no-underline first-letter:w-full"
+                                :href="route('parties.create')"
+                                >Create Party</Link
+                            >
+                        </li>
+                        <li class="px-2 py-1 transition-colors duration-150">
+                            <Link
+                                class="text-white no-underline first-letter:w-full"
+                                :href="route('parties.index')"
+                                >View Parties</Link
+                            >
+                        </li>
+                    </ul>
+                </div>
+            </transition>
+
             <a
                 class="flex items-center px-6 py-2 mt-4 text-gray-100 no-underline dropdown-toggle"
                 href="#"
@@ -580,6 +632,8 @@
                 /></span>
             </nav-link>
 
+
+
             <a
                 class="flex items-center px-6 py-2 mt-4 text-gray-100 no-underline"
                 href="#"
@@ -724,6 +778,7 @@ export default {
         let showingProformaInvoices = ref(false);
         let showingGSTInvoices = ref(false);
         let showingLedgerMenu = ref(false);
+        let showingPartyMenu = ref(false);
 
         return {
             showingTwoLevelMenu,
@@ -732,7 +787,8 @@ export default {
             showingInvoices,
             showingProformaInvoices,
             showingGSTInvoices,
-            showingLedgerMenu
+            showingLedgerMenu,
+            showingPartyMenu
         };
     },
 

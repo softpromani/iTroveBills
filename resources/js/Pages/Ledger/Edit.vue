@@ -1,117 +1,109 @@
 <template>
     <Head title="Edit Ledger Entry" />
+
     <AuthenticatedLayout>
         <template #header> Edit Ledger Entry </template>
 
-        <div class="max-w-4xl mx-auto py-10 sm:px-6 lg:px-8">
-            <div class="mt-5 md:mt-0 md:col-span-2">
-                <form @submit.prevent="submit">
-                    <div class="shadow overflow-hidden sm:rounded-md bg-white">
-                        <div class="px-4 py-5 sm:p-6">
-                            <div class="grid grid-cols-6 gap-6">
-                                <!-- Customer -->
-                                <div class="col-span-6 sm:col-span-4">
-                                    <InputLabel for="customer" value="Select Customer" />
+        <div class="py-12">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 bg-white border-b border-gray-200">
+                        <form @submit.prevent="submit">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="col-span-2">
+                                    <InputLabel for="account" value="Select Customer / Party" />
                                     <select
-                                        id="customer"
-                                        v-model="form.seller_customer_id"
-                                        class="mt-1 block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm"
+                                        id="account"
+                                        v-model="selectedAccount"
+                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                                         required
                                     >
-                                        <option value="" disabled>Select a customer</option>
-                                        <option v-for="customer in customers" :key="customer.id" :value="customer.id">
-                                            {{ customer.customer_detail?.name || 'Unnamed Customer' }} ({{ customer.customer_detail?.mobile || 'No Mobile' }})
-                                        </option>
+                                        <option value="" disabled>Choose an account</option>
+                                        <optgroup label="Customers">
+                                            <option v-for="customer in customers" :key="'c'+customer.id" :value="'customer_'+customer.id">
+                                                {{ customer.customer_detail?.name }}
+                                            </option>
+                                        </optgroup>
+                                        <optgroup label="Parties">
+                                            <option v-for="party in parties" :key="'p'+party.id" :value="'party_'+party.id">
+                                                {{ party.name }}
+                                            </option>
+                                        </optgroup>
                                     </select>
-                                    <InputError :message="form.errors.seller_customer_id" class="mt-2" />
+                                    <InputError class="mt-2" :message="form.errors.seller_customer_id || form.errors.party_id" />
                                 </div>
 
-                                <!-- Date -->
-                                <div class="col-span-6 sm:col-span-2">
+                                <div>
                                     <InputLabel for="date" value="Date" />
-                                    <TextInput
-                                        id="date"
-                                        type="date"
-                                        class="mt-1 block w-full"
-                                        v-model="form.date"
-                                        required
-                                    />
-                                    <InputError :message="form.errors.date" class="mt-2" />
+                                    <TextInput id="date" type="date" v-model="form.date" class="mt-1 block w-full" required />
+                                    <InputError class="mt-2" :message="form.errors.date" />
                                 </div>
 
-                                <!-- Row: Type and Payment Type -->
-                                <div class="col-span-6 sm:col-span-3">
+                                <div>
                                     <InputLabel for="type" value="Entry Type (Debit/Credit)" />
                                     <select
                                         id="type"
                                         v-model="form.type"
-                                        class="mt-1 block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm"
+                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                                         required
                                     >
-                                        <option value="debit">Debit (Payment Out)</option>
-                                        <option value="credit">Credit (Payment In)</option>
+                                        <option value="debit">Debit (+)</option>
+                                        <option value="credit">Credit (-)</option>
                                     </select>
-                                    <InputError :message="form.errors.type" class="mt-2" />
+                                    <InputError class="mt-2" :message="form.errors.type" />
                                 </div>
 
-                                <div class="col-span-6 sm:col-span-3">
+                                <div>
                                     <InputLabel for="payment_type" value="Payment Type" />
                                     <select
                                         id="payment_type"
                                         v-model="form.payment_type"
-                                        class="mt-1 block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm"
+                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                                         required
                                     >
                                         <option value="cash">Cash</option>
-                                        <option value="transfer">Bank Transfer/Online</option>
+                                        <option value="transfer">Bank/Transfer</option>
+                                        <option value="sales">Sales</option>
                                     </select>
-                                    <InputError :message="form.errors.payment_type" class="mt-2" />
+                                    <InputError class="mt-2" :message="form.errors.payment_type" />
                                 </div>
 
-                                <!-- Amount -->
-                                <div class="col-span-6 sm:col-span-6">
-                                    <InputLabel for="amount" value="Amount (₹)" />
-                                    <TextInput
-                                        id="amount"
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        class="mt-1 block w-full text-lg font-bold"
-                                        v-model="form.amount"
-                                        placeholder="0.00"
-                                        required
-                                    />
-                                    <InputError :message="form.errors.amount" class="mt-2" />
+                                <div>
+                                    <InputLabel for="particular_type" value="Voucher / Bill" />
+                                    <select
+                                        id="particular_type"
+                                        v-model="form.particular_type"
+                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                    >
+                                        <option value="">None</option>
+                                        <option value="Voucher">Voucher</option>
+                                        <option value="Bill">Bill</option>
+                                    </select>
+                                    <InputError class="mt-2" :message="form.errors.particular_type" />
                                 </div>
 
-                                <!-- Description -->
-                                <div class="col-span-6">
-                                    <InputLabel for="description" value="Description" />
-                                    <TextareaInput
-                                        id="description"
-                                        class="mt-1 block w-full"
-                                        v-model="form.description"
-                                        rows="3"
-                                        placeholder="Add any additional notes here..."
-                                    />
-                                    <InputError :message="form.errors.description" class="mt-2" />
+                                <div>
+                                    <InputLabel for="amount" value="Amount" />
+                                    <TextInput id="amount" type="number" step="0.01" v-model="form.amount" class="mt-1 block w-full" required />
+                                    <InputError class="mt-2" :message="form.errors.amount" />
+                                </div>
+
+                                <div class="col-span-2">
+                                    <InputLabel for="description" value="Description / Particulars (Literal)" />
+                                    <TextareaInput id="description" v-model="form.description" class="mt-1 block w-full" rows="3" />
+                                    <InputError class="mt-2" :message="form.errors.description" />
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="px-4 py-3 bg-gray-50 flex items-center justify-end gap-3 sm:px-6">
-                            <Link
-                                :href="route('ledgers.index')"
-                                class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:text-gray-800 active:bg-gray-50 transition ease-in-out duration-150 no-underline"
-                            >
-                                Cancel
-                            </Link>
-                            <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                                Update Entry
-                            </PrimaryButton>
-                        </div>
+                            <div class="flex items-center justify-end mt-6">
+                                <Link :href="route('ledgers.index')" class="mr-4 text-sm text-gray-600 hover:text-gray-900">Cancel</Link>
+                                <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                                    Update Entry
+                                </PrimaryButton>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </AuthenticatedLayout>
@@ -125,19 +117,43 @@ import TextInput from "@/Components/TextInput.vue";
 import TextareaInput from "@/Components/TextareaInput.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
+import { ref, watch, onMounted } from "vue";
 
 const props = defineProps({
     ledger: Object,
     customers: Array,
+    parties: Array,
 });
 
+const selectedAccount = ref("");
+
 const form = useForm({
-    seller_customer_id: props.ledger.seller_customer_id,
+    seller_customer_id: props.ledger.seller_customer_id || "",
+    party_id: props.ledger.party_id || "",
     type: props.ledger.type,
     payment_type: props.ledger.payment_type,
+    particular_type: props.ledger.particular_type || "",
     amount: props.ledger.amount,
     date: props.ledger.date,
     description: props.ledger.description || "",
+});
+
+onMounted(() => {
+    if (props.ledger.seller_customer_id) {
+        selectedAccount.value = `customer_${props.ledger.seller_customer_id}`;
+    } else if (props.ledger.party_id) {
+        selectedAccount.value = `party_${props.ledger.party_id}`;
+    }
+});
+
+watch(selectedAccount, (val) => {
+    if (val.startsWith("customer_")) {
+        form.seller_customer_id = val.replace("customer_", "");
+        form.party_id = "";
+    } else if (val.startsWith("party_")) {
+        form.party_id = val.replace("party_", "");
+        form.seller_customer_id = "";
+    }
 });
 
 const submit = () => {
