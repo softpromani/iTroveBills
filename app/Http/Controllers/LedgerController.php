@@ -13,7 +13,7 @@ class LedgerController extends Controller
 {
     public function index()
     {
-        $ledgers = Ledger::with(['seller_customer.customer_detail', 'party'])
+        $ledgers = Ledger::with(['seller_customer', 'party'])
             ->where('user_id', Auth::id())
             ->orderBy('date', 'desc')
             ->paginate(10);
@@ -25,8 +25,7 @@ class LedgerController extends Controller
 
     public function create()
     {
-        $customers = SellerCustomers::with('customer_detail')
-            ->where('seller_id', Auth::id())
+        $customers = SellerCustomers::where('seller_id', Auth::id())
             ->get();
             
         $parties = Party::where('user_id', Auth::id())->get();
@@ -77,8 +76,7 @@ class LedgerController extends Controller
             abort(403);
         }
 
-        $customers = SellerCustomers::with('customer_detail')
-            ->where('seller_id', Auth::id())
+        $customers = SellerCustomers::where('seller_id', Auth::id())
             ->get();
             
         $parties = Party::where('user_id', Auth::id())->get();
