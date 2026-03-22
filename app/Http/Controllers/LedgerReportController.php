@@ -89,8 +89,8 @@ class LedgerReportController extends Controller
             return [
                 'date' => $item->date,
                 'particulars' => $item->particular_type ?: ($item->description ?: ($item->type === 'debit' ? 'Debit Adjustment' : 'Payment Received')),
-                'vch_type' => $item->payment_type === 'cash' ? 'Cash' : ($item->payment_type === 'transfer' ? 'Bank/Transfer' : 'Sales'),
-                'vch_no' => $item->id,
+                'vch_type' => ucfirst($item->payment_type),
+                'vch_no' => $item->voucher_no ?: $item->id,
                 'debit' => $item->type === 'debit' ? (float)$item->amount : 0,
                 'credit' => $item->type === 'credit' ? (float)$item->amount : 0,
             ];

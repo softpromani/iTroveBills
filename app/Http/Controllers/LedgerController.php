@@ -13,11 +13,11 @@ class LedgerController extends Controller
 {
     public function index()
     {
-        $ledgers = Ledger::with(['sellerCustomer', 'party'])
+        $ledgers = Ledger::with(['seller_customer.customer_detail', 'party'])
             ->where('user_id', Auth::id())
-            ->latest('date')
+            ->orderBy('date', 'desc')
             ->paginate(10);
-
+            
         return Inertia::render('Ledger/Index', [
             'ledgers' => $ledgers
         ]);
@@ -25,7 +25,10 @@ class LedgerController extends Controller
 
     public function create()
     {
-        $customers = SellerCustomers::where('seller_id', Auth::id())->get();
+        $customers = SellerCustomers::with('customer_detail')
+            ->where('seller_id', Auth::id())
+            ->get();
+            
         $parties = Party::where('user_id', Auth::id())->get();
         
         return Inertia::render('Ledger/Create', [
@@ -40,14 +43,14 @@ class LedgerController extends Controller
             'seller_customer_id' => 'nullable|exists:seller_customers,id',
             'party_id' => 'nullable|exists:parties,id',
             'type' => 'required|in:debit,credit',
-            'payment_type' => 'required|in:cash,transfer,sales',
-            'particular_type' => 'nullable|in:Voucher,Bill',
+            'payment_type' => 'required|in:cash,transfer,sales,purchase',
+            'particular_type' => 'required|in:Voucher,Bill',
+            'voucher_no' => 'nullable|string|max:100',
             'amount' => 'required|numeric|min:0',
             'date' => 'required|date',
             'description' => 'nullable|string',
         ]);
 
-        // Ensure either customer or party is selected
         if (!$request->seller_customer_id && !$request->party_id) {
             return back()->withErrors(['seller_customer_id' => 'Please select either a customer or a party.']);
         }
@@ -59,6 +62,7 @@ class LedgerController extends Controller
             'type' => $request->type,
             'payment_type' => $request->payment_type,
             'particular_type' => $request->particular_type,
+            'voucher_no' => $request->voucher_no,
             'amount' => $request->amount,
             'date' => $request->date,
             'description' => $request->description,
@@ -73,7 +77,10 @@ class LedgerController extends Controller
             abort(403);
         }
 
-        $customers = SellerCustomers::where('seller_id', Auth::id())->get();
+        $customers = SellerCustomers::with('customer_detail')
+            ->where('seller_id', Auth::id())
+            ->get();
+            
         $parties = Party::where('user_id', Auth::id())->get();
 
         return Inertia::render('Ledger/Edit', [
@@ -93,8 +100,9 @@ class LedgerController extends Controller
             'seller_customer_id' => 'nullable|exists:seller_customers,id',
             'party_id' => 'nullable|exists:parties,id',
             'type' => 'required|in:debit,credit',
-            'payment_type' => 'required|in:cash,transfer,sales',
-            'particular_type' => 'nullable|in:Voucher,Bill',
+            'payment_type' => 'required|in:cash,transfer,sales,purchase',
+            'particular_type' => 'required|in:Voucher,Bill',
+            'voucher_no' => 'nullable|string|max:100',
             'amount' => 'required|numeric|min:0',
             'date' => 'required|date',
             'description' => 'nullable|string',
@@ -110,6 +118,7 @@ class LedgerController extends Controller
             'type' => $request->type,
             'payment_type' => $request->payment_type,
             'particular_type' => $request->particular_type,
+            'voucher_no' => $request->voucher_no,
             'amount' => $request->amount,
             'date' => $request->date,
             'description' => $request->description,

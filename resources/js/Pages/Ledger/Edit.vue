@@ -64,6 +64,7 @@
                                         <option value="cash">Cash</option>
                                         <option value="transfer">Bank/Transfer</option>
                                         <option value="sales">Sales</option>
+                                        <option value="purchase">Purchase</option>
                                     </select>
                                     <InputError class="mt-2" :message="form.errors.payment_type" />
                                 </div>
@@ -74,12 +75,18 @@
                                         id="particular_type"
                                         v-model="form.particular_type"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                        required
                                     >
-                                        <option value="">None</option>
                                         <option value="Voucher">Voucher</option>
                                         <option value="Bill">Bill</option>
                                     </select>
                                     <InputError class="mt-2" :message="form.errors.particular_type" />
+                                </div>
+
+                                <div>
+                                    <InputLabel for="voucher_no" value="Manual Voucher No." />
+                                    <TextInput id="voucher_no" type="text" v-model="form.voucher_no" class="mt-1 block w-full" placeholder="Enter voucher number" />
+                                    <InputError class="mt-2" :message="form.errors.voucher_no" />
                                 </div>
 
                                 <div>
@@ -133,6 +140,7 @@ const form = useForm({
     type: props.ledger.type,
     payment_type: props.ledger.payment_type,
     particular_type: props.ledger.particular_type || "",
+    voucher_no: props.ledger.voucher_no || "",
     amount: props.ledger.amount,
     date: props.ledger.date,
     description: props.ledger.description || "",

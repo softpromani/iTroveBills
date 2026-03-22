@@ -27,6 +27,7 @@
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Voucher/Bill</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vch No.</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                     </tr>
@@ -54,6 +55,7 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 uppercase">{{ ledger.payment_type }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ ledger.particular_type || '-' }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">{{ ledger.voucher_no || ledger.id }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                             ₹{{ parseFloat(ledger.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 }) }}
                                         </td>
@@ -63,7 +65,7 @@
                                         </td>
                                     </tr>
                                     <tr v-if="ledgers.data.length === 0">
-                                        <td colspan="7" class="px-6 py-10 text-center text-gray-500 text-sm">
+                                        <td colspan="8" class="px-6 py-10 text-center text-gray-500 text-sm">
                                             No ledger entries found.
                                         </td>
                                     </tr>

@@ -86,7 +86,6 @@
                                 <th class="border border-gray-400 p-2 text-left w-20">Vch No.</th>
                                 <th class="border border-gray-400 p-2 text-right w-32">Debit</th>
                                 <th class="border border-gray-400 p-2 text-right w-32">Credit</th>
-                                <th class="border border-gray-400 p-2 text-right w-32">Balance</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -102,10 +101,6 @@
                                 <td class="border border-gray-400 p-2 text-right font-semibold">
                                     {{ report_data.opening_balance < 0 ? formatAmount(Math.abs(report_data.opening_balance)) : '' }}
                                 </td>
-                                <td class="border border-gray-400 p-2 text-right font-semibold">
-                                    {{ formatAmount(report_data.opening_balance) }}
-                                    <span class="text-xs">{{ report_data.opening_balance >= 0 ? 'Dr' : 'Cr' }}</span>
-                                </td>
                             </tr>
 
                             <!-- Primary Transactions -->
@@ -113,26 +108,21 @@
                                 <td class="border border-gray-400 p-2">{{ formatDate(tx.date) }}</td>
                                 <td class="border border-gray-400 p-2">{{ tx.particulars }}</td>
                                 <td class="border border-gray-400 p-2">{{ tx.vch_type }}</td>
-                                <td class="border border-gray-400 p-2">{{ tx.vch_no }}</td>
+                                <td class="border border-gray-400 p-2 font-semibold">{{ tx.vch_no }}</td>
                                 <td class="border border-gray-400 p-2 text-right">
                                     {{ tx.debit != 0 ? formatAmount(tx.debit) : '' }}
                                 </td>
                                 <td class="border border-gray-400 p-2 text-right">
                                     {{ tx.credit != 0 ? formatAmount(tx.credit) : '' }}
                                 </td>
-                                <td class="border border-gray-400 p-2 text-right">
-                                    {{ formatAmount(tx.balance) }}
-                                    <span class="text-xs">{{ tx.balance >= 0 ? 'Dr' : 'Cr' }}</span>
-                                </td>
                             </tr>
                         </tbody>
-                        <tfoot class="font-bold bg-gray-50">
+                        <tfoot class="font-bold bg-gray-50 uppercase">
                             <!-- Footer Totals -->
                             <tr>
                                 <td class="border border-gray-400 p-2" colspan="4">Total Current Period</td>
                                 <td class="border border-gray-400 p-2 text-right">{{ formatAmount(report_data.total_debit) }}</td>
                                 <td class="border border-gray-400 p-2 text-right">{{ formatAmount(report_data.total_credit) }}</td>
-                                <td class="border border-gray-400 p-2 text-right"></td>
                             </tr>
                             <!-- Closing Balance row to balance the total columns -->
                             <tr>
@@ -143,7 +133,6 @@
                                 <td class="border border-gray-400 p-2 text-right">
                                     {{ report_data.closing_balance >= 0 ? formatAmount(report_data.closing_balance) : '' }}
                                 </td>
-                                <td class="border border-gray-400 p-2 text-right"></td>
                             </tr>
                             <tr class="bg-gray-200 uppercase">
                                 <td class="border border-gray-400 p-2" colspan="4">Grand Total</td>
@@ -153,17 +142,21 @@
                                 <td class="border border-gray-400 p-2 text-right">
                                     {{ formatAmount(report_data.total_credit + (report_data.opening_balance < 0 ? Math.abs(report_data.opening_balance) : 0) + (report_data.closing_balance >= 0 ? report_data.closing_balance : 0)) }}
                                 </td>
-                                <td class="border border-gray-400 p-2 text-right"></td>
                             </tr>
                         </tfoot>
                     </table>
 
+                    <!-- Net Balance Display -->
+                    <div class="mt-4 text-right">
+                        <p class="text-lg font-bold">Net Balance: {{ formatAmount(Math.abs(report_data.closing_balance)) }} {{ report_data.closing_balance >= 0 ? 'Dr' : 'Cr' }}</p>
+                    </div>
+
                     <!-- Signature Area (Hidden on screen, visible on Print) -->
                     <div class="mt-20 hidden print:flex justify-between">
-                        <div class="border-t border-gray-900 px-8 pt-2">
+                        <div class="border-t border-gray-900 px-8 pt-2 uppercase">
                             Customer Signature
                         </div>
-                        <div class="border-t border-gray-900 px-8 pt-2">
+                        <div class="border-t border-gray-900 px-8 pt-2 uppercase">
                             For {{ report_data.company?.company_name }}
                         </div>
                     </div>
@@ -240,6 +233,7 @@ const formatDate = (dateString) => {
 };
 
 const formatAmount = (amount) => {
+    if (isNaN(amount)) return "0.00";
     return parseFloat(amount).toLocaleString("en-IN", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
