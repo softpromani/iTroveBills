@@ -55,17 +55,47 @@ Route::get('/cookie-policy', function () {
     return Inertia::render('CookiePolicy');
 })->name('cookie.policy');
 
-Route::get('/dashboard', function () {
+Route::get('/dashboard', function (Illuminate\Http\Request $request) {
     $user = Auth::user();
 
-    $companyIds = $user->companies()->pluck('id');
+    // 1. Get available firms (companies)
+    $companies = $user->companies()->get();
+    $selectedFirm = $request->query('firm_id');
+    
+    if ($selectedFirm) {
+        $companyIds = [$selectedFirm];
+    } else {
+        $companyIds = $companies->pluck('id');
+    }
 
+    // 2. Financial Year (Session) Logic
     $currentMonth = now()->month;
     $currentYear  = now()->year;
-    $financialYear = $currentMonth < 4 ? $currentYear - 1 : $currentYear;
+    $defaultFinancialYear = $currentMonth < 4 ? $currentYear - 1 : $currentYear;
+    
+    $selectedSession = $request->query('session');
+    if ($selectedSession && preg_match('/^(\d{4})-\d{2}$/', $selectedSession, $matches)) {
+        $financialYear = (int)$matches[1];
+    } else {
+        $financialYear = $defaultFinancialYear;
+    }
+
     $startDate = \Carbon\Carbon::createFromDate($financialYear, 4, 1)->startOfDay();
     $endDate   = \Carbon\Carbon::createFromDate($financialYear + 1, 3, 31)->endOfDay();
 
+    // 3. Generate Sessions List (last 5 years)
+    $sessions = [];
+    for ($i = 0; $i < 5; $i++) {
+        $yr = $defaultFinancialYear - $i;
+        $sessions[] = $yr . '-' . substr($yr + 1, -2);
+    }
+    // Also include selected session if not in list
+    $currentSessionLabel = $financialYear . '-' . substr($financialYear + 1, -2);
+    if (!in_array($currentSessionLabel, $sessions)) {
+        array_unshift($sessions, $currentSessionLabel);
+    }
+
+    // 4. Calculate Stats
     $invoicesRevenue = \App\Models\Invoice::whereIn('company_id', $companyIds)
         ->whereBetween('invoice_date', [$startDate, $endDate])
         ->sum('total_ammount');
@@ -101,15 +131,16 @@ Route::get('/dashboard', function () {
         'totalRevenue' => $totalRevenue,
         'totalPaid' => $totalPaid,
         'totalDue' => $totalDue,
-        'totalCustomers' => Invoice::whereIn('company_id', $companyIds)
+        'totalCustomers' => \App\Models\Invoice::whereIn('company_id', $companyIds)
                                     ->distinct('customer_company_id')
                                     ->count('customer_company_id'),
     ];
 
-    $recentActivity = Invoice::with(['company', 'payment', 'paymentStatus' => function ($q) {
+    $recentActivity = \App\Models\Invoice::with(['company', 'payment', 'paymentStatus' => function ($q) {
                         $q->latest('created_at')->take(1); // get latest payment record
                         }])
                         ->whereIn('company_id', $companyIds)
+                        ->whereBetween('invoice_date', [$startDate, $endDate])
                         ->latest('created_at')
                         ->take(5)
                         ->get()
@@ -121,15 +152,20 @@ Route::get('/dashboard', function () {
 
     // Get user's subscription information
     $subscription = $user->subscriptions()
-                         ->with(['sellerSubscription']) // assuming you have a plan relationship
-                        //  ->where('status', '10') // or whatever status field you use
+                         ->with(['sellerSubscription'])
                          ->latest()
                          ->first();
 
     return Inertia::render('Dashboard', [
         'stats' => $stats,
         'recentActivity' => $recentActivity,
-        'subscription' => $subscription
+        'subscription' => $subscription,
+        'companies' => $companies,
+        'sessions' => $sessions,
+        'filters' => [
+            'firm_id' => $selectedFirm,
+            'session' => $currentSessionLabel
+        ]
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 

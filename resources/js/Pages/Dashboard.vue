@@ -8,8 +8,37 @@
                     <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
                     <p class="text-sm text-gray-600">Welcome back! Here's what's happening with your business.</p>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <div class="text-right">
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex items-center space-x-2">
+                        <label for="firm_filter" class="text-sm font-medium text-gray-700">Firm:</label>
+                        <select
+                            id="firm_filter"
+                            v-model="firmId"
+                            @change="applyFilters"
+                            class="text-sm border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 pr-8"
+                        >
+                            <option value="">All Firms</option>
+                            <option v-for="company in companies" :key="company.id" :value="company.id">
+                                {{ company.company_name }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <label for="session_filter" class="text-sm font-medium text-gray-700">Session:</label>
+                        <select
+                            id="session_filter"
+                            v-model="session"
+                            @change="applyFilters"
+                            class="text-sm border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 pr-8"
+                        >
+                            <option v-for="s in sessions" :key="s" :value="s">
+                                {{ s }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="text-right border-l pl-3 ml-3 hidden md:block">
                         <p class="text-sm font-medium text-gray-900">{{ currentDate }}</p>
                         <p class="text-xs text-gray-500">{{ currentTime }}</p>
                     </div>
@@ -319,8 +348,38 @@ const props = defineProps({
     subscription: {
         type: Object,
         default: null
+    },
+    companies: {
+        type: Array,
+        default: () => []
+    },
+    sessions: {
+        type: Array,
+        default: () => []
+    },
+    filters: {
+        type: Object,
+        default: () => ({
+            firm_id: '',
+            session: ''
+        })
     }
 });
+
+import { router } from '@inertiajs/vue3';
+
+const firmId = ref(props.filters.firm_id || '');
+const session = ref(props.filters.session);
+
+const applyFilters = () => {
+    router.get(route('dashboard'), {
+        firm_id: firmId.value,
+        session: session.value
+    }, {
+        preserveState: true,
+        replace: true
+    });
+};
 
 // Current date and time
 const currentDate = ref('');
