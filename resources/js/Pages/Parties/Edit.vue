@@ -21,6 +21,12 @@
                                     <TextareaInput id="address" v-model="form.address" class="mt-1 block w-full" rows="3" />
                                     <InputError class="mt-2" :message="form.errors.address" />
                                 </div>
+
+                                <div>
+                                    <InputLabel for="opening_balance" value="Opening Balance" />
+                                    <TextInput id="opening_balance" type="number" step="0.01" v-model="form.opening_balance" class="mt-1 block w-full" />
+                                    <InputError class="mt-2" :message="form.errors.opening_balance" />
+                                </div>
                             </div>
 
                             <div class="flex items-center justify-end mt-6">
@@ -53,6 +59,7 @@ const props = defineProps({
 const form = useForm({
     name: props.party.name,
     address: props.party.address || "",
+    opening_balance: props.party.opening_balance || 0,
 });
 
 const submit = () => {

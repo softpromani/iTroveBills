@@ -13,7 +13,7 @@ class LedgerController extends Controller
 {
     public function index()
     {
-        $ledgers = Ledger::with(['seller_customer', 'party'])
+        $ledgers = Ledger::with(['sellerCustomer', 'party'])
             ->where('user_id', Auth::id())
             ->orderBy('date', 'desc')
             ->paginate(10);
@@ -43,11 +43,10 @@ class LedgerController extends Controller
             'party_id' => 'nullable|exists:parties,id',
             'type' => 'required|in:debit,credit',
             'payment_type' => 'required|in:cash,transfer,sales,purchase',
-            'particular_type' => 'required|in:Voucher,Bill',
+            'particular_type' => 'required|in:Voucher,Bill,Paid,Receipt',
             'voucher_no' => 'nullable|string|max:100',
             'amount' => 'required|numeric|min:0',
             'date' => 'required|date',
-            'description' => 'nullable|string',
         ]);
 
         if (!$request->seller_customer_id && !$request->party_id) {
@@ -64,7 +63,6 @@ class LedgerController extends Controller
             'voucher_no' => $request->voucher_no,
             'amount' => $request->amount,
             'date' => $request->date,
-            'description' => $request->description,
         ]);
 
         return redirect()->route('ledgers.index')->with('success', 'Ledger entry created successfully.');
@@ -99,11 +97,10 @@ class LedgerController extends Controller
             'party_id' => 'nullable|exists:parties,id',
             'type' => 'required|in:debit,credit',
             'payment_type' => 'required|in:cash,transfer,sales,purchase',
-            'particular_type' => 'required|in:Voucher,Bill',
+            'particular_type' => 'required|in:Voucher,Bill,Paid,Receipt',
             'voucher_no' => 'nullable|string|max:100',
             'amount' => 'required|numeric|min:0',
             'date' => 'required|date',
-            'description' => 'nullable|string',
         ]);
 
         if (!$request->seller_customer_id && !$request->party_id) {
@@ -119,7 +116,6 @@ class LedgerController extends Controller
             'voucher_no' => $request->voucher_no,
             'amount' => $request->amount,
             'date' => $request->date,
-            'description' => $request->description,
         ]);
 
         return redirect()->route('ledgers.index')->with('success', 'Ledger entry updated successfully.');

@@ -79,6 +79,8 @@
                                     >
                                         <option value="Voucher">Voucher</option>
                                         <option value="Bill">Bill</option>
+                                        <option value="Paid">Paid</option>
+                                        <option value="Receipt">Receipt</option>
                                     </select>
                                     <InputError class="mt-2" :message="form.errors.particular_type" />
                                 </div>
@@ -95,11 +97,7 @@
                                     <InputError class="mt-2" :message="form.errors.amount" />
                                 </div>
 
-                                <div class="col-span-2">
-                                    <InputLabel for="description" value="Description / Particulars (Literal)" />
-                                    <TextareaInput id="description" v-model="form.description" class="mt-1 block w-full" rows="3" />
-                                    <InputError class="mt-2" :message="form.errors.description" />
-                                </div>
+
                             </div>
 
                             <div class="flex items-center justify-end mt-6">
@@ -143,7 +141,6 @@ const form = useForm({
     voucher_no: props.ledger.voucher_no || "",
     amount: props.ledger.amount,
     date: props.ledger.date,
-    description: props.ledger.description || "",
 });
 
 onMounted(() => {

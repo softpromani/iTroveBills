@@ -152,6 +152,24 @@
                                     :message="form.errors.pin"
                                 />
                             </div>
+                            <div class="mt-2 col-md-6">
+                                <InputLabel for="opening_balance" value="Opening Balance" />
+
+                                <TextInput
+                                    id="opening_balance"
+                                    type="number"
+                                    step="0.01"
+                                    class="block w-full mt-1"
+                                    v-model="form.opening_balance"
+                                    autofocus
+                                    autocomplete="opening_balance"
+                                />
+
+                                <InputError
+                                    class="mt-2"
+                                    :message="form.errors.opening_balance"
+                                />
+                            </div>
                             <div class="mt-2 col-12">
                                 <InputLabel
                                     for="address"
@@ -221,7 +239,8 @@ const form = useForm({
     gst: props.searchdata ? props.searchdata.gstin : "",
     pin: props.searchdata ? props.searchdata.pin : "",
     address: props.searchdata ? props.searchdata.address : "",
-    tax_type:props.searchdata?props.searchdata.tax_type : ""
+    tax_type:props.searchdata?props.searchdata.tax_type : "",
+    opening_balance: 0,
 });
 const form2 = useForm({});
 const enteredValue = ref('');

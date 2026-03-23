@@ -30,12 +30,14 @@ class PartyController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'address' => 'nullable|string',
+            'opening_balance' => 'nullable|numeric',
         ]);
 
         Party::create([
             'user_id' => Auth::id(),
             'name' => $request->name,
             'address' => $request->address,
+            'opening_balance' => $request->opening_balance ?? 0,
         ]);
 
         return redirect()->route('parties.index')->with('success', 'Party created successfully.');
@@ -61,11 +63,13 @@ class PartyController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'address' => 'nullable|string',
+            'opening_balance' => 'nullable|numeric',
         ]);
 
         $party->update([
             'name' => $request->name,
             'address' => $request->address,
+            'opening_balance' => $request->opening_balance ?? 0,
         ]);
 
         return redirect()->route('parties.index')->with('success', 'Party updated successfully.');

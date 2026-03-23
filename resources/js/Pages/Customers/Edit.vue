@@ -148,6 +148,24 @@
                                     :message="form.errors.pin"
                                 />
                             </div>
+                            <div class="col-md-6 mt-2">
+                                <InputLabel for="opening_balance" value="Opening Balance" />
+
+                                <TextInput
+                                    id="opening_balance"
+                                    type="number"
+                                    step="0.01"
+                                    class="mt-1 block w-full"
+                                    v-model="form.opening_balance"
+                                    autofocus
+                                    autocomplete="opening_balance"
+                                />
+
+                                <InputError
+                                    class="mt-2"
+                                    :message="form.errors.opening_balance"
+                                />
+                            </div>
                             <div class="col-12 mt-2">
                                 <InputLabel
                                     for="address"
@@ -219,7 +237,8 @@ const form = useForm({
     city:edata.city,
     pin:edata.pin,
     address:edata.address,
-    tax_type:edata.tax_type
+    tax_type:edata.tax_type,
+    opening_balance: props.edit_customers.opening_balance || 0
 });
 
 function update() {

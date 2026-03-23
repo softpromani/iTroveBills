@@ -37,6 +37,7 @@ class CustomerController extends Controller
             'address' => 'required',
             'pin' => 'required',
             'tax_type' => 'required',
+            'opening_balance' => 'nullable|numeric',
         ]);
         if ($valid) {
             $seller_id = Auth::id();
@@ -58,7 +59,8 @@ class CustomerController extends Controller
             ], [
                 'seller_id' => $seller_id,
                 'customer_company_id' => $customer_company_id,
-                'customer_company_data' => json_encode($request->all()), // Convert the array to JSON
+                'customer_company_data' => json_encode($request->all()),
+                'opening_balance' => $request->opening_balance ?? 0,
             ]);
 
 
@@ -88,10 +90,12 @@ class CustomerController extends Controller
             'address' => 'required',
             'pin' => 'required',
             'tax_type' => 'required',
+            'opening_balance' => 'nullable|numeric',
         ]);
         if($valid){
             SellerCustomers::find($id)->update([
-                'customer_company_data'=>json_encode($request->all())
+                'customer_company_data'=>json_encode($request->all()),
+                'opening_balance' => $request->opening_balance ?? 0,
             ]);
             return redirect()->route('company.customer.view')->with('success', 'Customer added successfully');
 

@@ -58,8 +58,16 @@ class LedgerReportController extends Controller
         $start_date = $request->start_date ? Carbon::parse($request->start_date) : null;
         $end_date = $request->end_date ? Carbon::parse($request->end_date) : Carbon::now();
 
-        // 1. Calculate Opening Balance (ONLY manual Ledgers now)
-        $opening_balance = 0;
+        // 1. Get Base Opening Balance from DB
+        $base_opening_balance = 0;
+        if ($request->seller_customer_id) {
+            $base_opening_balance = SellerCustomers::where('id', $request->seller_customer_id)->value('opening_balance') ?? 0;
+        } elseif ($request->party_id) {
+            $base_opening_balance = Party::where('id', $request->party_id)->value('opening_balance') ?? 0;
+        }
+
+        // 2. Calculate Transaction-based Opening Balance for the period
+        $opening_balance = (float)$base_opening_balance;
         if ($start_date) {
             $query_before = Ledger::where('date', '<', $start_date)
                 ->when($request->seller_customer_id, function($q) use ($request) {
@@ -72,7 +80,7 @@ class LedgerReportController extends Controller
             $ledger_debit_before = (clone $query_before)->where('type', 'debit')->sum('amount');
             $ledger_credit_before = (clone $query_before)->where('type', 'credit')->sum('amount');
 
-            $opening_balance = $ledger_debit_before - $ledger_credit_before;
+            $opening_balance += ($ledger_debit_before - $ledger_credit_before);
         }
 
         // 2. Fetch Transactions (ONLY manual Ledgers now)
