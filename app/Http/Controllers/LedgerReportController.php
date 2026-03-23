@@ -62,8 +62,10 @@ class LedgerReportController extends Controller
         $base_opening_balance = 0;
         if ($request->seller_customer_id) {
             $base_opening_balance = SellerCustomers::where('id', $request->seller_customer_id)->value('opening_balance') ?? 0;
+            $base_opening_balance = (float)$base_opening_balance; // Customers are Debit (+)
         } elseif ($request->party_id) {
             $base_opening_balance = Party::where('id', $request->party_id)->value('opening_balance') ?? 0;
+            $base_opening_balance = -1 * (float)$base_opening_balance; // Parties are Credit (-)
         }
 
         // 2. Calculate Transaction-based Opening Balance for the period
