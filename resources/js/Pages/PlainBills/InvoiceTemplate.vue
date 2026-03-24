@@ -10,7 +10,7 @@
         </button>
 
         <Link :href="route('plain-bill.list')" class="btn btn-outline-secondary mx-2">
-        <i class="fa fa-arrow-left mr-2"></i> Back to List
+            <i class="fa fa-arrow-left mr-2"></i> Back to List
         </Link>
     </div>
 
@@ -26,9 +26,7 @@
                 <!-- Seller Details (Left) -->
                 <div class="col-6 border-right border-dark p-3 min-vh-15">
                     <div class="d-flex align-items-start mb-2">
-                        <div v-if="props.invoice.company.logo" class="logo-container mr-3">
-                            <img :src="`/${props.invoice.company.logo}`" class="seller-logo" alt="Logo" />
-                        </div>
+
                         <div>
                             <h5 class="company-name mb-1 font-weight-bold">CHOICE ENTERPRISE</h5>
                             <div class="address-box details-text">
