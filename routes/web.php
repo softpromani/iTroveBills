@@ -15,6 +15,7 @@ use App\Http\Controllers\PaymentRequestController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SubscriptionPackController;
+use App\Http\Controllers\PlainBillController;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\SellerCustomers;
@@ -244,6 +245,17 @@ Route::middleware('auth')->group(function () {
 
     // routes/web.php
     Route::get('/hsn/search', [HsnSacMasterController::class, 'search'])->name('hsn.search');
+    
+    // Plain Bill Specific Routes
+    Route::group(['prefix' => 'plain-bill', 'as' => 'plain-bill.', 'middleware' => ['plainbill.auth']], function() {
+        Route::get('/', [PlainBillController::class, 'index'])->name('index');
+        Route::post('/auth', [PlainBillController::class, 'auth'])->name('auth');
+        Route::get('/list', [PlainBillController::class, 'list'])->name('list');
+        Route::post('/store', [PlainBillController::class, 'store'])->name('store');
+        Route::get('/edit/{id}', [PlainBillController::class, 'edit'])->name('edit');
+        Route::post('/update/{id}', [PlainBillController::class, 'update'])->name('update');
+        Route::get('/view-invoice', [PlainBillController::class, 'template'])->name('view.invoice');
+    });
 
 });
 Route::get('view-invoice',[CustomerBillController::class,'template'])->name('view.invoice');

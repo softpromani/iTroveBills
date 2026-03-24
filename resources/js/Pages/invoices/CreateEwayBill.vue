@@ -104,12 +104,18 @@
                                             <option value="3">Export</option>
                                             <option value="4">Job Work</option>
                                             <option value="5">For Own Use</option>
-                                            <option value="6">SKD/CKD</option>
-                                            <option value="7">Recipient Not Known</option>
-                                            <option value="8">Exhibition or Fairs</option>
-                                            <option value="9">Line Sales</option>
-                                            <option value="10">Others</option>
+                                            <option value="6">Job Work Returns</option>
+                                            <option value="7">Sales Return</option>
+                                            <option value="8">Others</option>
+                                            <option value="9">SKD/CKD/Lots</option>
+                                            <option value="10">Line Sales</option>
+                                            <option value="11">Recipient Not Known</option>
+                                            <option value="12">Exhibition or Fairs</option>
                                         </select>
+                                        <div v-if="form.subSupplyType == '8'" class="mt-2">
+                                            <label class="small font-weight-bold">Others Description</label>
+                                            <input type="text" v-model="form.subSupplyDesc" class="form-control form-control-sm" placeholder="Specify other type" required maxlength="20" />
+                                        </div>
                                         <InputError :message="form.errors.subSupplyType" />
                                     </div>
                                 </div>

@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Session;
+use Carbon\Carbon;
+
+class PlainBillAuthMiddleware
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        $authenticated = Session::get('plain_bill_authenticated');
+        $expiresAt = Session::get('plain_bill_expires_at');
+
+        if ($authenticated && $expiresAt && Carbon::now()->lessThan(Carbon::parse($expiresAt))) {
+            // Refresh expiration on each authenticated request? User said "give access untill 1 hours".
+            // If I refresh, it's a rolling session. If not, it's absolute. 
+            // I'll stick to absolute for now or just refresh to keep it simple.
+            // Session::put('plain_bill_expires_at', Carbon::now()->addHour()->toDateTimeString());
+            return $next($request);
+        }
+
+        // Not authenticated or expired
+        if ($request->routeIs('plain-bill.auth')) {
+            return $next($request);
+        }
+
+        // Only allow GET for index/list with a flag
+        if ($request->isMethod('GET') && ($request->routeIs('plain-bill.index') || $request->routeIs('plain-bill.list'))) {
+            $request->attributes->set('needs_plain_bill_auth', true);
+            return $next($request);
+        }
+
+        // Block everything else
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Unauthorized. Please authenticate first.'], 401);
+        }
+
+        return redirect()->route('plain-bill.index')->with('error', 'Please authenticate to access this module.');
+    }
+}

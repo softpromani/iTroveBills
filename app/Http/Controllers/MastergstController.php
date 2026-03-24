@@ -42,6 +42,8 @@ class MastergstController extends Controller
             $invoice = \App\Models\PerformaInvoice::with(['Company', 'Customer', 'invoiceitems'])->find($invoice_id);
         } elseif ($type === 'regular') {
             $invoice = Invoice::with(['Company', 'Customer', 'invoiceitems'])->find($invoice_id);
+        } elseif ($type === 'plain') {
+            $invoice = \App\Models\PlainBill::with(['Company', 'Customer', 'items'])->find($invoice_id);
         } else {
             // Fallback: Try to find in regular Invoice or GSTInvoice (Original logic)
             $invoice = GSTInvoice::with(['Company', 'Customer', 'invoiceitems'])->find($invoice_id);
@@ -55,7 +57,7 @@ class MastergstController extends Controller
 
         if ($invoice) {
             // Normalize items for the view
-            $invoice->items = $invoice->invoiceitems;
+            $invoice->items = $invoice->invoiceitems ?? $invoice->items;
         }
 
         if (!$invoice) {
@@ -97,6 +99,8 @@ class MastergstController extends Controller
             $invoice = \App\Models\PerformaInvoice::with(['Company', 'Customer', 'invoiceitems'])->find($invoice_id);
         } elseif ($type === 'regular') {
             $invoice = Invoice::with(['Company', 'Customer', 'invoiceitems'])->find($invoice_id);
+        } elseif ($type === 'plain') {
+            $invoice = \App\Models\PlainBill::with(['Company', 'Customer', 'items'])->find($invoice_id);
         } else {
             // Fallback
             $invoice = GSTInvoice::with(['Company', 'Customer', 'invoiceitems'])->find($invoice_id);
@@ -106,7 +110,7 @@ class MastergstController extends Controller
         }
         
         if ($invoice) {
-            $invoice->items = $invoice->invoiceitems;
+            $invoice->items = $invoice->invoiceitems ?? $invoice->items;
         }
 
         if (!$invoice) {
@@ -131,12 +135,17 @@ class MastergstController extends Controller
         $fromStateCode = (int)substr($fromGstin, 0, 2);
         
         // Derive ToStateCode from GSTIN if 15 chars, otherwise from Pincode
+        $toPincode = preg_replace('/[^0-9]/', '', $request->toPincode ?: $invoice->Customer->pin);
+        $isExport = (str_contains(strtoupper($invoice->Customer->address ?? ''), 'BHUTAN') || 
+                      str_contains(strtoupper($invoice->Customer->address ?? ''), 'EXPORT') ||
+                      str_contains(strtoupper($invoice->invoice_no), 'EXP') ||
+                      ($request->subSupplyType == '3'));
+
         if (strlen($toGstin) === 15) {
             $toStateCode = (int)substr($toGstin, 0, 2);
         } else {
-            // Fallback: Derive from Pincode (first 2 digits)
-            $toPincode = preg_replace('/[^0-9]/', '', $request->toPincode ?: $invoice->Customer->pin);
-            $toStateCode = $this->deriveStateCodeFromPincode($toPincode);
+            // Fallback: Derive from Pincode
+            $toStateCode = $isExport ? 99 : $this->deriveStateCodeFromPincode($toPincode);
             
             if (!$toStateCode) {
                  return response()->json(['status' => 0, 'message' => "Could not determine State Code for Unregistered Buyer. Please ensure a valid 6-digit Pincode is provided."], 400);
@@ -182,10 +191,18 @@ class MastergstController extends Controller
 
             $calculatedTotalTaxableValue += $taxableAmount;
 
-            // Unit Code must be exactly 3 chars as per NIC
+            // Unit Code must be exactly 3 chars (UQC standards)
             $qtyUnit = strtoupper(trim($item->unit ?: 'NOS'));
-            if (strlen($qtyUnit) > 3) $qtyUnit = substr($qtyUnit, 0, 3);
-            if (strlen($qtyUnit) < 3) $qtyUnit = str_pad($qtyUnit, 3, 'S'); // e.g. PC -> PCS
+            if ($qtyUnit == 'PC' || $qtyUnit == 'PCS' || $qtyUnit == 'PIECES') $qtyUnit = 'PCS';
+            elseif ($qtyUnit == 'KG' || $qtyUnit == 'KGS') $qtyUnit = 'KGS';
+            elseif ($qtyUnit == 'BOX' || $qtyUnit == 'BOXES') $qtyUnit = 'BOX';
+            elseif ($qtyUnit == 'BAG' || $qtyUnit == 'BAGS') $qtyUnit = 'BAG';
+            elseif ($qtyUnit == 'MTR' || $qtyUnit == 'METERS') $qtyUnit = 'MTR';
+            elseif ($qtyUnit == 'NOS' || $qtyUnit == 'NUMBERS') $qtyUnit = 'NOS';
+            else {
+                if (strlen($qtyUnit) > 3) $qtyUnit = substr($qtyUnit, 0, 3);
+                if (strlen($qtyUnit) < 3) $qtyUnit = str_pad($qtyUnit, 3, 'S'); 
+            }
 
             $itemList[] = [
                 "productName" => substr(strip_tags($item->desc_product), 0, 100), 
@@ -236,10 +253,27 @@ class MastergstController extends Controller
             return response()->json(['status' => 0, 'message' => 'Invalid Buyer Pincode ('.$toPincode.'). It must be exactly 6 digits.'], 400);
         }
 
+        $toPlace = $invoice->Customer->city;
+        if (!$toPlace && $invoice->Customer->address) {
+            $parts = explode(',', $invoice->Customer->address);
+            $lastPart = trim(end($parts));
+            $toPlace = trim(preg_replace('/-?[0-9]{6}$/', '', $lastPart));
+            if (strlen($toPlace) < 3 && count($parts) > 1) {
+                $toPlace = trim(preg_replace('/-?[0-9]{6}$/', '', trim($parts[count($parts)-2])));
+            }
+        }
+        $toPlace = substr($toPlace ?: "Place", 0, 50);
+        if (strlen($toPlace) < 3) $toPlace = str_pad($toPlace, 3, 'X'); 
+
+        if ($isExport) {
+            $toPincode = 999999;
+            $toStateCode = 99;
+        }
+
         $data = [
             "supplyType" => $request->supplyType,
-            "subSupplyType" => (int)$request->subSupplyType,
-            "subSupplyDesc" => $request->subSupplyType == "10" ? substr($request->subSupplyDesc ?? "Others", 0, 20) : "",
+            "subSupplyType" => $isExport ? "3" : (string)($request->subSupplyType ?? "1"),
+            "subSupplyDesc" => in_array($request->subSupplyType, ["8", 8, "Others"]) ? substr($request->subSupplyDesc ?? "Others", 0, 20) : "",
             "docType" => "INV",
             "docNo" => $docNo,
             "docDate" => date('d/m/Y', strtotime($invoice->invoice_date)),
@@ -255,9 +289,9 @@ class MastergstController extends Controller
             "toTrdName" => substr($invoice->Customer->company_name, 0, 100),
             "toAddr1" => substr($invoice->Customer->address ?? "Address", 0, 100),
             "toAddr2" => "",
-            "toPlace" => substr($invoice->Customer->city ?: "Default Place", 0, 50),
+            "toPlace" => $toPlace,
             "toPincode" => (int)$toPincode,
-            "actToStateCode" => (int)$toStateCode,
+            "actToStateCode" => $isExport ? 99 : (int)$toStateCode,
             "toStateCode" => (int)$toStateCode,
             "transactionType" => (int)($request->transactionType ?? 1),
             "totalValue" => round($calculatedTotalTaxableValue, 2),
@@ -265,13 +299,13 @@ class MastergstController extends Controller
             "sgstValue" => round($calculatedTotalSgst, 2),
             "igstValue" => round($calculatedTotalIgst, 2),
             "cessValue" => 0,
-            "totInvValue" => round($calculatedTotalTaxableValue + $calculatedTotalCgst + $calculatedTotalSgst + $calculatedTotalIgst, 2),
+            "totInvValue" => round($calculatedTotalTaxableValue + $calculatedTotalCgst + $calculatedTotalSgst + $calculatedTotalIgst + ($request->otherValue ?? 0), 2),
             "transMode" => (int)$request->transMode,
             "transDistance" => (int)$transDistance,
             "transporterName" => substr($request->transporterName ?? "", 0, 100),
             "transporterId" => $transporterId,
             "transDocNo" => substr($request->transDocNo ?? "", 0, 15),
-            "transDocDate" => $request->transDocDate ?? "",
+            "transDocDate" => $request->transDocDate ? date('d/m/Y', strtotime($request->transDocDate)) : "",
             "vehicleNo" => strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $request->vehicleNo)),
             "vehicleType" => $request->vehicleType ?? "R",
             "itemList" => $itemList,
@@ -291,22 +325,30 @@ class MastergstController extends Controller
 
             $apiUrl = rtrim($config->gst_base_url, '/') . '/ewayapi/v1.03/ewayapi/genewaybill?email=' . urlencode($config->email);
             
-            // Log the request for debugging
-            Log::error('DEBUG E-WAY BILL REQUEST PAYLOAD:', ['data' => $data]);
-
-            $response = Http::withHeaders([
+            $headers = [
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
                 'ip_address' => $config->ip_address,
                 'client_id' => $config->client_id,
                 'client_secret' => $config->client_secret,
-                'gstin' => $config->gstin ?? $invoice->Company->gstin,
-            ])->post($apiUrl, $data);
+                'username' => $config->username,
+                'password' => $config->password,
+                'gstin' => $invoice->Company->gstin,
+            ];
+
+            // Log the request for debugging
+            Log::info('MASTERGST E-WAY BILL REQUEST:', [
+                'url' => $apiUrl,
+                'headers' => $headers,
+                'payload' => ['ewayBill' => $data]
+            ]);
+
+            $response = Http::withHeaders($headers)->post($apiUrl, ['ewayBill' => $data]);
 
             $responseData = $response->json();
             
             // Log the response
-            Log::error('DEBUG E-WAY BILL RESPONSE:', ['response' => $responseData]);
+            Log::info('MASTERGST E-WAY BILL RESPONSE:', ['response' => $responseData]);
 
             if (isset($responseData['status_cd']) && $responseData['status_cd'] == "1") {
                 // ... same storage logic ...

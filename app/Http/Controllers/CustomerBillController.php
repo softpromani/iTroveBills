@@ -382,6 +382,8 @@ class CustomerBillController extends Controller
             $invoice = PerformaInvoice::find($id);
         } elseif ($type === 'regular') {
             $invoice = Invoice::find($id);
+        } elseif ($type === 'plain') {
+            $invoice = \App\Models\PlainBill::find($id);
         } else {
             // Fallback to previous logic if type is not provided
             $invoice = Invoice::find($id) 

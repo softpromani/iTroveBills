@@ -15,11 +15,11 @@
     >
         <div class="flex items-center justify-center mt-8">
             <div class="flex items-center">
-                <!-- <img :src="$page.props.auth.user.app_logo??'itimages/it.png'" alt="" srcset="" style="height: 70px;">
+                <img :src="$page.props.auth.user.app_logo??'itimages/it.png'" alt="" srcset="" style="height: 70px;">
 
                 <span class="mx-2 text-2xl font-semibold text-white"
                     >{{ $page.props.auth.user.app_name??'Innovation Trove' }}</span
-                > -->
+                >
             </div>
         </div>
 
