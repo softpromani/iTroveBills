@@ -16,6 +16,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SubscriptionPackController;
 use App\Http\Controllers\PlainBillController;
+use App\Http\Controllers\PlainLedgerController;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\SellerCustomers;
@@ -255,6 +256,19 @@ Route::middleware('auth')->group(function () {
         Route::get('/edit/{id}', [PlainBillController::class, 'edit'])->name('edit');
         Route::post('/update/{id}', [PlainBillController::class, 'update'])->name('update');
         Route::get('/view-invoice', [PlainBillController::class, 'template'])->name('view.invoice');
+    });
+
+    // Plain Ledger Specific Routes
+    Route::group(['prefix' => 'plain-ledger', 'as' => 'plain-ledger.', 'middleware' => ['plainbill.auth']], function() {
+        Route::get('/', [PlainLedgerController::class, 'index'])->name('index');
+        Route::post('/auth', [PlainLedgerController::class, 'auth'])->name('auth');
+        Route::get('/create', [PlainLedgerController::class, 'create'])->name('create');
+        Route::post('/store', [PlainLedgerController::class, 'store'])->name('store');
+        Route::get('/edit/{id}', [PlainLedgerController::class, 'edit'])->name('edit');
+        Route::post('/update/{id}', [PlainLedgerController::class, 'update'])->name('update');
+        Route::delete('/destroy/{id}', [PlainLedgerController::class, 'destroy'])->name('destroy');
+        Route::get('/report', [PlainLedgerController::class, 'report'])->name('report');
+        Route::get('/report/generate', [PlainLedgerController::class, 'generate_report'])->name('report.generate');
     });
 
 });
