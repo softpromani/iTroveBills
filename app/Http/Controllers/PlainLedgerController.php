@@ -205,11 +205,19 @@ class PlainLedgerController extends Controller
         $start_date = $request->start_date ? Carbon::parse($request->start_date) : null;
         $end_date = $request->end_date ? Carbon::parse($request->end_date) : Carbon::now();
 
-        // 1. Get Base Opening Balance (Assuming Plain Ledger starts from 0 as it's separate)
-        // If user wants opening balance from the main module, they can define it.
-        // For now, I'll stick to a simple separate ledger logic.
-        $opening_balance = 0;
+        // 1. Get Base Opening Balance from DB
+        $base_opening_balance = 0;
+        if ($request->seller_customer_id) {
+            $base_opening_balance = SellerCustomers::where('id', $request->seller_customer_id)->value('opening_balance') ?? 0;
+            $base_opening_balance = (float)$base_opening_balance;
+        } elseif ($request->party_id) {
+            $base_opening_balance = Party::where('id', $request->party_id)->value('opening_balance') ?? 0;
+            $base_opening_balance = -1 * (float)$base_opening_balance; // Parties are Credit (-)
+        }
+
+        $opening_balance = (float)$base_opening_balance;
         
+        // 2. Calculate Transaction-based Opening Balance for the period (prior to start_date)
         if ($start_date) {
             $query_before = PlainLedger::where('user_id', Auth::id())
                 ->where('date', '<', $start_date)
