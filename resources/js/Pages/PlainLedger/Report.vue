@@ -230,7 +230,7 @@ const authForm = useForm({
 });
 
 const submitAuth = () => {
-    authForm.post(route("plain-ledger.auth"), {
+    authForm.post(route("ink.auth"), {
         onSuccess: () => {
             showAuthModal.value = false;
         },
@@ -265,7 +265,7 @@ watch(selectedAccount, (val) => {
 });
 
 const generateReport = () => {
-    form.get(route("plain-ledger.report.generate"), {
+    form.get(route("ink.report.generate"), {
         preserveState: true,
         replace: true,
     });

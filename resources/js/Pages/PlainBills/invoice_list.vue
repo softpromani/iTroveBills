@@ -112,13 +112,13 @@
                                         </span>
                                         <ul class="dropdown-menu">
                                             <li>
-                                                <Link class="dropdown-item" :href="route('plain-bill.edit', invoice.id)">
+                                                <Link class="dropdown-item" :href="route('book.edit', invoice.id)">
                                                     <i class="fa-solid fa-pen-to-square" style="color: blueviolet"></i>
                                                     Edit
                                                 </Link>
                                             </li>
                                             <li>
-                                                <Link :href="route('plain-bill.view.invoice')" method="get" :data="{ invoice_id: invoice.id }" class="dropdown-item">
+                                                <Link :href="route('book.view.invoice')" method="get" :data="{ invoice_id: invoice.id }" class="dropdown-item">
                                                     <i class="fa fa-print" aria-hidden="true" style="color: rgb(241, 12, 12);"></i>
                                                     Print
                                                 </Link>
@@ -198,7 +198,7 @@ const authForm = useForm({
 });
 
 const submitAuth = () => {
-    authForm.post(route("plain-bill.auth"), {
+    authForm.post(route("book.auth"), {
         onSuccess: () => {
             showAuthModal.value = false;
         },
@@ -213,7 +213,7 @@ const filters = ref({
 const invoiceList = computed(() => props.invoices || []);
 
 const applyFilters = () => {
-    router.get(route('plain-bill.list'), filters.value, {
+    router.get(route('book.list'), filters.value, {
         preserveState: true,
         replace: true
     });

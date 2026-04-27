@@ -58,7 +58,7 @@
                             <div class="meta-value font-weight-bold">{{ formatDate(props.invoice.invoice_date) }}</div>
                         </div>
                     </div>
-                    <div class="row no-gutters h-50">
+                    <div class="row no-gutters h-50" v-if="props.invoice.company.firm_type !== 'IT'">
                         <div class="col-6 border-right border-dark p-2">
                             <label class="meta-label">LUT</label>
                             <div class="meta-value">{{ props.invoice.lut?.lut_no || "" }}</div>
@@ -116,7 +116,7 @@
                             <label class="meta-label">Dispatched through</label>
                             <div class="meta-value">{{ props.invoice.dispatched_through || "-" }}</div>
                         </div>
-                        <div class="col-6 p-2">
+                        <div class="col-6 p-2" v-if="props.invoice.company.firm_type !== 'IT'">
                             <label class="meta-label">Vehicle No.</label>
                             <div class="meta-value">{{ props.invoice.vehicle_no }}</div>
                         </div>

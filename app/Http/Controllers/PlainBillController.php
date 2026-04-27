@@ -113,7 +113,7 @@ class PlainBillController extends Controller
         $request->validate([
             'invoicedata.*.*' => 'required',
             'invoicedetails.0.invoice' => 'required|string',
-            'invoicedetails.0.vehical_no' => 'required|string',
+            'invoicedetails.0.vehical_no' => 'nullable|string',
             'invoicedetails.0.totalWeight' => 'required|numeric',
             'invoicedetails.0.totalTaxableValue' => 'required|numeric',
         ]);
@@ -178,7 +178,7 @@ class PlainBillController extends Controller
             ]);
         }
 
-        return redirect()->route('plain-bill.list')->with('success', 'Plain Bill Created Successfully');
+        return redirect()->route('book.list')->with('success', 'Plain Bill Created Successfully');
     }
 
     public function list(Request $request)
@@ -238,7 +238,7 @@ class PlainBillController extends Controller
         $request->validate([
             'invoicedata.*.*' => 'required',
             'invoicedetails.0.invoice' => 'required|string',
-            'invoicedetails.0.vehical_no' => 'required|string',
+            'invoicedetails.0.vehical_no' => 'nullable|string',
             'invoicedetails.0.totalWeight' => 'required|numeric',
             'invoicedetails.0.totalTaxableValue' => 'required|numeric',
         ]);
@@ -264,6 +264,6 @@ class PlainBillController extends Controller
             ]);
         }
 
-        return redirect()->route('plain-bill.list')->with('success', 'Plain Bill Updated Successfully');
+        return redirect()->route('book.list')->with('success', 'Plain Bill Updated Successfully');
     }
 }

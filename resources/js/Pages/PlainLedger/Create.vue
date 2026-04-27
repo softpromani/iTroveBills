@@ -100,7 +100,7 @@
                             </div>
 
                             <div class="flex items-center justify-end mt-6">
-                                <Link :href="route('plain-ledger.index')" class="mr-4 text-sm text-gray-600 hover:text-gray-900">Cancel</Link>
+                                <Link :href="route('ink.index')" class="mr-4 text-sm text-gray-600 hover:text-gray-900">Cancel</Link>
                                 <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                                     Save Entry
                                 </PrimaryButton>
@@ -151,6 +151,6 @@ watch(selectedAccount, (val) => {
 });
 
 const submit = () => {
-    form.post(route("plain-ledger.store"));
+    form.post(route("ink.store"));
 };
 </script>

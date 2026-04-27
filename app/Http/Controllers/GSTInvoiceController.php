@@ -91,7 +91,7 @@ class GSTInvoiceController extends Controller
                 $billCount = $startingNumber > 0 ? $startingNumber : ($company_obj->ThisYearGstInvoice()->count() ?? 0) + 1;
             }
 
-            $inv_no = $company_obj->invoice_series . '-' . $financialYear . '/' . str_pad($billCount, 5, '0', STR_PAD_LEFT);
+            $inv_no = $company_obj->gst_invoice_series . '-' . $financialYear . '/' . str_pad($billCount, 5, '0', STR_PAD_LEFT);
 
             $customer_data = null;
             if ($customer_id) {
@@ -139,7 +139,7 @@ class GSTInvoiceController extends Controller
             'invoicedetails.0.invoice' => 'required|string|max:100',
             'invoicedetails.0.customer' => 'nullable|string',
             'invoicedetails.0.company' => 'required|string',
-            'invoicedetails.0.vehical_no' => 'required|string|max:50',
+            'invoicedetails.0.vehical_no' => 'nullable|string|max:50',
             'invoicedetails.0.totalWeight' => 'required|numeric|min:0',
             'invoicedetails.0.totalTaxableValue' => 'required|numeric|min:0',
             'invoicedetails.0.totalGstAmount' => 'required|numeric|min:0',
@@ -148,7 +148,6 @@ class GSTInvoiceController extends Controller
             'invoicedata.required' => 'Invoice items are required.',
             'invoicedetails.0.invoice.required' => 'Invoice number is required.',
             'invoicedetails.0.company.required' => 'Company is required.',
-            'invoicedetails.0.vehical_no.required' => 'Vehicle number is required.',
         ]);
 
         try {
@@ -329,7 +328,7 @@ class GSTInvoiceController extends Controller
             'invoicedetails.0.invoice' => 'required|string|max:100',
             'invoicedetails.0.customer' => 'required',
             'invoicedetails.0.company' => 'required',
-            'invoicedetails.0.vehical_no' => 'required|string|max:50',
+            'invoicedetails.0.vehical_no' => 'nullable|string|max:50',
             'invoicedetails.0.totalWeight' => 'required|numeric|min:0',
             'invoicedetails.0.totalTaxableValue' => 'required|numeric|min:0',
             'invoicedetails.0.totalGstAmount' => 'required|numeric|min:0',
@@ -340,7 +339,6 @@ class GSTInvoiceController extends Controller
             'invoicedetails.0.invoice.required' => 'Invoice number is required.',
             'invoicedetails.0.customer.required' => 'Customer is required.',
             'invoicedetails.0.company.required' => 'Company is required.',
-            'invoicedetails.0.vehical_no.required' => 'Vehicle number is required.',
         ]);
 
         try {

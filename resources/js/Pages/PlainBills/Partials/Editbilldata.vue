@@ -309,7 +309,7 @@ const updatebill = () => {
     };
 
     form.post(
-        route("plain-bill.update", {
+        route("book.update", {
             invoicedata: tableData.value,
             id: props.edit_id,
             invoicedetails: invoicedetails.value,

@@ -9,7 +9,7 @@
             <i class="fa fa-download mr-2"></i> Download PDF
         </button>
 
-        <Link :href="route('plain-bill.list')" class="btn btn-outline-secondary mx-2">
+        <Link :href="route('book.list')" class="btn btn-outline-secondary mx-2">
             <i class="fa fa-arrow-left mr-2"></i> Back to List
         </Link>
     </div>
@@ -89,7 +89,7 @@
                             <label class="meta-label">Dispatched through</label>
                             <div class="meta-value">{{ props.invoice.dispatched_through || "-" }}</div>
                         </div>
-                        <div class="col-6 p-2">
+                        <div class="col-6 p-2" v-if="props.invoice.company?.firm_type !== 'IT'">
                             <label class="meta-label">Vehicle No.</label>
                             <div class="meta-value">{{ props.invoice.vehicle_no }}</div>
                         </div>

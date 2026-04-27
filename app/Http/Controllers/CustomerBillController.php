@@ -134,7 +134,7 @@ class CustomerBillController extends Controller
         $valid = $request->validate([
             'invoicedata.*.*' => 'required',
             'invoicedetails.*.invoice' => 'required|string',
-            'invoicedetails.*.vehical_no' => 'required|string',
+            'invoicedetails.*.vehical_no' => 'nullable|string',
             'invoicedetails.*.totalWeight' => 'required|numeric',
             'invoicedetails.*.totalTaxableValue' => 'required|numeric',
         ]);
@@ -338,7 +338,7 @@ class CustomerBillController extends Controller
         $valid = $request->validate([
             'invoicedata.*.*' => 'required',
             'invoicedetails.*.invoice' => 'required|string',
-            'invoicedetails.*.vehical_no' => 'required|string',
+            'invoicedetails.*.vehical_no' => 'nullable|string',
             'invoicedetails.*.totalWeight' => 'required|numeric',
             'invoicedetails.*.totalTaxableValue' => 'required|numeric',
             'invoice_id' => 'required',
@@ -489,7 +489,7 @@ class CustomerBillController extends Controller
                 $billCount = $startingNumber > 0 ? $startingNumber : ($company_obj->ThisYearPerformaInvoice()->count() ?? 0) + 1;
             }
 
-            $inv_no = $company_obj->invoice_series . '-' . $financialYear . '/' . str_pad($billCount, 5, '0', STR_PAD_LEFT);
+            $inv_no = $company_obj->proforma_invoice_series . '-' . $financialYear . '/' . str_pad($billCount, 5, '0', STR_PAD_LEFT);
 
             $customer_data = null;
             if ($customer_id) {
@@ -523,7 +523,7 @@ class CustomerBillController extends Controller
         $valid = $request->validate([
             'invoicedata.*.*' => 'required',
             'invoicedetails.*.invoice' => 'required|string',
-            'invoicedetails.*.vehical_no' => 'required|string',
+            'invoicedetails.*.vehical_no' => 'nullable|string',
             'invoicedetails.*.totalWeight' => 'required|numeric',
             'invoicedetails.*.totalTaxableValue' => 'required|numeric',
         ]);
@@ -619,7 +619,7 @@ class CustomerBillController extends Controller
         $valid = $request->validate([
             'invoicedata.*.*' => 'required',
             'invoicedetails.*.invoice' => 'required|string',
-            'invoicedetails.*.vehical_no' => 'required|string',
+            'invoicedetails.*.vehical_no' => 'nullable|string',
             'invoicedetails.*.totalWeight' => 'required|numeric',
             'invoicedetails.*.totalTaxableValue' => 'required|numeric',
             'invoice_id' => 'required',

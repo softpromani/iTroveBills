@@ -36,7 +36,10 @@ class CompanyController extends Controller
             'pin'               => 'required',
             'gstin'             => 'required|unique:companies,gstin',
             'iec'               => 'required',
+            'firm_type'         => 'required|string',
             'invoice_series'    => 'required',
+            'gst_invoice_series' => 'required',
+            'proforma_invoice_series' => 'required',
             'bank_name'         => 'required',
             'bank_branch'       => 'required',
             'bank_ifsc'         => 'required',
@@ -80,11 +83,10 @@ class CompanyController extends Controller
         // New banners array
         $newBanners = [];
         // Handle Brand Banners
-        if ($request->brand_banner) {
+        if ($request->hasFile('brand_banner')) {
             // Upload new banners
             foreach ($request->brand_banner as $bannerFile) {
-                $bannerFile = $bannerFile['file'];
-                if ($bannerFile ) {
+                if ($bannerFile instanceof \Illuminate\Http\UploadedFile) {
                     $bannerName = time() . '-' . rand(1000, 9999) . '.' . $bannerFile->getClientOriginalExtension();
                     $path = $bannerFile->storeAs('company_file/inv_banner', $bannerName, 'public');
                     $newBanners[] = 'storage/' . $path;
@@ -101,7 +103,10 @@ class CompanyController extends Controller
             'pin'             => $request->pin,
             'gstin'           => $request->gstin,
             'iec'             => $request->iec,
+            'firm_type'       => $request->firm_type,
             'invoice_series'  => $request->invoice_series,
+            'gst_invoice_series' => $request->gst_invoice_series,
+            'proforma_invoice_series' => $request->proforma_invoice_series,
             'bank_name'       => $request->bank_name,
             'bank_branch'     => $request->bank_branch,
             'bank_ifsc'       => $request->bank_ifsc,
@@ -167,7 +172,10 @@ class CompanyController extends Controller
             'pin'               => 'required',
             'gstin'             => 'required',
             'iec'               => 'required',
+            'firm_type'         => 'required|string',
             'invoice_series'    => 'required',
+            'gst_invoice_series' => 'required',
+            'proforma_invoice_series' => 'required',
             'bank_name'         => 'required',
             'bank_branch'       => 'required',
             'bank_ifsc'         => 'required',
@@ -178,28 +186,18 @@ class CompanyController extends Controller
 
         $company = Company::findOrFail($id);
 
-        // Existing banners array
-        $existingBanners = [];
-
-        // Only decode if it's a string
-        if (!empty($company->brand_banner)) {
-            if (is_string($company->brand_banner)) {
-                $existingBanners = json_decode($company->brand_banner, true) ?? [];
-            } elseif (is_array($company->brand_banner)) {
-                $existingBanners = $company->brand_banner; // already an array
-            }
-        }
+        // Existing banners are automatically cast to array by the model
+        $existingBanners = $company->brand_banner ?? [];
 
 
         // New banners array
         $newBanners = [];
 
         // Handle Brand Banners
-        if ($request->brand_banner) {
+        if ($request->hasFile('brand_banner')) {
             // Delete old banners if any
             if (!empty($existingBanners)) {
                 foreach ($existingBanners as $oldBanner) {
-                    // Check if it's a storage path or legacy public path
                     if (strpos($oldBanner, 'storage/') === 0) {
                         $relativePath = str_replace('storage/', '', $oldBanner);
                         if (Storage::disk('public')->exists($relativePath)) {
@@ -213,8 +211,7 @@ class CompanyController extends Controller
 
             // Upload new banners
             foreach ($request->brand_banner as $bannerFile) {
-                $bannerFile = $bannerFile['file'];
-                if ($bannerFile ) {
+                if ($bannerFile instanceof \Illuminate\Http\UploadedFile) {
                     $bannerName = time() . '-' . rand(1000, 9999) . '.' . $bannerFile->getClientOriginalExtension();
                     $path = $bannerFile->storeAs('company_file/inv_banner', $bannerName, 'public');
                     $newBanners[] = 'storage/' . $path;
@@ -286,7 +283,10 @@ class CompanyController extends Controller
             'pin'               => $request->pin,
             'gstin'             => $request->gstin,
             'iec'               => $request->iec,
+            'firm_type'         => $request->firm_type,
             'invoice_series'    => $request->invoice_series,
+            'gst_invoice_series' => $request->gst_invoice_series,
+            'proforma_invoice_series' => $request->proforma_invoice_series,
             'bank_name'         => $request->bank_name,
             'bank_branch'       => $request->bank_branch,
             'bank_ifsc'         => $request->bank_ifsc,

@@ -17,7 +17,7 @@ class PlainBillAuthMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $isLedger = $request->is('plain-ledger*');
+        $isLedger = $request->is('ink*');
         
         $authenticated = $isLedger ? Session::get('plain_ledger_authenticated') : Session::get('plain_bill_authenticated');
         $expiresAt = $isLedger ? Session::get('plain_ledger_expires_at') : Session::get('plain_bill_expires_at');
@@ -27,16 +27,16 @@ class PlainBillAuthMiddleware
         }
 
         // Not authenticated or expired
-        if ($request->routeIs('plain-bill.auth') || $request->routeIs('plain-ledger.auth')) {
+        if ($request->routeIs('book.auth') || $request->routeIs('ink.auth')) {
             return $next($request);
         }
 
         // Only allow GET for landing/index with a flag
         if ($request->isMethod('GET') && (
-            $request->routeIs('plain-bill.index') || 
-            $request->routeIs('plain-bill.list') ||
-            $request->routeIs('plain-ledger.index') ||
-            $request->routeIs('plain-ledger.report')
+            $request->routeIs('book.index') || 
+            $request->routeIs('book.list') ||
+            $request->routeIs('ink.index') ||
+            $request->routeIs('ink.report')
         )) {
             $request->attributes->set('needs_plain_bill_auth', true);
             return $next($request);
@@ -49,9 +49,9 @@ class PlainBillAuthMiddleware
 
         // Redirect to appropriate landing page
         if ($isLedger) {
-            return redirect()->route('plain-ledger.index')->with('error', 'Please authenticate to access this module.');
+            return redirect()->route('ink.index')->with('error', 'Please authenticate to access this module.');
         }
 
-        return redirect()->route('plain-bill.index')->with('error', 'Please authenticate to access this module.');
+        return redirect()->route('book.index')->with('error', 'Please authenticate to access this module.');
     }
 }

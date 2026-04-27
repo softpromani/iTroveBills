@@ -41,7 +41,7 @@
                                 Search
                             </PrimaryButton>
                             <Link
-                                :href="route('plain-bill.list')"
+                                :href="route('book.list')"
                                 class="btn btn-secondary h-12 w-100 d-flex align-items-center justify-content-center"
                             >
                                 List
@@ -55,7 +55,7 @@
             <CustomerDetailVue
                 :billing_user_detail="currentCustomerDetail"
                 :series="series"
-                :company="company_id"
+                :company="company"
                 :customer="customer_id"
                 :company_name="CompanyName"
             />
@@ -126,7 +126,7 @@ const authForm = useForm({
 });
 
 const submitAuth = () => {
-    authForm.post(route("plain-bill.auth"), {
+    authForm.post(route("book.auth"), {
         onSuccess: () => {
             showAuthModal.value = false;
         },
@@ -149,7 +149,7 @@ function getcustomerdetail() {
         return;
     }
 
-    router.get(route("plain-bill.index"), {
+    router.get(route("book.index"), {
         customer_id: form.customer_id ? form.customer_id.id : null,
         company_id: form.company_id ? form.company_id.id : null,
     }, {

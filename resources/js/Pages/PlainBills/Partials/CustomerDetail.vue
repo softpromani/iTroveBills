@@ -9,7 +9,7 @@ const props = defineProps({
     billing_user_detail: Object,
     series: String,
     customer: Number,
-    company: Number,
+    company: [Number, Object],
     company_name: String
 });
 
@@ -29,12 +29,14 @@ const form = useForm({
     mobile: props.billing_user_detail?.mobile ?? "",
     customer_name: props.billing_user_detail?.name ?? "",
     customer: props.customer ?? "",
-    company: props.company ?? "",
+    company: (typeof props.company === 'object' ? props.company?.id : props.company) ?? "",
 });
 
 // Watch for prop changes to update form
 watch(() => props.series, (val) => form.invoice_no = val);
-watch(() => props.company, (val) => form.company = val);
+watch(() => props.company, (val) => {
+    form.company = typeof val === 'object' ? val?.id : val;
+});
 watch(() => props.customer, (val) => form.customer = val);
 watch(() => props.billing_user_detail, (val) => {
     if (val) {
@@ -155,14 +157,14 @@ watch(() => props.billing_user_detail, (val) => {
                                 />
                                 <InputError class="mt-2" :message="form.errors.gst" />
                             </div>
-                            <div class="mt-2 col-md-6">
+                            <div class="mt-2 col-md-6" v-if="company?.firm_type !== 'IT'">
                                 <InputLabel for="vehical_no" value="Vehicle No*" />
                                 <TextInput
                                     id="vehical_no"
                                     type="text"
                                     class="block w-full mt-1"
                                     v-model="form.vehical_no"
-                                    required
+                                    :required="company?.firm_type !== 'IT'"
                                 />
                                 <InputError class="mt-2" :message="form.errors.vehical_no" />
                             </div>

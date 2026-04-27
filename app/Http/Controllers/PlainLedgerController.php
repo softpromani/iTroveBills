@@ -83,7 +83,7 @@ class PlainLedgerController extends Controller
             'date' => $request->date,
         ]);
 
-        return redirect()->route('plain-ledger.index')->with('success', 'Plain Ledger entry created successfully.');
+        return redirect()->route('ink.index')->with('success', 'Plain Ledger entry created successfully.');
     }
 
     public function edit($id)
@@ -140,7 +140,7 @@ class PlainLedgerController extends Controller
             'date' => $request->date,
         ]);
 
-        return redirect()->route('plain-ledger.index')->with('success', 'Plain Ledger entry updated successfully.');
+        return redirect()->route('ink.index')->with('success', 'Plain Ledger entry updated successfully.');
     }
 
     public function destroy($id)
@@ -153,7 +153,7 @@ class PlainLedgerController extends Controller
 
         $ledger->delete();
 
-        return redirect()->route('plain-ledger.index')->with('success', 'Plain Ledger entry deleted successfully.');
+        return redirect()->route('ink.index')->with('success', 'Plain Ledger entry deleted successfully.');
     }
 
     public function report(Request $request)

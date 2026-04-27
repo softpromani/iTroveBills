@@ -248,7 +248,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/hsn/search', [HsnSacMasterController::class, 'search'])->name('hsn.search');
     
     // Plain Bill Specific Routes
-    Route::group(['prefix' => 'plain-bill', 'as' => 'plain-bill.', 'middleware' => ['plainbill.auth']], function() {
+    Route::group(['prefix' => 'book', 'as' => 'book.', 'middleware' => ['plainbill.auth']], function() {
         Route::get('/', [PlainBillController::class, 'index'])->name('index');
         Route::post('/auth', [PlainBillController::class, 'auth'])->name('auth');
         Route::get('/list', [PlainBillController::class, 'list'])->name('list');
@@ -259,7 +259,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Plain Ledger Specific Routes
-    Route::group(['prefix' => 'plain-ledger', 'as' => 'plain-ledger.', 'middleware' => ['plainbill.auth']], function() {
+    Route::group(['prefix' => 'ink', 'as' => 'ink.', 'middleware' => ['plainbill.auth']], function() {
         Route::get('/', [PlainLedgerController::class, 'index'])->name('index');
         Route::post('/auth', [PlainLedgerController::class, 'auth'])->name('auth');
         Route::get('/create', [PlainLedgerController::class, 'create'])->name('create');

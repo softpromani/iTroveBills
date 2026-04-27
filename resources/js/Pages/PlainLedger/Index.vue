@@ -13,14 +13,14 @@
                                 <div class="flex items-center gap-4">
                                     <h2 class="text-xl font-semibold text-gray-800">Plain Transactions</h2>
                                     <Link 
-                                        :href="route('plain-ledger.report')"
+                                        :href="route('ink.report')"
                                         class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition text-sm"
                                     >
                                         <i class="fa fa-file-invoice mr-1"></i> Report
                                     </Link>
                                 </div>
                                 <Link
-                                    :href="route('plain-ledger.create')"
+                                    :href="route('ink.create')"
                                     class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition"
                                 >
                                     Add New Entry
@@ -69,7 +69,7 @@
                                                 ₹{{ parseFloat(ledger.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 }) }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                <Link :href="route('plain-ledger.edit', ledger.id)" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</Link>
+                                                <Link :href="route('ink.edit', ledger.id)" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</Link>
                                                 <button @click="deleteLedger(ledger.id)" class="text-red-600 hover:text-red-900">Delete</button>
                                             </td>
                                         </tr>
@@ -161,7 +161,7 @@ const authForm = useForm({
 });
 
 const submitAuth = () => {
-    authForm.post(route("plain-ledger.auth"), {
+    authForm.post(route("ink.auth"), {
         onSuccess: () => {
             showAuthModal.value = false;
         },
@@ -181,7 +181,7 @@ const deleteLedger = (id) => {
 
 const proceedWithDeletion = () => {
     processingDeletion.value = true;
-    deleteForm.delete(route("plain-ledger.destroy", ledgerToDelete.value), {
+    deleteForm.delete(route("ink.destroy", ledgerToDelete.value), {
         onSuccess: () => {
             confirmingDeletion.value = false;
             processingDeletion.value = false;

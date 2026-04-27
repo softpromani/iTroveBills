@@ -11,24 +11,27 @@ const props = defineProps({
 });
 
 const form = useForm({
-    company_name: props.editdata.company_name ?? "",
-    email: props.editdata.email ?? "",
-    mobile: props.editdata.mobile ?? "",
-    logo: props.editdata.logo ?? "",
-    sign: props.editdata.sign ?? "",
-    bank_qr: props.editdata.bank_qr ?? "",
-    address: props.editdata.address ?? "",
-    city: props.editdata.city ?? "",
-    pin: props.editdata.pin ?? "",
-    gstin: props.editdata.gstin ?? "",
-    iec: props.editdata.iec ?? "",
-    invoice_series: props.editdata.invoice_series ?? "",
-    bank_name: props.editdata.bank_name ?? "",
-    bank_branch: props.editdata.bank_branch ?? "",
-    bank_ifsc: props.editdata.bank_ifsc ?? "",
-    bank_account_no: props.editdata.bank_account_no ?? "",
-    adcode: props.editdata.ad_code ?? "",
-    brand_banner: [], // always keep as array of Files
+    company_name: props.editdata?.company_name ?? "",
+    email: props.editdata?.email ?? "",
+    mobile: props.editdata?.mobile ?? "",
+    logo: props.editdata?.logo ?? "",
+    sign: props.editdata?.sign ?? "",
+    bank_qr: props.editdata?.bank_qr ?? "",
+    address: props.editdata?.address ?? "",
+    city: props.editdata?.city ?? "",
+    pin: props.editdata?.pin ?? "",
+    gstin: props.editdata?.gstin ?? "",
+    iec: props.editdata?.iec ?? "",
+    firm_type: props.editdata?.firm_type ?? "",
+    bank_name: props.editdata?.bank_name ?? "",
+    bank_branch: props.editdata?.bank_branch ?? "",
+    bank_ifsc: props.editdata?.bank_ifsc ?? "",
+    bank_account_no: props.editdata?.bank_account_no ?? "",
+    adcode: props.editdata?.ad_code ?? "",
+    invoice_series: props.editdata?.invoice_series ?? "",
+    gst_invoice_series: props.editdata?.gst_invoice_series ?? "",
+    proforma_invoice_series: props.editdata?.proforma_invoice_series ?? "",
+    brand_banner: [], // This will only hold NEWLY selected files
 });
 
 // handle file input for multiple images
@@ -37,27 +40,30 @@ function handleFileInput(event) {
     form.brand_banner.push(...files);
 }
 
+function removeBanner(index) {
+    form.brand_banner.splice(index, 1);
+}
+
+const getImageUrl = (fileOrPath) => {
+    if (!fileOrPath) return '';
+    if (fileOrPath instanceof File) {
+        return URL.createObjectURL(fileOrPath);
+    }
+    // If it's a relative path from DB, ensure it has / if needed, 
+    // but usually standard Laravel paths starting with storage/ or public/ work if base URL is correct.
+    return fileOrPath.startsWith('http') || fileOrPath.startsWith('/') ? fileOrPath : '/' + fileOrPath;
+};
+
 function submit() {
-    const routeName = props.editdata ? "company.update" : "company.store";
-    const routeParams = props.editdata ? props.editdata.id : undefined;
+    const isUpdate = props.editdata && props.editdata.id;
+    const routeName = isUpdate ? "company.update" : "company.store";
+    const routeParams = isUpdate ? props.editdata.id : undefined;
 
-    form.transform((data) => {
-        const formData = new FormData();
-
-        Object.entries(data).forEach(([key, value]) => {
-            if (key === "brand_banner") {
-                value.forEach((file, index) => {
-                    formData.append(`${key}[${index}]`, file);
-                });
-            } else {
-                formData.append(key, value);
-            }
-        });
-
-        return formData;
-    }).post(route(routeName, routeParams), {
+    form.post(route(routeName, routeParams), {
         preserveScroll: true,
-        onSuccess: () => form.reset(),
+        onSuccess: () => {
+             if (!isUpdate) form.reset();
+        },
     });
 }
 </script>
@@ -137,12 +143,39 @@ function submit() {
                     <InputError class="mt-2" :message="form.errors.iec" />
                 </div>
                 <div class="mt-2 col-md-6">
-                    <InputLabel for="invoice_series" value="Invoice Series" />
+                    <InputLabel for="firm_type" value="Firm Type" />
+
+                    <select id="firm_type" class="block w-full mt-1 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" v-model="form.firm_type" required>
+                        <option value="" disabled>Select Firm Type</option>
+                        <option value="IT">IT</option>
+                        <option value="Non IT">Non IT</option>
+                    </select>
+
+                    <InputError class="mt-2" :message="form.errors.firm_type" />
+                </div>
+                <div class="mt-2 col-md-6">
+                    <InputLabel for="invoice_series" value="Export Invoice Series" />
 
                     <TextInput id="invoice_series" type="text" class="block w-full mt-1" v-model="form.invoice_series"
                         required autocomplete="invoice_series" />
 
                     <InputError class="mt-2" :message="form.errors.invoice_series" />
+                </div>
+                <div class="mt-2 col-md-6">
+                    <InputLabel for="gst_invoice_series" value="GST Invoice Series" />
+
+                    <TextInput id="gst_invoice_series" type="text" class="block w-full mt-1" v-model="form.gst_invoice_series"
+                        required autocomplete="gst_invoice_series" />
+
+                    <InputError class="mt-2" :message="form.errors.gst_invoice_series" />
+                </div>
+                <div class="mt-2 col-md-6">
+                    <InputLabel for="proforma_invoice_series" value="Proforma Invoice Series" />
+
+                    <TextInput id="proforma_invoice_series" type="text" class="block w-full mt-1" v-model="form.proforma_invoice_series"
+                        required autocomplete="proforma_invoice_series" />
+
+                    <InputError class="mt-2" :message="form.errors.proforma_invoice_series" />
                 </div>
                 <div class="mt-2 col-md-6">
                     <InputLabel for="bank_name" value="Bank Name" />
@@ -188,7 +221,7 @@ function submit() {
                     <InputLabel for="formFile" value="Company Logo" />
                     <input class="form-control" id="formFile" type="file" @input="form.logo = $event.target.files[0]" />
                     <InputError class="mt-2" :message="form.errors.logo" />
-                    <img v-if="props.editdata" :src="form.logo" alt="" sizes="" srcset="" />
+                    <img v-if="form.logo" :src="getImageUrl(form.logo)" alt="Logo Preview" class="mt-2 img-thumbnail" style="width: 150px;" />
                 </div>
                 <div class="mt-3 col-md-6">
                     <InputLabel for="sign" value="Signature" />
@@ -197,7 +230,7 @@ function submit() {
                     <progress v-if="form.progress" :value="form.progress.percentage" max="100">
                         {{ form.progress.percentage }}%
                     </progress>
-                    <img v-if="props.editdata" :src="form.sign" alt="" sizes="" srcset="" />
+                    <img v-if="form.sign" :src="getImageUrl(form.sign)" alt="Signature Preview" class="mt-2 img-thumbnail" style="width: 150px;" />
                 </div>
 
                 <div class="mt-3 col-md-6">
@@ -207,7 +240,7 @@ function submit() {
                     <progress v-if="form.progress" :value="form.progress.percentage" max="100">
                         {{ form.progress.percentage }}%
                     </progress>
-                    <img v-if="props.editdata" :src="form.bank_qr" alt="" sizes="" srcset="" />
+                    <img v-if="form.bank_qr" :src="getImageUrl(form.bank_qr)" alt="Bank QR Preview" class="mt-2 img-thumbnail" style="width: 150px;" />
                 </div>
 
                 <div class="mt-3 col-md-6">
@@ -215,15 +248,43 @@ function submit() {
                     <input class="form-control" id="brand_banner" type="file" multiple @change="handleFileInput" />
                     <InputError class="mt-2" :message="form.errors.brand_banner" />
 
-                    <div v-if="form.brand_banner.length">
-                        <img
-                            v-for="(file, index) in form.brand_banner"
-                            :key="index"
-                            :src="file instanceof File ? URL.createObjectURL(file) : file"
-                            alt="Brand Banner"
-                            class="img-thumbnail"
-                            style="width: 150px; height: auto; margin: 5px;"
-                        />
+                    <!-- Existing Banners (if editing) -->
+                    <div v-if="props.editdata?.brand_banner?.length" class="mt-2">
+                        <p class="text-sm font-semibold text-gray-600">Existing Banners:</p>
+                        <div class="flex flex-wrap">
+                            <img
+                                v-for="(path, index) in props.editdata.brand_banner"
+                                :key="'existing-' + index"
+                                :src="getImageUrl(path)"
+                                alt="Existing Brand Banner"
+                                class="img-thumbnail"
+                                style="width: 100px; height: auto; margin: 5px;"
+                            />
+                        </div>
+                        <p class="text-xs text-red-500">* Uploading new banners will replace existing ones.</p>
+                    </div>
+
+                    <!-- New Banners Preview -->
+                    <div v-if="form.brand_banner.length" class="mt-2">
+                        <p class="text-sm font-semibold text-gray-600">New Banners to Upload:</p>
+                        <div class="flex flex-wrap">
+                            <div v-for="(file, index) in form.brand_banner" :key="'new-' + index" class="relative">
+                                <img
+                                    :src="getImageUrl(file)"
+                                    alt="New Brand Banner"
+                                    class="img-thumbnail"
+                                    style="width: 100px; height: auto; margin: 5px;"
+                                />
+                                <button
+                                    type="button"
+                                    @click="removeBanner(index)"
+                                    class="absolute top-0 right-0 p-1 text-white bg-red-500 rounded-full"
+                                    style="transform: translate(25%, -25%);"
+                                >
+                                    &times;
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

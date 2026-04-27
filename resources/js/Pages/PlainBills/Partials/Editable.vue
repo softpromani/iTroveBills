@@ -297,7 +297,7 @@ const submitForm = () => {
     };
 
     form.post(
-        route("plain-bill.store", {
+        route("book.store", {
             invoicedata: tableData.value,
             invoicedetails: invoicedetails.value,
         }),

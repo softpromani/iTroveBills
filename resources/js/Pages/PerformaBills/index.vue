@@ -47,7 +47,7 @@
         <CustomerDetailVue
             :billing_user_detail="data"
             :series="series"
-            :company="company_id"
+            :company="company"
             :customer="customer_id"
             :company_name="CompanyName"
         />
