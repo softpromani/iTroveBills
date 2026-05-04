@@ -44,7 +44,7 @@
 
                 <!-- Invoice Metadata (Right) -->
                 <div class="col-6 no-gutters">
-                    <div class="row no-gutters border-bottom border-dark h-50">
+                    <div class="row no-gutters h-50" :class="{'border-bottom border-dark': props.invoice.company.firm_type !== 'IT'}">
                         <div class="col-6 border-right border-dark p-2">
                             <label class="meta-label">Invoice No.</label>
                             <div class="meta-value font-weight-bold">{{ props.invoice.invoice_number }}</div>
@@ -87,7 +87,7 @@
 
                 <!-- Dispatch Details (Right) -->
                 <div class="col-6 no-gutters h-100">
-                    <div class="row no-gutters border-bottom border-dark h-25">
+                    <div class="row no-gutters border-bottom border-dark h-25" v-if="props.invoice.company.firm_type !== 'IT'">
                         <div class="col-6 border-right border-dark p-2">
                             <label class="meta-label">IEC Code</label>
                             <div class="meta-value">{{ props.invoice.company.iec }}</div>
@@ -97,7 +97,7 @@
                             <div class="meta-value">{{ props.invoice.company.ad_code }}</div>
                         </div>
                     </div>
-                    <div class="row no-gutters border-bottom border-dark h-25">
+                    <div class="row no-gutters border-bottom border-dark h-25" v-if="props.invoice.company.firm_type !== 'IT'">
                         <div class="col-6 border-right border-dark p-2">
                             <label class="meta-label">Total Weight</label>
                             <div class="meta-value">{{ props.invoice.total_weight ?? "" }}</div>
@@ -107,8 +107,8 @@
                             <div class="meta-value">{{ props.invoice.no_packets ?? "No Packs" }}</div>
                         </div>
                     </div>
-                    <div class="row no-gutters border-dark h-25">
-                        <div class="col-6 border-right border-dark p-2">
+                    <div class="row no-gutters border-dark h-25" v-if="props.invoice.company.firm_type !== 'IT'">
+                        <div class="col-6 border-right border-dark p-2" v-if="props.invoice.company.firm_type !== 'IT'">
                             <label class="meta-label">Dispatched through</label>
                             <div class="meta-value">{{ props.invoice.dispatched_through || "-" }}</div>
                         </div>
@@ -131,9 +131,9 @@
                             <th width="60" class="border-right border-dark">GST Rate</th>
                             <th width="70" class="border-right border-dark">Quantity</th>
                             <th width="60" class="border-right border-dark">Unit</th>
-                            <th width="80" class="border-right border-dark">Weight</th>
+                            <th width="80" class="border-right border-dark" v-if="props.invoice.company.firm_type !== 'IT'">Weight</th>
                             <th width="80" class="border-right border-dark">Rate</th>
-                            <th width="100">Amount</th>
+                            <th width="120">Amount</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -148,7 +148,7 @@
                                 <strong>{{ item.quantity }}</strong>
                             </td>
                             <td class="text-center border-right border-dark">{{ item.unit || 'PCS' }}</td>
-                            <td class="text-center border-right border-dark">{{ item.weight }}</td>
+                            <td class="text-center border-right border-dark" v-if="props.invoice.company.firm_type !== 'IT'">{{ item.weight }}</td>
                             <td class="text-right border-right border-dark">{{ formatCurrency(item.rate) }}</td>
                             <td class="text-right font-weight-bold">
                                 {{ formatCurrency(item.rate * item.quantity) }}
@@ -157,12 +157,16 @@
                     </tbody>
                     <tfoot class="row-border-top">
                         <tr class="font-weight-bold total-bold">
-                            <td class="text-right border-right border-dark" colspan="4">Total</td>
+                            <td class="text-right border-right border-dark" colspan="4">Total Taxable</td>
                             <td class="text-right border-right border-dark">{{ calculateTotalQty() }}</td>
                             <td class="border-right border-dark"></td>
-                            <td class="text-right border-right border-dark">{{ props.invoice.total_weight ?? "" }}</td>
+                            <td class="text-right border-right border-dark" v-if="props.invoice.company.firm_type !== 'IT'">{{ props.invoice.total_weight ?? "" }}</td>
                             <td class="border-right border-dark"></td>
-                            <td class="text-right">₹ {{ formatAmount(props.invoice.total_ammount) }}</td>
+                            <td class="text-right font-weight-bold" style="white-space: nowrap;">₹ {{ formatAmount(props.invoice.total_ammount) }}</td>
+                        </tr>
+                        <tr class="font-weight-bold total-bold border-top border-dark">
+                            <td class="text-right border-right border-dark" :colspan="props.invoice.company.firm_type === 'IT' ? 7 : 8">Grand Total (Incl. GST)</td>
+                            <td class="text-right font-weight-bold" style="white-space: nowrap;">₹ {{ formatAmount(props.invoice.subtotal_amount) }}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -361,7 +365,7 @@ const getWords = (total) => {
 
 onMounted(() => {
     taxAmountInWords.value = getWords(props.invoice.tax_amount || calculateTotalTax());
-    amountInWords.value = getWords(props.invoice.total_ammount);
+    amountInWords.value = getWords(props.invoice.subtotal_amount);
 });
 </script>
 

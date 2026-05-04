@@ -395,8 +395,24 @@ class CustomerBillController extends Controller
         {
             // Ensure payment record exists
             if (!$invoice->payment) {
-                $invoice->payment()->create(['total_amount' => $invoice->total_ammount]);
+                // Determine the correct total amount based on invoice type
+                $total_amount = $invoice->total_ammount;
+                if ($type === 'gst' && isset($invoice->subtotal_amount)) {
+                    $total_amount = $invoice->subtotal_amount;
+                }
+                
+                $invoice->payment()->create(['total_amount' => $total_amount]);
                 $invoice->refresh();
+            }
+
+            $payment = $invoice->payment;
+            $remaining = $payment->total_amount - $payment->paid_amount;
+
+            if ($request->amount > $remaining) {
+                return response()->json([
+                    'status' => 0, 
+                    'message' => 'Payment amount (₹' . number_format($request->amount, 2) . ') exceeds remaining balance (₹' . number_format($remaining, 2) . ').'
+                ]);
             }
 
             $invoice->payment->payment_history()->create([
@@ -413,6 +429,59 @@ class CustomerBillController extends Controller
             return response()->json([ 'status' => 0, 'message' => 'Something went wrong!']);
         }
 
+    }
+
+    public function fetchPaymentHistory($id, $type = 'regular')
+    {
+        $model = $type === 'gst' ? \App\Models\GSTInvoice::class : \App\Models\Invoice::class;
+        $payment = \App\Models\Payment::where('paymentable_id', $id)
+            ->where('paymentable_type', $model)
+            ->first();
+            
+        if (!$payment) {
+            return response()->json([]);
+        }
+
+        return response()->json($payment->payment_history()->with('payment_type')->get());
+    }
+
+    public function updatePaymentHistory(Request $request)
+    {
+        $history = \App\Models\PaymentHistory::find($request->id);
+        if (!$history) {
+            return response()->json(['status' => 0, 'message' => 'Payment record not found.']);
+        }
+
+        $payment = $history->payment;
+        $diff = $request->amount - $history->amount;
+        $newTotalPaid = $payment->paid_amount + $diff;
+
+        if ($newTotalPaid > $payment->total_amount) {
+            return response()->json([
+                'status' => 0, 
+                'message' => 'Updated amount (₹' . number_format($request->amount, 2) . ') would cause total paid (₹' . number_format($newTotalPaid, 2) . ') to exceed invoice total (₹' . number_format($payment->total_amount, 2) . ').'
+            ]);
+        }
+
+        $history->update([
+            'amount' => $request->amount,
+            'reference_no' => $request->reference_no,
+            'payment_type_id' => $request->payment_method_id,
+            'remark' => $request->remark
+        ]);
+
+        return response()->json(['status' => 1, 'message' => 'Payment record updated successfully.']);
+    }
+
+    public function deletePaymentHistory($id)
+    {
+        $history = \App\Models\PaymentHistory::find($id);
+        if (!$history) {
+            return response()->json(['status' => 0, 'message' => 'Payment record not found.']);
+        }
+
+        $history->delete();
+        return response()->json(['status' => 1, 'message' => 'Payment record deleted successfully.']);
     }
 
     // performa
@@ -689,14 +758,42 @@ class CustomerBillController extends Controller
         return inertia('my-invoices/invoice_list', compact('invoices'));
     }
 
-    public function Fetch_bill_create_payment_for_old_data(){
-        $invoices=Invoice::get();
-        foreach($invoices as $inv){
-           $res= $inv->payment()->firstOrCreate([
-                'paid_amount'=>0.00,
-                'total_amount'=>$inv->total_ammount
-            ]);
-          echo json_encode($res);
+    public function fixPaymentData()
+    {
+        $payments = \App\Models\Payment::all();
+        $results = [];
+
+        foreach ($payments as $payment) {
+            $invoice = $payment->paymentable;
+            if (!$invoice) {
+                $results[] = "No invoice found for Payment ID {$payment->id}";
+                continue;
+            }
+
+            // 1. Correct the total_amount
+            $correctTotal = $invoice->total_ammount;
+            if (get_class($invoice) === \App\Models\GSTInvoice::class) {
+                $correctTotal = $invoice->subtotal_amount;
+            }
+
+            // 2. Recalculate paid_amount from history
+            $actualPaid = $payment->payment_history()->sum('amount');
+
+            // 3. Update if changed
+            if (abs($payment->total_amount - $correctTotal) > 0.01 || abs($payment->paid_amount - $actualPaid) > 0.01) {
+                $oldStatus = $payment->status;
+                $payment->total_amount = $correctTotal;
+                $payment->paid_amount = $actualPaid;
+                $payment->save(); // Triggers status recalculation
+                
+                $results[] = "Fixed Payment ID {$payment->id} (" . class_basename($invoice) . " #{$invoice->invoice_number}): Total {$payment->total_amount}, Paid {$payment->paid_amount}, Status {$oldStatus} -> {$payment->status}";
+            }
         }
+
+        if (empty($results)) {
+            return response()->json(['message' => 'All payment records are already synchronized.']);
+        }
+
+        return response()->json($results);
     }
 }

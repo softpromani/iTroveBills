@@ -29,3 +29,6 @@ Route::get('fetch-payment-types', [PaymentTypeController::class, 'fetchPaymentTy
 
 //Fetch payment types
 Route::post('pay-bill', [CustomerBillController::class, 'payBill']);
+Route::get('fetch-payment-history/{id}/{type?}', [CustomerBillController::class, 'fetchPaymentHistory']);
+Route::post('update-payment-history', [CustomerBillController::class, 'updatePaymentHistory']);
+Route::delete('delete-payment-history/{id}', [CustomerBillController::class, 'deletePaymentHistory']);

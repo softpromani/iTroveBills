@@ -27,7 +27,7 @@ class GSTInvoice extends Model
         static::created(function($invoice) {
             // Create a payment record associated with the invoice
             Log::info('created event -'.json_encode($invoice));
-            $invoice->payment()->create(['total_amount' => $invoice->total_ammount]);
+            $invoice->payment()->create(['total_amount' => $invoice->subtotal_amount]);
         });
 
 
@@ -36,7 +36,7 @@ class GSTInvoice extends Model
             $attributes = ['paymentable_id' => $invoice->id, 'paymentable_type' => get_class($invoice)];
 
             // Define the values to update or create
-            $values = ['total_amount' => $invoice->total_ammount];
+            $values = ['total_amount' => $invoice->subtotal_amount];
 
             // Use updateOrCreate
             $invoice->payment()->updateOrCreate($attributes, $values);

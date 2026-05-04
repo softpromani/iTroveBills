@@ -15,24 +15,30 @@ class PaymentHistory extends Model
     {
         parent::boot();
 
-        // Listen for the created event
-        static::created(function ($pay) {
-            $payment = $pay->payment;
-            $payment->increment('paid_amount', $pay->amount);
-            $payment->refresh();
-            
-            $status = 'partial-paid';
-            if ($payment->paid_amount >= $payment->total_amount) {
-                $status = 'paid';
-            } elseif ($payment->paid_amount <= 0) {
-                $status = 'due';
-            }
-            
-            $payment->update(['status' => $status]);
+        static::saved(function ($history) {
+            $history->syncPayment();
         });
+
+        static::deleted(function ($history) {
+            $history->syncPayment();
+        });
+    }
+
+    public function syncPayment()
+    {
+        $payment = $this->payment;
+        if ($payment) {
+            $payment->paid_amount = $payment->payment_history()->sum('amount');
+            $payment->save(); // This will also trigger status update in Payment's boot
+        }
     }
 
     public function payment(){
         return $this->belongsTo(Payment::class,'payment_id');
+    }
+
+    public function payment_type()
+    {
+        return $this->belongsTo(PaymentType::class, 'payment_type_id');
     }
 }

@@ -234,7 +234,9 @@ Route::middleware('auth')->group(function () {
         Route::post('bill-mail',[MailController::class,'gst_billmail'])->name('bill.sendmail');
     });
 
-    Route::get('old-payments-feed',[CustomerBillController::class,'Fetch_bill_create_payment_for_old_data']);
+
+    Route::get('fix-payment-data',[CustomerBillController::class,'fixPaymentData']);
+
     //Customer My Bill Route
     Route::get('my-bill', [CustomerBillController::class, 'myBill'])->name('customer.mybill');
 
