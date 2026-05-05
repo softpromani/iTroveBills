@@ -181,6 +181,9 @@ class CompanyController extends Controller
             'bank_ifsc'         => 'required',
             'bank_account_no'   => 'required',
             'adcode'            => 'required',
+            'logo'              => 'nullable|image|mimes:jpg,png,jpeg',
+            'sign'              => 'nullable|image|mimes:jpg,png,jpeg',
+            'bank_qr'           => 'nullable|image|mimes:jpg,png,jpeg',
             'brand_banner.*'    => 'nullable', // validate each file
         ]);
 
@@ -293,6 +296,9 @@ class CompanyController extends Controller
             'bank_account_no'   => $request->bank_account_no,
             'ad_code'           => $request->adcode,
             'seller_id'         => Auth::id(),
+            'logo'              => $company->logo,
+            'sign'              => $company->sign,
+            'bank_qr'           => $company->bank_qr,
             'brand_banner'      => $newBanners, // encode array to JSON
         ]);
 

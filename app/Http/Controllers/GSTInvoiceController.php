@@ -71,7 +71,10 @@ class GSTInvoiceController extends Controller
             }
 
             // Get existing GST invoice numbers for this company & financial year
-            $existingInvoices = $company_obj->ThisYearGstInvoice()->pluck('invoice_number')->toArray();
+            $existingInvoices = [];
+            if ($company_obj) {
+                $existingInvoices = $company_obj->ThisYearGstInvoice()->pluck('invoice_number')->toArray();
+            }
 
             // Extract numeric part from invoice numbers
             $existingNumbers = [];
@@ -88,10 +91,10 @@ class GSTInvoiceController extends Controller
                 $maxExisting = max($existingNumbers);
                 $billCount = max($startingNumber, $maxExisting + 1);
             } else {
-                $billCount = $startingNumber > 0 ? $startingNumber : ($company_obj->ThisYearGstInvoice()->count() ?? 0) + 1;
+                $billCount = ($company_obj && $startingNumber > 0) ? $startingNumber : (($company_obj ? $company_obj->ThisYearGstInvoice()->count() : 0) + 1);
             }
 
-            $inv_no = $company_obj->gst_invoice_series . '-' . $financialYear . '/' . str_pad($billCount, 5, '0', STR_PAD_LEFT);
+            $inv_no = $company_obj ? ($company_obj->gst_invoice_series . '-' . $financialYear . '/' . str_pad($billCount, 5, '0', STR_PAD_LEFT)) : '';
 
             $customer_data = null;
             if ($customer_id) {

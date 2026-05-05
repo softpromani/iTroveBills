@@ -46,12 +46,17 @@ function removeBanner(index) {
 
 const getImageUrl = (fileOrPath) => {
     if (!fileOrPath) return '';
-    if (fileOrPath instanceof File) {
+    if (fileOrPath instanceof File || fileOrPath instanceof Blob) {
         return URL.createObjectURL(fileOrPath);
     }
-    // If it's a relative path from DB, ensure it has / if needed, 
-    // but usually standard Laravel paths starting with storage/ or public/ work if base URL is correct.
-    return fileOrPath.startsWith('http') || fileOrPath.startsWith('/') ? fileOrPath : '/' + fileOrPath;
+    // If it's a string path from DB (e.g. storage/company_file/...)
+    // In production, we should ensure it has a leading slash
+    if (typeof fileOrPath === 'string') {
+        if (fileOrPath.startsWith('http')) return fileOrPath;
+        const path = fileOrPath.startsWith('/') ? fileOrPath : '/' + fileOrPath;
+        return path;
+    }
+    return '';
 };
 
 function submit() {
@@ -219,13 +224,13 @@ function submit() {
                 </div>
                 <div class="mt-3 col-md-6">
                     <InputLabel for="formFile" value="Company Logo" />
-                    <input class="form-control" id="formFile" type="file" @input="form.logo = $event.target.files[0]" />
+                    <input class="form-control" id="formFile" type="file" @change="form.logo = $event.target.files[0]" />
                     <InputError class="mt-2" :message="form.errors.logo" />
                     <img v-if="form.logo" :src="getImageUrl(form.logo)" alt="Logo Preview" class="mt-2 img-thumbnail" style="width: 150px;" />
                 </div>
                 <div class="mt-3 col-md-6">
                     <InputLabel for="sign" value="Signature" />
-                    <input class="form-control" id="sign" type="file" @input="form.sign = $event.target.files[0]" />
+                    <input class="form-control" id="sign" type="file" @change="form.sign = $event.target.files[0]" />
                     <InputError class="mt-2" :message="form.errors.sign" />
                     <progress v-if="form.progress" :value="form.progress.percentage" max="100">
                         {{ form.progress.percentage }}%
@@ -235,7 +240,7 @@ function submit() {
 
                 <div class="mt-3 col-md-6">
                     <InputLabel for="bank_qr" value="Bank QR" />
-                    <input class="form-control" id="bank_qr" type="file" @input="form.bank_qr = $event.target.files[0]" />
+                    <input class="form-control" id="bank_qr" type="file" @change="form.bank_qr = $event.target.files[0]" />
                     <InputError class="mt-2" :message="form.errors.bank_qr" />
                     <progress v-if="form.progress" :value="form.progress.percentage" max="100">
                         {{ form.progress.percentage }}%
