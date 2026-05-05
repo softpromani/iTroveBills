@@ -19,7 +19,7 @@
                             <th>HSN Code</th>
                             <th>Quantity</th>
                             <th>Unit</th>
-                            <th>Weight</th>
+                             <th v-if="props.company?.firm_type !== 'IT'">Weight</th>
                             <th>Rate</th>
                             <th>Taxable Value</th>
                             <th>GST %</th>
@@ -96,18 +96,18 @@
                                     :ref="el => setFieldRef(`unit-${rowIndex}`, el)"
                                 />
                             </td>
-                            <td>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    :value="row[4]"
-                                    @input="updateCell(rowIndex, 4, $event)"
-                                    @keydown.tab="handleTabNavigation($event, rowIndex, 4)"
-                                    class="form-control border-0 p-1"
-                                    placeholder="0"
-                                    :ref="el => setFieldRef(`weight-${rowIndex}`, el)"
-                                />
-                            </td>
+                             <td v-if="props.company?.firm_type !== 'IT'">
+                                 <input
+                                     type="number"
+                                     step="0.01"
+                                     :value="row[4]"
+                                     @input="updateCell(rowIndex, 4, $event)"
+                                     @keydown.tab="handleTabNavigation($event, rowIndex, 4)"
+                                     class="form-control border-0 p-1"
+                                     placeholder="0"
+                                     :ref="el => setFieldRef(`weight-${rowIndex}`, el)"
+                                 />
+                             </td>
                             <td>
                                 <input
                                     type="number"
@@ -160,7 +160,7 @@
                         </tr>
                         <tr class="table-info">
                             <td colspan="5" class="text-end font-bold">TOTALS:</td>
-                            <td class="font-bold text-end">{{ calculateTotalWeight() }}</td>
+                             <td v-if="props.company?.firm_type !== 'IT'" class="font-bold text-end">{{ calculateTotalWeight() }}</td>
                             <td></td>
                             <td class="font-bold text-end">{{ calculateTotalTaxableValue() }}</td>
                             <td></td>
@@ -206,6 +206,7 @@ const props = defineProps({
     invoicedetails: Object,
     invoiceitem: Array,
     invoiceId: [String, Number],
+    company: Object,
 });
 
 // Initialize form data using useForm with correct route
@@ -573,7 +574,8 @@ const updatebill = () => {
         return;
     }
 
-    if (!props.invoicedetails?.vehical_no && !form.vehical_no) {
+    const isITFirm = props.company?.firm_type?.toString().toUpperCase() === 'IT';
+    if (!isITFirm && !props.invoicedetails?.vehical_no && !form.vehical_no) {
         alert('Vehicle number is required');
         return;
     }

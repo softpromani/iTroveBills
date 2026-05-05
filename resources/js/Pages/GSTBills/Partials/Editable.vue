@@ -19,7 +19,7 @@
                             <th>HSN Code</th>
                             <th>Quantity</th>
                             <th>Unit</th>
-                            <th>Weight</th>
+                            <th v-if="props.company?.firm_type !== 'IT'">Weight</th>
                             <th>Rate</th>
                             <th>Taxable Value</th>
                             <th>GST %</th>
@@ -108,7 +108,7 @@
                             </td>
 
                             <!-- Weight -->
-                            <td>
+                            <td v-if="props.company?.firm_type !== 'IT'">
                                 <input
                                     type="number"
                                     step="0.01"
@@ -189,7 +189,7 @@
                         <!-- Totals Row -->
                         <tr class="table-info">
                             <td colspan="5" class="text-end font-bold">TOTALS:</td>
-                            <td class="font-bold text-end">{{ calculateTotalWeight() }}</td>
+                            <td v-if="props.company?.firm_type !== 'IT'" class="font-bold text-end">{{ calculateTotalWeight() }}</td>
                             <td></td>
                             <td class="font-bold text-end">{{ calculateTotalTaxableValue() }}</td>
                             <td></td>
@@ -212,6 +212,10 @@
 import { ref, reactive, nextTick } from "vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
+
+const props = defineProps({
+    company: Object
+});
 
 const form = useForm({});
 
@@ -522,9 +526,12 @@ const submitForm = () => {
     const email = document.getElementById("email")?.value || "";
     const gst = document.getElementById("gst")?.value || "";
 
-    // Validate required fields (Customer is now optional)
-    if (!invoiceNoValue || !company || !vehical_no) {
-        alert('Please fill in all required fields (Invoice No, Company, Vehicle No)');
+    // Validate required fields (Vehicle No is optional for IT firms)
+    const isITFirm = props.company?.firm_type?.toString().toUpperCase() === 'IT';
+    if (!invoiceNoValue || !company || (!vehical_no && !isITFirm)) {
+        const missingFields = ['Invoice No', 'Company'];
+        if (!isITFirm) missingFields.push('Vehicle No');
+        alert(`Please fill in all required fields (${missingFields.join(', ')})`);
         return;
     }
 

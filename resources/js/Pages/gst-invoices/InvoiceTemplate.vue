@@ -128,12 +128,14 @@
                             <th width="40" class="border-right border-dark">Sl No.</th>
                             <th class="border-right border-dark text-left">Description of Goods</th>
                             <th width="80" class="border-right border-dark">HSN/SAC</th>
-                            <th width="60" class="border-right border-dark">GST Rate</th>
-                            <th width="70" class="border-right border-dark">Quantity</th>
+                            <th width="60" class="border-right border-dark">Quantity</th>
                             <th width="60" class="border-right border-dark">Unit</th>
-                            <th width="80" class="border-right border-dark" v-if="props.invoice.company.firm_type !== 'IT'">Weight</th>
+                            <th width="70" class="border-right border-dark" v-if="props.invoice.company.firm_type !== 'IT'">Weight</th>
                             <th width="80" class="border-right border-dark">Rate</th>
-                            <th width="120">Amount</th>
+                            <th width="90" class="border-right border-dark">Taxable</th>
+                            <th width="50" class="border-right border-dark">GST %</th>
+                            <th width="80" class="border-right border-dark">GST Amt</th>
+                            <th width="100">Total</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -143,29 +145,36 @@
                                 <strong>{{ item.desc_product }}</strong>
                             </td>
                             <td class="text-center border-right border-dark">{{ item.hsn_code }}</td>
-                            <td class="text-center border-right border-dark">{{ item.gst_percentage || 0 }}%</td>
                             <td class="text-right border-right border-dark">
                                 <strong>{{ item.quantity }}</strong>
                             </td>
                             <td class="text-center border-right border-dark">{{ item.unit || 'PCS' }}</td>
                             <td class="text-center border-right border-dark" v-if="props.invoice.company.firm_type !== 'IT'">{{ item.weight }}</td>
                             <td class="text-right border-right border-dark">{{ formatCurrency(item.rate) }}</td>
-                            <td class="text-right font-weight-bold">
+                            <td class="text-right border-right border-dark">
                                 {{ formatCurrency(item.rate * item.quantity) }}
+                            </td>
+                            <td class="text-center border-right border-dark">{{ item.gst_percentage || 0 }}%</td>
+                            <td class="text-right border-right border-dark">{{ formatCurrency(item.gst_amount) }}</td>
+                            <td class="text-right font-weight-bold">
+                                {{ formatCurrency(item.subtotal_amount) }}
                             </td>
                         </tr>
                     </tbody>
                     <tfoot class="row-border-top">
                         <tr class="font-weight-bold total-bold">
-                            <td class="text-right border-right border-dark" colspan="4">Total Taxable</td>
+                            <td class="text-right border-right border-dark" colspan="3">TOTALS</td>
                             <td class="text-right border-right border-dark">{{ calculateTotalQty() }}</td>
                             <td class="border-right border-dark"></td>
                             <td class="text-right border-right border-dark" v-if="props.invoice.company.firm_type !== 'IT'">{{ props.invoice.total_weight ?? "" }}</td>
                             <td class="border-right border-dark"></td>
-                            <td class="text-right font-weight-bold" style="white-space: nowrap;">₹ {{ formatAmount(props.invoice.total_ammount) }}</td>
+                            <td class="text-right border-right border-dark">₹ {{ formatAmount(props.invoice.total_ammount) }}</td>
+                            <td class="border-right border-dark"></td>
+                            <td class="text-right border-right border-dark">₹ {{ formatAmount(props.invoice.tax_amount) }}</td>
+                            <td class="text-right font-weight-bold" style="white-space: nowrap;">₹ {{ formatAmount(props.invoice.subtotal_amount) }}</td>
                         </tr>
                         <tr class="font-weight-bold total-bold border-top border-dark">
-                            <td class="text-right border-right border-dark" :colspan="props.invoice.company.firm_type === 'IT' ? 7 : 8">Grand Total (Incl. GST)</td>
+                            <td class="text-right border-right border-dark" :colspan="props.invoice.company.firm_type === 'IT' ? 9 : 10">Grand Total (Incl. GST)</td>
                             <td class="text-right font-weight-bold" style="white-space: nowrap;">₹ {{ formatAmount(props.invoice.subtotal_amount) }}</td>
                         </tr>
                     </tfoot>

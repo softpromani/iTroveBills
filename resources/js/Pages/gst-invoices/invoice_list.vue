@@ -32,7 +32,9 @@
                             <th class="col-1">Sr.no.</th>
                             <th class="col-1">Invoice Number</th>
                             <th class="col-1">Invoice Date</th>
-                            <th class="col-1">Total Amount</th>
+                            <th class="col-1">Taxable Amount</th>
+                            <th class="col-1">GST Amount</th>
+                            <th class="col-1">Grand Total</th>
                             <th class="col-1">Vehicle No</th>
                             <th class="col-1">No. Packets</th>
                             <th class="col-1">Customer</th>
@@ -47,7 +49,9 @@
                             <td>{{ index + 1 }}</td>
                             <td>{{ invoice.invoice_number ?? "" }}</td>
                             <td>{{ invoice.invoice_date ?? "" }}</td>
-                            <td>{{ invoice.total_ammount ?? "" }}</td>
+                            <td>{{ invoice.total_ammount ?? "0.00" }}</td>
+                            <td>{{ invoice.tax_amount ?? "0.00" }}</td>
+                            <td>{{ invoice.subtotal_amount ?? "0.00" }}</td>
                             <td>{{ invoice.vehicle_no ?? "" }}</td>
                             <td>{{ invoice.no_packets ?? "NO PACK" }}</td>
                             <td>{{ invoice.customer.company_name ?? "" }}</td>
