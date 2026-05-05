@@ -168,14 +168,14 @@
                             <td class="border-right border-dark"></td>
                             <td class="text-right border-right border-dark" v-if="props.invoice.company.firm_type !== 'IT'">{{ props.invoice.total_weight ?? "" }}</td>
                             <td class="border-right border-dark"></td>
-                            <td class="text-right border-right border-dark">₹ {{ formatAmount(props.invoice.total_ammount) }}</td>
+                            <td class="text-right border-right border-dark" style="white-space: nowrap;">₹{{ formatAmount(props.invoice.total_ammount) }}</td>
                             <td class="border-right border-dark"></td>
-                            <td class="text-right border-right border-dark">₹ {{ formatAmount(props.invoice.tax_amount) }}</td>
-                            <td class="text-right font-weight-bold" style="white-space: nowrap;">₹ {{ formatAmount(props.invoice.subtotal_amount) }}</td>
+                            <td class="text-right border-right border-dark" style="white-space: nowrap;">₹{{ formatAmount(props.invoice.tax_amount) }}</td>
+                            <td class="text-right font-weight-bold" style="white-space: nowrap;">₹{{ formatAmount(props.invoice.subtotal_amount) }}</td>
                         </tr>
                         <tr class="font-weight-bold total-bold border-top border-dark">
                             <td class="text-right border-right border-dark" :colspan="props.invoice.company.firm_type === 'IT' ? 9 : 10">Grand Total (Incl. GST)</td>
-                            <td class="text-right font-weight-bold" style="white-space: nowrap;">₹ {{ formatAmount(props.invoice.subtotal_amount) }}</td>
+                            <td class="text-right font-weight-bold" style="white-space: nowrap;">₹{{ formatAmount(props.invoice.subtotal_amount) }}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -410,6 +410,8 @@ onMounted(() => {
 
 .total-bold {
     font-weight: 800 !important;
+    font-size: 13px !important;
+    white-space: nowrap;
 }
 
 .invoice-title {
@@ -439,7 +441,7 @@ onMounted(() => {
 
 .seller-logo {
     max-width: 100%;
-    max-height: 70px;
+    max-height: 90px;
     height: auto;
     object-fit: contain;
 }
@@ -514,7 +516,7 @@ onMounted(() => {
 }
 
 .sign-img {
-    max-height: 50px;
+    max-height: 85px;
     width: auto;
 }
 
