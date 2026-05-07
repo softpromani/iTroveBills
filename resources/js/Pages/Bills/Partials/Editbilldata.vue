@@ -22,7 +22,7 @@
                             <th>HSN Code</th>
                             <th>Quantity</th>
                             <th>Unit</th>
-                            <th>Weight</th>
+                            <th v-if="props.company?.firm_type !== 'IT'">Weight</th>
                             <th>Rate</th>
                             <th>Taxable Value</th>
                             <th>Action</th>
@@ -87,8 +87,7 @@
                                 @blur="updateCell(rowIndex, 3, $event)">
                             </td>
 
-                            <!-- Weight - contenteditable -->
-                            <td contenteditable="true"
+                            <td contenteditable="true" v-if="props.company?.firm_type !== 'IT'"
                                 :data-row="rowIndex"
                                 :data-cell="4"
                                 v-html="row[4]"
@@ -129,8 +128,8 @@
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td class="font-bold">Total Weight:</td>
-                            <td class="font-bold">{{ calculateTotalWeight() }}</td>
+                            <td class="font-bold" v-if="props.company?.firm_type !== 'IT'">Total Weight:</td>
+                            <td class="font-bold" v-if="props.company?.firm_type !== 'IT'">{{ calculateTotalWeight() }}</td>
                             <td class="font-bold">Total:</td>
                             <td class="font-bold">{{ calculateTotalTaxableValue() }}</td>
                             <td></td>
@@ -154,6 +153,7 @@ import axios from 'axios';
 const form = useForm({});
 const props = defineProps({
     invoiceitem: Object,
+    company: Object
 });
 
 const tableData = ref([]);

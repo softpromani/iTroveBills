@@ -19,7 +19,7 @@
                             <th>HSN Code</th>
                             <th>Quantity</th>
                             <th>Unit</th>
-                            <th>Weight</th>
+                            <th v-if="props.company?.firm_type !== 'IT'">Weight</th>
                             <th>Rate</th>
                             <th>Taxable Value</th>
                             <th>Action</th>
@@ -78,8 +78,7 @@
                                 @keydown="saveCursor($event)">
                             </td>
 
-                            <!-- Weight - contenteditable (like original) -->
-                            <td contenteditable
+                            <td contenteditable v-if="props.company?.firm_type !== 'IT'"
                                 @input="updateCell(rowIndex, 4, $event)"
                                 @keydown="saveCursor($event)">
                             </td>
@@ -105,8 +104,8 @@
 
                         <tr>
                             <td colspan="4"></td>
-                            <td class="font-bold">Total Weight:</td>
-                            <td class="font-bold">{{ calculateTotalWeight() }}</td>
+                            <td class="font-bold" v-if="props.company?.firm_type !== 'IT'">Total Weight:</td>
+                            <td class="font-bold" v-if="props.company?.firm_type !== 'IT'">{{ calculateTotalWeight() }}</td>
                             <td class="font-bold">Total:</td>
                             <td class="font-bold">{{ calculateTotalTaxableValue() }}</td>
                             <td></td>
@@ -127,6 +126,9 @@ import { ref, reactive } from "vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
 
+const props = defineProps({
+    company: Object
+});
 const form = useForm({});
 
 // Initial table data (Description, HSN, Quantity, Unit, Weight, Rate)

@@ -157,14 +157,14 @@ watch(() => props.billing_user_detail, (val) => {
                                 />
                                 <InputError class="mt-2" :message="form.errors.gst" />
                             </div>
-                            <div class="mt-2 col-md-6">
-                                <InputLabel for="vehical_no" value="Vehicle No*" />
+                            <div class="mt-2 col-md-6" v-if="company?.firm_type !== 'IT'">
+                                <InputLabel for="vehical_no" :value="company?.firm_type !== 'IT' ? 'Vehicle No*' : 'Vehicle No'" />
                                 <TextInput
                                     id="vehical_no"
                                     type="text"
                                     class="block w-full mt-1"
                                     v-model="form.vehical_no"
-                                    required
+                                    :required="company?.firm_type !== 'IT'"
                                 />
                                 <InputError class="mt-2" :message="form.errors.vehical_no" />
                             </div>

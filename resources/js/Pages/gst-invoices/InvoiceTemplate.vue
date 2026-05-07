@@ -88,13 +88,9 @@
                 <!-- Dispatch Details (Right) -->
                 <div class="col-6 no-gutters h-100">
                     <div class="row no-gutters border-bottom border-dark h-25" v-if="props.invoice.company.firm_type !== 'IT'">
-                        <div class="col-6 border-right border-dark p-2">
+                        <div class="col-12 p-2">
                             <label class="meta-label">IEC Code</label>
                             <div class="meta-value">{{ props.invoice.company.iec }}</div>
-                        </div>
-                        <div class="col-6 p-2">
-                            <label class="meta-label">AD Code</label>
-                            <div class="meta-value">{{ props.invoice.company.ad_code }}</div>
                         </div>
                     </div>
                     <div class="row no-gutters border-bottom border-dark h-25" v-if="props.invoice.company.firm_type !== 'IT'">
@@ -176,6 +172,11 @@
                         <tr class="font-weight-bold total-bold border-top border-dark">
                             <td class="text-right border-right border-dark" :colspan="props.invoice.company.firm_type === 'IT' ? 9 : 10">Grand Total (Incl. GST)</td>
                             <td class="text-right font-weight-bold" style="white-space: nowrap;">₹{{ formatAmount(props.invoice.subtotal_amount) }}</td>
+                        </tr>
+                        <tr v-if="amountInWords">
+                            <td :colspan="props.invoice.company.firm_type === 'IT' ? 10 : 11" class="text-right x-small font-weight-bold border-top border-dark">
+                                Total Rupees: {{ amountInWords }} Only
+                            </td>
                         </tr>
                     </tfoot>
                 </table>

@@ -136,8 +136,13 @@
                             <td class="text-right border-right border-dark">{{ calculateTotalQty() }}</td>
                             <td class="border-right border-dark"></td>
                             <td class="text-right border-right border-dark" v-if="props.invoice.company?.firm_type !== 'IT'">{{ props.invoice.total_weight ?? "" }}</td>
-                            <td class="border-right border-dark" v-if="props.invoice.company?.firm_type !== 'IT'"></td>
-                            <td class="text-right">₹ {{ formatAmount(props.invoice.total_ammount) }}</td>
+                            <td class="border-right border-dark"></td>
+                            <td class="text-right font-weight-bold">₹ {{ formatAmount(props.invoice.total_ammount) }}</td>
+                        </tr>
+                        <tr v-if="amountInWords">
+                            <td :colspan="props.invoice.company?.firm_type !== 'IT' ? 8 : 7" class="text-right x-small font-weight-bold border-top border-dark">
+                                Total Rupees: {{ amountInWords }} Only
+                            </td>
                         </tr>
                     </tfoot>
                 </table>
@@ -169,7 +174,7 @@
                         <div class="col-4">A/c No.</div>
                         <div class="col-8">: <strong>702101010050178</strong></div>
                         <div class="col-4">Branch & IFSC Code</div>
-                        <div class="col-8">: UBIN05700214 </div>
+                        <div class="col-8">: UBIN0570214 </div>
                     </div>
                     <div class="mb-1"><u>Declaration:</u></div>
                     <div class="text-justify line-height-tight">

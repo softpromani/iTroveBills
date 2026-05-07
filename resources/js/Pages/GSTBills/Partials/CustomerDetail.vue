@@ -226,7 +226,7 @@ watch(() => props.billing_user_detail, (val) => {
                             <div class="mt-2 col-md-6" v-if="company?.firm_type !== 'IT'">
                                 <InputLabel
                                     for="vehical_no"
-                                    value="Vehicle No*"
+                                    :value="company?.firm_type !== 'IT' ? 'Vehicle No*' : 'Vehicle No'"
                                 />
                                 <TextInput
                                     id="vehical_no"

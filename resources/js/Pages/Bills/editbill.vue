@@ -138,16 +138,16 @@
                                         class="mt-2"
                                     />
                                 </div>
-                                <div class="mt-2 col-md-6">
+                                <div class="mt-2 col-md-6" v-if="edit_data.company?.firm_type !== 'IT'">
                                     <InputLabel
                                         for="vehical_no"
-                                        value="Vehicle No*"
+                                        :value="edit_data.company?.firm_type !== 'IT' ? 'Vehicle No*' : 'Vehicle No'"
                                     />
                                     <TextInput
                                         id="vehical_no"
                                         type="text"
                                         class="block w-full mt-1"
-                                        required
+                                        :required="edit_data.company?.firm_type !== 'IT'"
                                         v-model="form.vehical_no"
                                         autofocus
                                         autocomplete="vehical_no"
@@ -164,7 +164,7 @@
             </div>
         </section>
         <div>
-            <Editbilldata :invoiceitem ="edit_data.invoiceitems"/>
+            <Editbilldata :company="edit_data.company" :invoiceitem ="edit_data.invoiceitems"/>
         </div>
     </AuthenticatedLayout>
 </template>

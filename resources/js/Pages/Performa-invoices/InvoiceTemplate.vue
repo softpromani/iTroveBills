@@ -88,13 +88,9 @@
                 <!-- Dispatch Details (Right) -->
                 <div class="col-6 no-gutters h-100">
                     <div class="row no-gutters border-bottom border-dark h-25" v-if="props.invoice.company.firm_type !== 'IT'">
-                        <div class="col-6 border-right border-dark p-2">
+                        <div class="col-12 p-2">
                             <label class="meta-label">IEC Code</label>
                             <div class="meta-value">{{ props.invoice.company.iec }}</div>
-                        </div>
-                        <div class="col-6 p-2">
-                            <label class="meta-label">AD Code</label>
-                            <div class="meta-value">{{ props.invoice.company.ad_code }}</div>
                         </div>
                     </div>
                     <div class="row no-gutters border-bottom border-dark h-25" v-if="props.invoice.company.firm_type !== 'IT'">
@@ -159,8 +155,13 @@
                             <td class="text-right border-right border-dark">{{ calculateTotalQty() }}</td>
                             <td class="border-right border-dark"></td>
                             <td class="text-right border-right border-dark" v-if="props.invoice.company.firm_type !== 'IT'">{{ props.invoice.total_weight ?? "" }}</td>
-                            <td class="border-right border-dark" v-if="props.invoice.company.firm_type !== 'IT'"></td>
-                            <td class="text-right">₹ {{ formatAmount(props.invoice.total_ammount) }}</td>
+                            <td class="border-right border-dark"></td>
+                            <td class="text-right font-weight-bold">₹ {{ formatAmount(props.invoice.total_ammount) }}</td>
+                        </tr>
+                        <tr v-if="amountInWords">
+                            <td :colspan="props.invoice.company.firm_type !== 'IT' ? 8 : 7" class="text-right x-small font-weight-bold border-top border-dark">
+                                Total Rupees: {{ amountInWords }} Only
+                            </td>
                         </tr>
                     </tfoot>
                 </table>

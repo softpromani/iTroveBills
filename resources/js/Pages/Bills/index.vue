@@ -53,7 +53,7 @@
             :company_name="CompanyName"
         />
         <div>
-            <Editable />
+            <Editable :company="company" />
         </div>
     </AuthenticatedLayout>
 </template>
