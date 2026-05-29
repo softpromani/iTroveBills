@@ -132,7 +132,12 @@ class CustomerBillController extends Controller
     public function store(Request $request)
     {
         $valid = $request->validate([
-            'invoicedata.*.*' => 'required',
+            'invoicedata.*.0' => 'required',
+            'invoicedata.*.1' => 'required',
+            'invoicedata.*.2' => 'required',
+            'invoicedata.*.3' => 'required',
+            'invoicedata.*.4' => 'nullable',
+            'invoicedata.*.5' => 'required',
             'invoicedetails.*.invoice' => 'required|string',
             'invoicedetails.*.vehical_no' => 'nullable|string',
             'invoicedetails.*.totalWeight' => 'required|numeric',
@@ -334,7 +339,12 @@ class CustomerBillController extends Controller
     public function update(Request $request)
     {
         $valid = $request->validate([
-            'invoicedata.*.*' => 'required',
+            'invoicedata.*.0' => 'required',
+            'invoicedata.*.1' => 'required',
+            'invoicedata.*.2' => 'required',
+            'invoicedata.*.3' => 'required',
+            'invoicedata.*.4' => 'nullable',
+            'invoicedata.*.5' => 'required',
             'invoicedetails.*.invoice' => 'required|string',
             'invoicedetails.*.vehical_no' => 'nullable|string',
             'invoicedetails.*.totalWeight' => 'required|numeric',
@@ -588,7 +598,12 @@ class CustomerBillController extends Controller
     public function performa_store(Request $request)
     {
         $valid = $request->validate([
-            'invoicedata.*.*' => 'required',
+            'invoicedata.*.0' => 'required',
+            'invoicedata.*.1' => 'required',
+            'invoicedata.*.2' => 'required',
+            'invoicedata.*.3' => 'required',
+            'invoicedata.*.4' => 'nullable',
+            'invoicedata.*.5' => 'required',
             'invoicedetails.*.invoice' => 'required|string',
             'invoicedetails.*.vehical_no' => 'nullable|string',
             'invoicedetails.*.totalWeight' => 'required|numeric',
@@ -682,7 +697,12 @@ class CustomerBillController extends Controller
     public function performa_update(Request $request)
     {
         $valid = $request->validate([
-            'invoicedata.*.*' => 'required',
+            'invoicedata.*.0' => 'required',
+            'invoicedata.*.1' => 'required',
+            'invoicedata.*.2' => 'required',
+            'invoicedata.*.3' => 'required',
+            'invoicedata.*.4' => 'nullable',
+            'invoicedata.*.5' => 'required',
             'invoicedetails.*.invoice' => 'required|string',
             'invoicedetails.*.vehical_no' => 'nullable|string',
             'invoicedetails.*.totalWeight' => 'required|numeric',

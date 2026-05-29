@@ -111,7 +111,12 @@ class PlainBillController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'invoicedata.*.*' => 'required',
+            'invoicedata.*.0' => 'required',
+            'invoicedata.*.1' => 'required',
+            'invoicedata.*.2' => 'required',
+            'invoicedata.*.3' => 'required',
+            'invoicedata.*.4' => 'nullable',
+            'invoicedata.*.5' => 'required',
             'invoicedetails.0.invoice' => 'required|string',
             'invoicedetails.0.vehical_no' => 'nullable|string',
             'invoicedetails.0.totalWeight' => 'required|numeric',
@@ -236,7 +241,12 @@ class PlainBillController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'invoicedata.*.*' => 'required',
+            'invoicedata.*.0' => 'required',
+            'invoicedata.*.1' => 'required',
+            'invoicedata.*.2' => 'required',
+            'invoicedata.*.3' => 'required',
+            'invoicedata.*.4' => 'nullable',
+            'invoicedata.*.5' => 'required',
             'invoicedetails.0.invoice' => 'required|string',
             'invoicedetails.0.vehical_no' => 'nullable|string',
             'invoicedetails.0.totalWeight' => 'required|numeric',
