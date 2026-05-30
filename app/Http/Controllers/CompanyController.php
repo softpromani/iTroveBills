@@ -181,9 +181,9 @@ class CompanyController extends Controller
             'bank_ifsc'         => 'required',
             'bank_account_no'   => 'required',
             'adcode'            => 'required',
-            'logo'              => 'nullable|image|mimes:jpg,png,jpeg',
-            'sign'              => 'nullable|image|mimes:jpg,png,jpeg',
-            'bank_qr'           => 'nullable|image|mimes:jpg,png,jpeg',
+            'logo'              => $request->hasFile('logo') ? 'image|mimes:jpg,png,jpeg' : 'nullable',
+            'sign'              => $request->hasFile('sign') ? 'image|mimes:jpg,png,jpeg' : 'nullable',
+            'bank_qr'           => $request->hasFile('bank_qr') ? 'image|mimes:jpg,png,jpeg' : 'nullable',
             'brand_banner.*'    => 'nullable', // validate each file
         ]);
 

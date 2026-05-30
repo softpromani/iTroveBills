@@ -76,15 +76,10 @@
                 >
                     {{ $page.props.flash.error }}
                 </div>
-                <div v-else class="ml-3 text-sm font-normal">
-                    <span v-if="Object.keys($page.props.errors).length === 1"
-                        >There is one form error.</span
-                    >
-                    <span v-else
-                        >There are
-                        {{ Object.keys($page.props.errors).length }} form
-                        errors.</span
-                    >
+                <div v-else class="ml-3 text-sm font-normal flex-1">
+                    <div v-for="(error, key) in $page.props.errors" :key="key" class="mt-0.5 first:mt-0 text-red-600 dark:text-red-400 font-medium">
+                        • {{ error }}
+                    </div>
                 </div>
 
                 <button
