@@ -127,6 +127,14 @@ class PlainBillController extends Controller
         $customerId = $details['customer'] ?? null;
         $companyId = $details['company'] ?? null;
 
+        // Check if invoice number already exists for this company
+        $existingInvoice = PlainBill::where('invoice_number', $details['invoice'])
+            ->where('company_id', $companyId)
+            ->first();
+        if ($existingInvoice) {
+            return back()->withErrors(['invoice' => 'Plain bill invoice number already exists for this company.']);
+        }
+
         // Simplified customer creation logic as per requirement "same functionality"
         if (empty($customerId) && !empty($details['name'])) {
             $customerCompany = Company::firstOrCreate(
@@ -165,7 +173,7 @@ class PlainBillController extends Controller
             'payment_status' => Status::moduleStatusId('invoice_payment', 'unpaid'),
             'total_ammount' => $details['totalTaxableValue'],
             'total_weight' => $details['totalWeight'],
-            'vehicle_no' => $details['vehical_no'],
+            'vehicle_no' => $details['vehical_no'] ?? '',
             'customer_company_id' => $customerId,
             'company_id' => $companyId,
             'lut_id' => $lut ? $lut->id : null,
@@ -178,7 +186,7 @@ class PlainBillController extends Controller
                 'hsn_code' => $data[1],
                 'quantity' => $data[2],
                 'unit' => $data[3],
-                'weight' => $data[4],
+                'weight' => $data[4] ?? 0.00,
                 'rate' => $data[5],
             ]);
         }
@@ -258,7 +266,7 @@ class PlainBillController extends Controller
             'invoice_number' => $request->invoicedetails[0]['invoice'],
             'total_ammount' => $request->invoicedetails[0]['totalTaxableValue'],
             'total_weight' => $request->invoicedetails[0]['totalWeight'],
-            'vehicle_no' => $request->invoicedetails[0]['vehical_no'],
+            'vehicle_no' => $request->invoicedetails[0]['vehical_no'] ?? '',
         ]);
 
         $bill->items()->delete();
@@ -269,7 +277,7 @@ class PlainBillController extends Controller
                 'hsn_code' => $data[1],
                 'quantity' => $data[2],
                 'unit' => $data[3],
-                'weight' => $data[4],
+                'weight' => $data[4] ?? 0.00,
                 'rate' => $data[5],
             ]);
         }

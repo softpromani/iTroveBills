@@ -148,6 +148,14 @@ class CustomerBillController extends Controller
             $customerId = $details['customer'] ?? null;
             $companyId = $details['company'] ?? null;
 
+            // Check if invoice number already exists for this company
+            $existingInvoice = Invoice::where('invoice_number', $details['invoice'])
+                ->where('company_id', $companyId)
+                ->first();
+            if ($existingInvoice) {
+                return back()->withErrors(['invoice' => 'Invoice number already exists for this company.']);
+            }
+
             if (empty($customerId)) {
                 // Logic to create new customer
                 $name = $details['name'] ?? null;
@@ -203,7 +211,7 @@ class CustomerBillController extends Controller
                 'payment_status' => Status::moduleStatusId('invoice_payment', 'unpaid'),
                 'total_ammount' => $details['totalTaxableValue'],
                 'total_weight' => $details['totalWeight'],
-                'vehicle_no' => $details['vehical_no'],
+                'vehicle_no' => $details['vehical_no'] ?? '',
                 'customer_company_id' => $customerId,
                 'company_id' => $companyId,
                 'lut_id' => isset($lut) ? $lut->id : Null,
@@ -216,7 +224,7 @@ class CustomerBillController extends Controller
                     'hsn_code' => $data[1],
                     'quantity' => $data[2],
                     'unit' => $data[3],
-                    'weight' => $data[4],
+                    'weight' => $data[4] ?? 0.00,
                     'rate' => $data[5],
                 ]);
             }
@@ -358,7 +366,7 @@ class CustomerBillController extends Controller
                 'invoice_number' => $request->invoicedetails[0]['invoice'],
                 'total_ammount' => $request->invoicedetails[0]['totalTaxableValue'],
                 'total_weight' => $request->invoicedetails[0]['totalWeight'],
-                'vehicle_no' => $request->invoicedetails[0]['vehical_no'],
+                'vehicle_no' => $request->invoicedetails[0]['vehical_no'] ?? '',
             ]);
 
             foreach ($request->invoicedata as $key => $data) {
@@ -368,7 +376,7 @@ class CustomerBillController extends Controller
                     'hsn_code' => $data[1],
                     'quantity' => $data[2],
                     'unit' => $data[3],
-                    'weight' => $data[4],
+                    'weight' => $data[4] ?? 0.00,
                     'rate' => $data[5],
                 ]);
             }
@@ -614,6 +622,14 @@ class CustomerBillController extends Controller
             $customerId = $details['customer'] ?? null;
             $companyId = $details['company'] ?? null;
 
+            // Check if performa invoice number already exists for this company
+            $existingInvoice = PerformaInvoice::where('invoice_number', $details['invoice'])
+                ->where('company_id', $companyId)
+                ->first();
+            if ($existingInvoice) {
+                return back()->withErrors(['invoice' => 'Performa Invoice number already exists for this company.']);
+            }
+
             if (empty($customerId)) {
                 $name = $details['customer_name'] ?? null;
                 if ($name) {
@@ -664,7 +680,7 @@ class CustomerBillController extends Controller
                 'payment_status' => Status::moduleStatusId('invoice_payment', 'unpaid'),
                 'total_ammount' => $details['totalTaxableValue'],
                 'total_weight' => $details['totalWeight'],
-                'vehicle_no' => $details['vehical_no'],
+                'vehicle_no' => $details['vehical_no'] ?? '',
                 'delivery_in_days' => $details['delivery_in_days'] ?? null,
                 'customer_company_id' => $customerId,
                 'company_id' => $companyId,
@@ -678,7 +694,7 @@ class CustomerBillController extends Controller
                     'hsn_code' => $data[1],
                     'quantity' => $data[2],
                     'unit' => $data[3],
-                    'weight' => $data[4],
+                    'weight' => $data[4] ?? 0.00,
                     'rate' => $data[5],
                 ]);
             }
@@ -716,7 +732,7 @@ class CustomerBillController extends Controller
                 'invoice_number' => $request->invoicedetails[0]['invoice'],
                 'total_ammount' => $request->invoicedetails[0]['totalTaxableValue'],
                 'total_weight' => $request->invoicedetails[0]['totalWeight'],
-                'vehicle_no' => $request->invoicedetails[0]['vehical_no'],
+                'vehicle_no' => $request->invoicedetails[0]['vehical_no'] ?? '',
                 'delivery_in_days' => $request->invoicedetails[0]['delivery_in_days'] ?? null,
             ]);
 
@@ -727,7 +743,7 @@ class CustomerBillController extends Controller
                     'hsn_code' => $data[1],
                     'quantity' => $data[2],
                     'unit' => $data[3],
-                    'weight' => $data[4],
+                    'weight' => $data[4] ?? 0.00,
                     'rate' => $data[5],
                 ]);
             }

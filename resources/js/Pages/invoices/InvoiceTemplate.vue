@@ -1,6 +1,6 @@
 <template>
 
-    <Head title="Tax Invoice" />
+    <Head title="Export Invoice" />
     <div class="no-print p-3 bg-light border-bottom sticky-top d-flex align-items-center justify-content-center">
         <button @click="printInvoice" class="btn btn-dark mx-2">
             <i class="fa fa-print mr-2"></i> Print Invoice
@@ -21,7 +21,7 @@
         <div class="invoice-container shadow-sm mx-auto bg-white border-2 border-dark">
             <!-- Header Title -->
             <div class="text-center font-weight-bold border-bottom border-dark py-2 bg-light invoice-title">
-                TAX INVOICE
+                EXPORT INVOICE
             </div>
 
             <!-- Top Section: Seller and Metadata -->
