@@ -156,8 +156,8 @@
                             <th class="col-1">Total Amount</th>
                             <th class="col-1">Paid Amount</th>
                             <th class="col-2">Payment Status</th>
-                            <th class="col-1">Vehicle No</th>
-                            <th class="col-1">No. Packets</th>
+                            <th v-if="showVehicleAndPackets" class="col-1">Vehicle No</th>
+                            <th v-if="showVehicleAndPackets" class="col-1">No. Packets</th>
                             <th class="col-1">Customer</th>
                             <th class="col-1">Action</th>
                         </tr>
@@ -189,8 +189,8 @@
                                   {{ invoice.payment?.status || 'N/A' }}
                                 </span>
                             </td>
-                            <td>{{ invoice.vehicle_no || "N/A" }}</td>
-                            <td>{{ invoice.no_packets || "NO PACK" }}</td>
+                            <td v-if="showVehicleAndPackets">{{ invoice.vehicle_no || "N/A" }}</td>
+                            <td v-if="showVehicleAndPackets">{{ invoice.no_packets || "NO PACK" }}</td>
                             <td>{{invoice.customer.company_name || "N/A" }}</td>
 
                             <td>
@@ -481,6 +481,12 @@ const PayBillModal = ref(false);
 const no_packets = ref('');
 const vehicle_no = ref('');
 const dispatched_through = ref('');
+const invoices = ref(props.invoices); // Reactive invoices array
+
+const showVehicleAndPackets = computed(() => {
+  if (!invoiceList.value || invoiceList.value.length === 0) return true;
+  return invoiceList.value.some(inv => inv.company?.firm_type !== 'IT');
+});
 const invoiceId = ref(null);
 const invoiceNumber = ref('');
 const reference_no = ref('');

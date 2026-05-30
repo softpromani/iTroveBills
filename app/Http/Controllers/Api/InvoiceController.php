@@ -11,11 +11,25 @@ class InvoiceController extends Controller
     function fetchInvoice($invoice_id, $type = 'regular')
     {
         if ($type === 'gst') {
-            $data = \App\Models\GSTInvoice::find($invoice_id);
+            $data = \App\Models\GSTInvoice::with('payment')->find($invoice_id);
         } elseif ($type === 'proforma') {
-            $data = \App\Models\PerformaInvoice::find($invoice_id);
+            $data = \App\Models\PerformaInvoice::with('payment')->find($invoice_id);
+        } elseif ($type === 'plain') {
+            $data = \App\Models\PlainBill::with('payment')->find($invoice_id);
         } else {
-            $data = Invoice::find($invoice_id);
+            $data = Invoice::with('payment')->find($invoice_id);
+        }
+
+        if ($data && $data->payment) {
+            $correct_total = $data->total_ammount;
+            if ($type === 'gst' && isset($data->subtotal_amount)) {
+                $correct_total = $data->subtotal_amount;
+            }
+            if (abs($data->payment->total_amount - $correct_total) > 0.01) {
+                $data->payment->total_amount = $correct_total;
+                $data->payment->save();
+                $data->refresh();
+            }
         }
 
         return $data;

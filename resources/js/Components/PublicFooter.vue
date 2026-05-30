@@ -9,8 +9,11 @@ import { Link } from '@inertiajs/vue3';
                 <!-- Company Info -->
                 <div class="md:col-span-2">
                     <div class="flex items-center mb-6">
-                        <img src="/itimages/itlogo.png" alt="ITrove Logo" class="h-12 w-auto mr-4" />
-                        <span class="text-2xl font-bold">ITrove Bills</span>
+                        <div class="flex items-start">
+                            <img src="/itimages/itlogo.png" alt="ITrove Logo" class="h-12 w-auto mr-4" />
+                            <sup class="inline-flex items-center justify-center border border-purple-400 rounded-full w-4 h-4 text-[8px] font-extrabold text-purple-400 -ml-3.5 mt-0.5 mr-4 leading-none">TM</sup>
+                        </div>
+                        <span class="text-2xl font-bold flex items-start">ITrove Bills<sup class="inline-flex items-center justify-center border border-purple-400 rounded-full w-3.5 h-3.5 text-[7px] font-extrabold text-purple-400 ml-1.5 mt-1 leading-none">TM</sup></span>
                     </div>
                     <p class="text-gray-300 mb-6 max-w-md">
                         Empowering businesses with innovative billing solutions. Complete GST compliance,

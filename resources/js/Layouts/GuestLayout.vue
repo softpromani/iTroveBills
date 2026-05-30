@@ -6,8 +6,8 @@
             class="relative overflow-hidden md:flex w-1/2 bg-gradient-to-tr from-purple-800 to-pink-700 justify-around items-center hidden px-12"
         >
             <div class="z-10 w-full max-w-lg">
-                <h1 class="text-white font-bold text-5xl font-sans mb-6 tracking-tight">
-                    ITroveBills
+                <h1 class="text-white font-bold text-5xl font-sans mb-6 tracking-tight flex items-start">
+                    ITroveBills<sup class="inline-flex items-center justify-center border border-pink-300 rounded-full w-5 h-5 text-[10px] font-extrabold ml-2 text-pink-300 align-super mt-1.5 leading-none">TM</sup>
                 </h1>
                 <div class="space-y-4">
                     <p class="text-white text-lg leading-relaxed opacity-90">

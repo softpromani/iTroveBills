@@ -4,8 +4,9 @@
     <GuestLayout>
         <div class="space-y-6">
             <div class="flex justify-center mb-2">
-                <Link href="/">
+                <Link href="/" class="flex items-start">
                     <img src="itimages/itlogo.png" alt="Innovation Trove" class="h-16 w-auto drop-shadow-sm" />
+                    <sup class="inline-flex items-center justify-center border border-purple-800 rounded-full w-4 h-4 text-[8px] font-extrabold text-purple-800 ml-1 mt-1 leading-none">TM</sup>
                 </Link>
             </div>
 

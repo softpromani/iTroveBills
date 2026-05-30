@@ -56,8 +56,11 @@
         <!-- Header with Logo -->
         <div class="header">
             <!-- Logo -->
-            <img src="{{ asset('itimages/itlogo.png') }}" alt="Company Logo" class="logo">
-            <h3>{{ env('APP_NAME') }}</h3>
+            <div style="display: inline-block; position: relative; vertical-align: top;">
+                <img src="{{ asset('itimages/itlogo.png') }}" alt="Company Logo" class="logo">
+                <sup style="font-size: 7px; font-weight: bold; color: #6b21a8; position: absolute; top: 0; right: -14px; border: 1px solid #6b21a8; border-radius: 50%; width: 12px; height: 12px; display: inline-flex; align-items: center; justify-content: center; line-height: 1; text-align: center;">TM</sup>
+            </div>
+            <h3>{{ env('APP_NAME') }}<sup style="font-size: 7px; font-weight: bold; color: #6b21a8; border: 1px solid #6b21a8; border-radius: 50%; width: 12px; height: 12px; display: inline-flex; align-items: center; justify-content: center; line-height: 1; text-align: center; margin-left: 4px; vertical-align: super;">TM</sup></h3>
         </div>
 
         <!-- Content -->

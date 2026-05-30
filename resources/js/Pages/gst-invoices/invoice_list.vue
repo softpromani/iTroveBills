@@ -35,8 +35,10 @@
                             <th class="col-1">Taxable Amount</th>
                             <th class="col-1">GST Amount</th>
                             <th class="col-1">Grand Total</th>
-                            <th class="col-1">Vehicle No</th>
-                            <th class="col-1">No. Packets</th>
+                            <th class="col-1">Paid Amount</th>
+                            <th class="col-1">Payment Status</th>
+                            <th v-if="showVehicleAndPackets" class="col-1">Vehicle No</th>
+                            <th v-if="showVehicleAndPackets" class="col-1">No. Packets</th>
                             <th class="col-1">Customer</th>
                             <th class="col-1">Action</th>
                         </tr>
@@ -52,8 +54,21 @@
                             <td>{{ invoice.total_ammount ?? "0.00" }}</td>
                             <td>{{ invoice.tax_amount ?? "0.00" }}</td>
                             <td>{{ invoice.subtotal_amount ?? "0.00" }}</td>
-                            <td>{{ invoice.vehicle_no ?? "" }}</td>
-                            <td>{{ invoice.no_packets ?? "NO PACK" }}</td>
+                            <td>₹{{ formatAmount(invoice.payment?.paid_amount) }}</td>
+                            <td>
+                                <span
+                                  class="px-3 py-1 mr-2 text-xs font-medium rounded-full"
+                                  :class="{
+                                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300': invoice.payment?.status === 'due',
+                                    'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300': invoice.payment?.status === 'partial-paid',
+                                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': invoice.payment?.status === 'paid'
+                                  }"
+                                >
+                                  {{ invoice.payment?.status || 'N/A' }}
+                                </span>
+                            </td>
+                            <td v-if="showVehicleAndPackets">{{ invoice.vehicle_no ?? "" }}</td>
+                            <td v-if="showVehicleAndPackets">{{ invoice.no_packets ?? "NO PACK" }}</td>
                             <td>{{ invoice.customer.company_name ?? "" }}</td>
 
                             <td>
@@ -309,7 +324,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Pagination from "@/Components/Pagination.vue";
 import { Head, Link } from "@inertiajs/vue3";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import Modal from "@/Components/Modal.vue";
 import DangerButton from "@/Components/DangerButton.vue";
 import PrimaryButton from "@/Components/DangerButton.vue";
@@ -349,6 +364,11 @@ const editForm = ref({
     remark: ''
 });
 const invoices = ref(props.invoices); // Reactive invoices array
+
+const showVehicleAndPackets = computed(() => {
+  if (!invoices.value || invoices.value.length === 0) return true;
+  return invoices.value.some(inv => inv.company?.firm_type !== 'IT');
+});
 
 const formatAmount = (amount) => {
     if (!amount) return '0.00';

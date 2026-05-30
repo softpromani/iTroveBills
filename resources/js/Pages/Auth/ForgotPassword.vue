@@ -4,12 +4,13 @@
     <GuestLayout>
         <div class="container">
             <div class="row">
-                <Link href="/" class="flex items-center justify-center mb-4">
+                <Link href="/" class="flex items-start justify-center mb-4">
                     <img
                         src="itimage/itlogo.png"
-                        alt=""
+                        alt="Innovation Trove"
                         class="h-20 text-gray-500 fill-current w-30"
                     />
+                    <sup class="inline-flex items-center justify-center border border-purple-800 rounded-full w-4 h-4 text-[8px] font-extrabold text-purple-800 ml-1 mt-2 leading-none">TM</sup>
                 </Link>
                 <div class="row justify-content-center">
                     <div class="col-md-8">

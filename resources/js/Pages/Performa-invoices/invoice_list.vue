@@ -33,8 +33,8 @@
                             <th class="col-1">Invoice Number</th>
                             <th class="col-1">Invoice Date</th>
                             <th class="col-1">Total Amount</th>
-                            <th class="col-1">Vehicle No</th>
-                            <th class="col-1">No. Packets</th>
+                            <th v-if="showVehicleAndPackets" class="col-1">Vehicle No</th>
+                            <th v-if="showVehicleAndPackets" class="col-1">No. Packets</th>
                             <th class="col-1">Customer</th>
                             <th class="col-1">Action</th>
                         </tr>
@@ -48,8 +48,8 @@
                             <td>{{ invoice.invoice_number ?? "" }}</td>
                             <td>{{ invoice.invoice_date ?? "" }}</td>
                             <td>{{ invoice.total_ammount ?? "" }}</td>
-                            <td>{{ invoice.vehicle_no ?? "" }}</td>
-                            <td>{{ invoice.no_packets ?? "NO PACK" }}</td>
+                            <td v-if="showVehicleAndPackets">{{ invoice.vehicle_no ?? "" }}</td>
+                            <td v-if="showVehicleAndPackets">{{ invoice.no_packets ?? "NO PACK" }}</td>
                             <td>{{ invoice.customer.company_name ?? "" }}</td>
 
                             <td>
@@ -215,7 +215,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Pagination from "@/Components/Pagination.vue";
 import { Head, Link } from "@inertiajs/vue3";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import Modal from "@/Components/Modal.vue";
 import DangerButton from "@/Components/DangerButton.vue";
 import PrimaryButton from "@/Components/DangerButton.vue";
@@ -244,6 +244,11 @@ const amount = ref('');
 const remark = ref('');
 const paymentTypes = ref([]);
 const invoices = ref(props.invoices); // Reactive invoices array
+
+const showVehicleAndPackets = computed(() => {
+  if (!invoices.value || invoices.value.length === 0) return true;
+  return invoices.value.some(inv => inv.company?.firm_type !== 'IT');
+});
 
 // Method to open the modal and fetch invoice data
 const openModal = (id) => {

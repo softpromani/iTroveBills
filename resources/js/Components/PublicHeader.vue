@@ -21,10 +21,11 @@ const mobileMenuOpen = ref(false);
         <div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
             <div class="flex h-20 items-center justify-between">
                 <div class="flex-1 md:flex md:items-center md:gap-12">
-                    <a class="block text-teal-600 hover:opacity-80 transition-opacity" href="/">
+                    <a class="flex items-start text-teal-600 hover:opacity-80 transition-opacity" href="/">
                         <span class="sr-only">Home</span>
                         <!-- Use absolute path for images to work from other pages -->
                         <img src="/itimages/itlogo.png" alt="ITrove Logo" class="mt-2 h-12 w-auto" />
+                        <sup class="inline-flex items-center justify-center border border-purple-600 rounded-full w-4 h-4 text-[8px] font-extrabold text-purple-600 ml-1 mt-2 leading-none">TM</sup>
                     </a>
                 </div>
 

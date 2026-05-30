@@ -409,16 +409,23 @@ class CustomerBillController extends Controller
 
         if($invoice)
         {
-            // Ensure payment record exists
+            // Determine the correct total amount based on invoice type
+            $correct_total = $invoice->total_ammount;
+            if ($type === 'gst' && isset($invoice->subtotal_amount)) {
+                $correct_total = $invoice->subtotal_amount;
+            }
+
+            // Ensure payment record exists and has the correct total amount
             if (!$invoice->payment) {
-                // Determine the correct total amount based on invoice type
-                $total_amount = $invoice->total_ammount;
-                if ($type === 'gst' && isset($invoice->subtotal_amount)) {
-                    $total_amount = $invoice->subtotal_amount;
-                }
-                
-                $invoice->payment()->create(['total_amount' => $total_amount]);
+                $invoice->payment()->create(['total_amount' => $correct_total]);
                 $invoice->refresh();
+            } else {
+                $payment = $invoice->payment;
+                if (abs($payment->total_amount - $correct_total) > 0.01) {
+                    $payment->total_amount = $correct_total;
+                    $payment->save();
+                    $invoice->refresh();
+                }
             }
 
             $payment = $invoice->payment;
@@ -469,6 +476,18 @@ class CustomerBillController extends Controller
         }
 
         $payment = $history->payment;
+        $invoice = $payment->paymentable;
+        if ($invoice) {
+            $correct_total = $invoice->total_ammount;
+            if (get_class($invoice) === \App\Models\GSTInvoice::class && isset($invoice->subtotal_amount)) {
+                $correct_total = $invoice->subtotal_amount;
+            }
+            if (abs($payment->total_amount - $correct_total) > 0.01) {
+                $payment->total_amount = $correct_total;
+                $payment->save();
+            }
+        }
+
         $diff = $request->amount - $history->amount;
         $newTotalPaid = $payment->paid_amount + $diff;
 
