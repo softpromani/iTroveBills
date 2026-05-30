@@ -13,7 +13,24 @@
         <form @submit.prevent="submit">
             <div>
                 <InputLabel for="password" value="Password" />
-                <TextInput id="password" type="password" class="mt-1 block w-full" v-model="form.password" required autocomplete="current-password" autofocus />
+                <div class="relative mt-1">
+                    <TextInput
+                        id="password"
+                        :type="showPassword ? 'text' : 'password'"
+                        class="block w-full pr-10"
+                        v-model="form.password"
+                        required
+                        autocomplete="current-password"
+                        autofocus
+                    />
+                    <button
+                        type="button"
+                        @click="showPassword = !showPassword"
+                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-purple-700 focus:outline-none"
+                    >
+                        <i :class="showPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"></i>
+                    </button>
+                </div>
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
@@ -27,6 +44,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import InputError from '@/Components/InputError.vue';
@@ -34,6 +52,8 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
+
+const showPassword = ref(false);
 
 const form = useForm({
     password: '',

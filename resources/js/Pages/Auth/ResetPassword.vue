@@ -15,13 +15,45 @@
 
             <div class="mt-3">
                 <InputLabel for="password" value="Password" />
-                <TextInput id="password" type="password" class="mt-1 block w-full" v-model="form.password" required autocomplete="new-password" />
+                <div class="relative mt-1">
+                    <TextInput
+                        id="password"
+                        :type="showPassword ? 'text' : 'password'"
+                        class="block w-full pr-10"
+                        v-model="form.password"
+                        required
+                        autocomplete="new-password"
+                    />
+                    <button
+                        type="button"
+                        @click="showPassword = !showPassword"
+                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-purple-700 focus:outline-none"
+                    >
+                        <i :class="showPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"></i>
+                    </button>
+                </div>
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
             <div class="mt-3">
                 <InputLabel for="password_confirmation" value="Confirm Password" />
-                <TextInput id="password_confirmation" type="password" class="mt-1 block w-full" v-model="form.password_confirmation" required autocomplete="new-password" />
+                <div class="relative mt-1">
+                    <TextInput
+                        id="password_confirmation"
+                        :type="showConfirmPassword ? 'text' : 'password'"
+                        class="block w-full pr-10"
+                        v-model="form.password_confirmation"
+                        required
+                        autocomplete="new-password"
+                    />
+                    <button
+                        type="button"
+                        @click="showConfirmPassword = !showConfirmPassword"
+                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-purple-700 focus:outline-none"
+                    >
+                        <i :class="showConfirmPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"></i>
+                    </button>
+                </div>
                 <InputError class="mt-2" :message="form.errors.password_confirmation" />
             </div>
 
@@ -35,6 +67,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import InputError from '@/Components/InputError.vue';
@@ -42,6 +75,9 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
+
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
 
 const props = defineProps({
     email: String,

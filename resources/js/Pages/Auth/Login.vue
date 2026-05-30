@@ -32,7 +32,24 @@
 
                 <div>
                     <InputLabel for="password" value="Password" />
-                    <TextInput id="password" type="password" class="block w-full mt-1.5" v-model="form.password" required autocomplete="current-password" placeholder="••••••••" />
+                    <div class="relative mt-1.5">
+                        <TextInput
+                            id="password"
+                            :type="showPassword ? 'text' : 'password'"
+                            class="block w-full pr-10"
+                            v-model="form.password"
+                            required
+                            autocomplete="current-password"
+                            placeholder="••••••••"
+                        />
+                        <button
+                            type="button"
+                            @click="showPassword = !showPassword"
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-purple-700 focus:outline-none"
+                        >
+                            <i :class="showPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"></i>
+                        </button>
+                    </div>
                     <InputError class="mt-1.5" :message="form.errors.password" />
                 </div>
 
@@ -64,6 +81,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Checkbox from '@/Components/Checkbox.vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
@@ -72,6 +90,8 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+
+const showPassword = ref(false);
 
 defineProps({
     canResetPassword: Boolean,
