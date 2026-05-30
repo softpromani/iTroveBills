@@ -104,7 +104,7 @@ Route::get('/dashboard', function (Illuminate\Http\Request $request) {
 
     $gstRevenue = \App\Models\GSTInvoice::whereIn('company_id', $companyIds)
         ->whereBetween('invoice_date', [$startDate, $endDate])
-        ->sum('total_ammount');
+        ->sum('subtotal_amount');
 
     $totalRevenue = $invoicesRevenue + $gstRevenue;
 
