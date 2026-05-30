@@ -218,6 +218,17 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Brand Banners Section -->
+            <div v-if="props.invoice.company?.brand_banner && props.invoice.company?.brand_banner.length" class="border-top border-dark p-2 text-center brand-banners-section">
+                <div class="d-flex justify-content-center align-items-center flex-row flex-wrap">
+                    <img v-for="(banner, index) in props.invoice.company.brand_banner" 
+                         :key="index" 
+                         :src="`/${banner}`" 
+                         class="brand-banner-img mx-3 my-1" 
+                         alt="Brand Banner" />
+                </div>
+            </div>
         </div>
 
         <div class="text-center small mt-2 no-print font-weight-bold">
@@ -511,5 +522,11 @@ onMounted(() => {
     * {
         color: #000 !important;
     }
+}
+
+.brand-banner-img {
+    max-height: 55px;
+    width: auto;
+    object-fit: contain;
 }
 </style>

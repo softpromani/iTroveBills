@@ -216,8 +216,18 @@
                         <img v-if="props.invoice.company.sign" :src="`/${props.invoice.company.sign}`" class="sign-img"
                             alt="Authorized Signatory" />
                     </div>
-                    <div class="small font-weight-bold text-center border-top border-dark pt-1">Authorized Signatory
-                    </div>
+                    <div class="small font-weight-bold text-center border-top border-dark pt-1">Authorized Signatory</div>
+                </div>
+            </div>
+
+            <!-- Brand Banners Section -->
+            <div v-if="props.invoice.company.brand_banner && props.invoice.company.brand_banner.length" class="border-top border-dark p-2 text-center brand-banners-section">
+                <div class="d-flex justify-content-center align-items-center flex-row flex-wrap">
+                    <img v-for="(banner, index) in props.invoice.company.brand_banner" 
+                         :key="index" 
+                         :src="`/${banner}`" 
+                         class="brand-banner-img mx-3 my-1" 
+                         alt="Brand Banner" />
                 </div>
             </div>
         </div>
@@ -537,5 +547,11 @@ onMounted(() => {
 .tax-summary-table td {
     padding: 1px 4px !important;
     font-size: 11px !important;
+}
+
+.brand-banner-img {
+    max-height: 55px;
+    width: auto;
+    object-fit: contain;
 }
 </style>

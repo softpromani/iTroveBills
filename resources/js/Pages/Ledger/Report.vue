@@ -8,37 +8,32 @@
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 print:p-0">
                 <!-- Filters (Hidden on Print) -->
                 <div class="bg-white p-6 rounded-lg shadow mb-6 print:hidden">
-                    <form @submit.prevent="generateReport" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                        <div class="md:col-span-2">
+                    <form @submit.prevent="generateReport" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                        <div class="md:col-span-4">
                             <InputLabel for="account" value="Select Customer / Party" />
-                            <select
+                            <Dropdown
                                 id="account"
                                 v-model="selectedAccount"
-                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                :options="groupedAccounts"
+                                optionLabel="label"
+                                optionGroupLabel="label"
+                                optionGroupChildren="items"
+                                optionValue="value"
+                                filter
+                                placeholder="Choose an account"
+                                class="mt-1 block w-full w-100 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 h-11 d-flex align-items-center"
                                 required
-                            >
-                                <option value="" disabled>Choose an account</option>
-                                <optgroup label="Customers">
-                                    <option v-for="customer in customers" :key="'c'+customer.id" :value="'customer_'+customer.id">
-                                        {{ customer.customer_detail?.name }}
-                                    </option>
-                                </optgroup>
-                                <optgroup label="Parties">
-                                    <option v-for="party in parties" :key="'p'+party.id" :value="'party_'+party.id">
-                                        {{ party.name }}
-                                    </option>
-                                </optgroup>
-                            </select>
+                            />
                         </div>
-                        <div>
+                        <div class="md:col-span-3">
                             <InputLabel for="start_date" value="Start Date" />
                             <TextInput id="start_date" type="date" v-model="form.start_date" class="mt-1 block w-full" />
                         </div>
-                        <div>
+                        <div class="md:col-span-3">
                             <InputLabel for="end_date" value="End Date" />
                             <TextInput id="end_date" type="date" v-model="form.end_date" class="mt-1 block w-full" />
                         </div>
-                        <div class="flex gap-2">
+                        <div class="md:col-span-2 flex gap-2">
                             <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                                 Generate
                             </PrimaryButton>
@@ -178,8 +173,9 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import TextInput from "@/Components/TextInput.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
+import Dropdown from "primevue/dropdown";
 import { Head, useForm } from "@inertiajs/vue3";
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, computed } from "vue";
 
 const props = defineProps({
     customers: { type: Array, default: () => [] },
@@ -189,6 +185,25 @@ const props = defineProps({
 });
 
 const selectedAccount = ref("");
+
+const groupedAccounts = computed(() => {
+    return [
+        {
+            label: 'Customers',
+            items: props.customers.map(c => ({
+                label: c.customer_detail?.name || 'Unknown Customer',
+                value: 'customer_' + c.id
+            }))
+        },
+        {
+            label: 'Parties',
+            items: props.parties.map(p => ({
+                label: p.name || 'Unknown Party',
+                value: 'party_' + p.id
+            }))
+        }
+    ];
+});
 
 const form = useForm({
     seller_customer_id: props.filters?.seller_customer_id || "",
@@ -206,12 +221,15 @@ onMounted(() => {
 });
 
 watch(selectedAccount, (val) => {
-    if (val.startsWith("customer_")) {
+    if (val && val.startsWith("customer_")) {
         form.seller_customer_id = val.replace("customer_", "");
         form.party_id = "";
-    } else if (val.startsWith("party_")) {
+    } else if (val && val.startsWith("party_")) {
         form.party_id = val.replace("party_", "");
         form.seller_customer_id = "";
+    } else {
+        form.seller_customer_id = "";
+        form.party_id = "";
     }
 });
 
