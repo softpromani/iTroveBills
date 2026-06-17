@@ -44,6 +44,8 @@ class InvoiceController extends Controller
             $model = \App\Models\GSTInvoice::class;
         } elseif ($type === 'proforma') {
             $model = \App\Models\PerformaInvoice::class;
+        } elseif ($type === 'plain') {
+            $model = \App\Models\PlainBill::class;
         } else {
             $model = Invoice::class;
         }

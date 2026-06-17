@@ -71,13 +71,14 @@
                                 <th class="col-1">Paid Amount</th>
                                 <th class="col-2">Payment Status</th>
                                 <th class="col-1">Vehicle No</th>
+                                <th class="col-1">No. Packets</th>
                                 <th class="col-1">Customer</th>
                                 <th class="col-1">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-if="!invoiceList || invoiceList.length === 0">
-                                <td colspan="9" class="text-center py-4">
+                                <td colspan="10" class="text-center py-4">
                                     <div class="text-gray-500">
                                         <i class="fa fa-inbox fa-3x mb-3"></i>
                                         <p>No plain bills found matching your criteria</p>
@@ -103,6 +104,7 @@
                                     </span>
                                 </td>
                                 <td>{{ invoice.vehicle_no || "N/A" }}</td>
+                                <td>{{ invoice.no_packets || "NO PACK" }}</td>
                                 <td>{{ invoice.customer ? invoice.customer.company_name : "N/A" }}</td>
 
                                 <td>
@@ -135,6 +137,12 @@
                                                     Generate E-Way Bill
                                                 </Link>
                                             </li>
+                                            <li>
+                                                <a @click.prevent="openModal(invoice.id)" class="dropdown-item" href="#">
+                                                    <i class="fa fa-car" aria-hidden="true" style="color: rgb(245, 180, 0);"></i>
+                                                    Package Update
+                                                </a>
+                                            </li>
                                         </ul>
                                     </div>
                                 </td>
@@ -144,6 +152,43 @@
                 </div>
             </div>
         </template>
+
+        <!-- Package Update Modal Component -->
+        <div v-if="showModal" class="modal fade show" style="display: block;" aria-modal="true" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Update Package</h5>
+                        <button type="button" class="close" @click="closeModal">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form @submit.prevent="submitForm">
+                            <div class="form-group mb-3">
+                                <label for="no_packets">No. of Package</label>
+                                <input type="number" class="form-control" id="no_packets" v-model="no_packets" required>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="vehicle_no">Vehicle Number</label>
+                                <input type="text" class="form-control" id="vehicle_no" v-model="vehicle_no" required>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="dispatched_through">Dispatched Through</label>
+                                <input type="text" class="form-control" id="dispatched_through" v-model="dispatched_through">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" @click="closeModal">Close</button>
+                                <button type="submit" class="btn btn-primary">Save changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Backdrop -->
+        <div v-if="showModal" class="modal-backdrop fade show"></div>
 
         <!-- Password Modal -->
         <Dialog 
@@ -185,6 +230,8 @@ import { ref, computed } from "vue";
 import Dialog from "primevue/dialog";
 import InputError from "@/Components/InputError.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
+import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const props = defineProps({
     invoices: Array,
@@ -209,6 +256,73 @@ const filters = ref({
     customer_id: '',
     customer_name: '',
 });
+
+// Reactive variables for package update modal
+const showModal = ref(false);
+const no_packets = ref('');
+const vehicle_no = ref('');
+const dispatched_through = ref('');
+const invoiceId = ref(null);
+
+// Method to open the modal and fetch invoice data
+const openModal = (id) => {
+    showModal.value = true;
+    invoiceId.value = id;
+    const type = 'plain';
+
+    axios.get(`/api/fetch-invoice/${id}/${type}`)
+        .then(response => {
+            const invoiceData = response.data;
+            no_packets.value = invoiceData.no_packets || '';
+            vehicle_no.value = invoiceData.vehicle_no || '';
+            dispatched_through.value = invoiceData.dispatched_through || '';
+            invoiceId.value = invoiceData.id || '';
+        })
+        .catch(error => {
+            console.error('Error fetching invoice:', error);
+        });
+};
+
+// Method to close the modal and reset fields
+const closeModal = () => {
+    showModal.value = false;
+    no_packets.value = '';
+    vehicle_no.value = '';
+    dispatched_through.value = '';
+    invoiceId.value = null;
+};
+
+// Method to submit the form and update the invoice package
+const submitForm = () => {
+    axios.post(`/api/update-invoice-package`, {
+        no_packets: no_packets.value,
+        vehicle_no: vehicle_no.value,
+        dispatched_through: dispatched_through.value,
+        invoice_id: invoiceId.value,
+        type: 'plain'
+    })
+    .then(response => {
+        console.log('Package updated successfully:', response.data);
+        Swal.fire({
+            title: 'Success!',
+            text: 'Package updated successfully.',
+            icon: 'success',
+            confirmButtonText: 'OK'
+        }).then(() => {
+            location.reload();
+        });
+        closeModal();
+    })
+    .catch(error => {
+        console.error('Error updating package:', error);
+        Swal.fire({
+            title: 'Error!',
+            text: 'There was an error updating the package.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+    });
+};
 
 const invoiceList = computed(() => props.invoices || []);
 
