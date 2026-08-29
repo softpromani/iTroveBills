@@ -267,13 +267,23 @@ Route::middleware('auth')->group(function () {
         Route::get('/create', [PlainLedgerController::class, 'create'])->name('create');
         Route::post('/store', [PlainLedgerController::class, 'store'])->name('store');
         Route::get('/edit/{id}', [PlainLedgerController::class, 'edit'])->name('edit');
-        Route::post('/update/{id}', [PlainLedgerController::class, 'update'])->name('update');
-        Route::delete('/destroy/{id}', [PlainLedgerController::class, 'destroy'])->name('destroy');
         Route::get('/report', [PlainLedgerController::class, 'report'])->name('report');
         Route::get('/report/generate', [PlainLedgerController::class, 'generate_report'])->name('report.generate');
     });
 
+    // Quotation Routes
+    Route::group(['prefix' => 'quotations', 'as' => 'quotation.'], function () {
+        Route::get('/create', [\App\Http\Controllers\QuotationController::class, 'index'])->name('create');
+        Route::get('/list', [\App\Http\Controllers\QuotationController::class, 'list'])->name('list');
+        Route::post('/store', [\App\Http\Controllers\QuotationController::class, 'store'])->name('store');
+        Route::get('/edit/{id}', [\App\Http\Controllers\QuotationController::class, 'edit'])->name('edit');
+        Route::post('/update/{id}', [\App\Http\Controllers\QuotationController::class, 'update'])->name('update');
+        Route::delete('/delete/{id}', [\App\Http\Controllers\QuotationController::class, 'destroy'])->name('destroy');
+        Route::post('/mail', [\App\Http\Controllers\QuotationController::class, 'send_mail'])->name('sendmail');
+    });
+
 });
+Route::get('quotations/view/{id}', [\App\Http\Controllers\QuotationController::class, 'template'])->name('quotation.view');
 Route::get('view-invoice',[CustomerBillController::class,'template'])->name('view.invoice');
 Route::get('performa/view-invoice',[CustomerBillController::class,'performa_template'])->name('performa.view.invoice');
 Route::get('gst/view-invoice',[GSTInvoiceController::class,'gst_template'])->name('gst.view.invoice');

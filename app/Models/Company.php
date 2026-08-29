@@ -73,6 +73,19 @@ class Company extends Model
        // \Log::info('Fiscal Year Start: ' . $startOfYear);
        // \Log::info('Fiscal Year End: ' . $endOfYear);
        return $this->GstInvoices()->whereBetween('invoice_date', [$startOfYear, $endOfYear]);
-   }
-    // end performa
+    }
+
+    // Quotations
+    public function Quotations(){
+        return $this->hasMany(Quotation::class, 'company_id', 'id');
+    }
+
+    public function ThisYearQuotation(){
+        $startOfYear = Carbon::now()->month >= 4
+            ? Carbon::now()->startOfYear()->addMonths(3)
+            : Carbon::now()->subYear()->startOfYear()->addMonths(3);
+        $endOfYear = $startOfYear->copy()->addYear()->subDay();
+
+        return $this->Quotations()->whereBetween('quotation_date', [$startOfYear, $endOfYear]);
+    }
 }

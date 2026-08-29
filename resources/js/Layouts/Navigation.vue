@@ -515,7 +515,59 @@
                                 >View Invoice List </Link
                             >
                         </li>
-                         <!-- end performa invoices -->
+                    </ul>
+                </div>
+            </transition>
+
+            <a
+                class="flex items-center px-6 py-2 mt-4 text-gray-100 no-underline dropdown-toggle"
+                href="#"
+                @click="showingQuotations = !showingQuotations"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg"
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true">
+                    <title>Quotations</title>
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+
+                <span class="mx-3">Quotations</span>
+            </a>
+            <transition
+                enter-to-class="transition-all duration-300 ease-in-out"
+                enter-from-class="opacity-25 max-h-0"
+                leave-from-class="opacity-100 max-h-xl"
+                leave-to-class="opacity-0 max-h-0"
+            >
+                <div v-show="showingQuotations">
+                    <ul
+                        class="p-2 mx-4 mt-2 space-y-2 overflow-hidden text-sm font-medium text-white bg-gray-700 bg-opacity-50 rounded-md shadow-inner"
+                        aria-label="submenu"
+                    >
+                        <li class="px-2 py-1 transition-colors duration-150">
+                            <Link
+                                class="text-white no-underline first-letter:w-full"
+                                :href="route('quotation.create')"
+                                >Create Quotation</Link
+                            >
+                        </li>
+                        <li class="px-2 py-1 transition-colors duration-150">
+                            <Link
+                                class="text-white no-underline first-letter:w-full"
+                                :href="route('quotation.list')"
+                                >View Quotations</Link
+                            >
+                        </li>
                     </ul>
                 </div>
             </transition>
@@ -777,6 +829,7 @@ export default {
         let showingInvoices = ref(false);
         let showingProformaInvoices = ref(false);
         let showingGSTInvoices = ref(false);
+        let showingQuotations = ref(false);
         let showingLedgerMenu = ref(false);
         let showingPartyMenu = ref(false);
 
@@ -787,6 +840,7 @@ export default {
             showingInvoices,
             showingProformaInvoices,
             showingGSTInvoices,
+            showingQuotations,
             showingLedgerMenu,
             showingPartyMenu
         };
