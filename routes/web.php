@@ -138,17 +138,14 @@ Route::get('/dashboard', function (Illuminate\Http\Request $request) {
                                     ->count('customer_company_id'),
     ];
 
-    $recentActivity = \App\Models\Invoice::with(['company', 'payment', 'paymentStatus' => function ($q) {
-                        $q->latest('created_at')->take(1); // get latest payment record
-                        }])
+    $recentActivity = \App\Models\Invoice::with(['company', 'payment'])
                         ->whereIn('company_id', $companyIds)
                         ->whereBetween('invoice_date', [$startDate, $endDate])
                         ->latest('created_at')
                         ->take(5)
                         ->get()
                         ->map(function ($invoice) {
-                            $latestPayment = $invoice->payment->first(); // this is now a Collection
-                            $invoice->payment_status = $latestPayment ? $latestPayment->status : 'due';
+                            $invoice->payment_status = $invoice->payment ? $invoice->payment->status : 'due';
                             return $invoice;
                         });
 

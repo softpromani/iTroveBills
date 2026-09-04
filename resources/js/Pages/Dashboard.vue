@@ -245,9 +245,9 @@
                                 <p class="text-sm text-gray-900">
                                     Invoice #{{ activity.invoice_number || `INV-${activity.id}` }}
 
-                                    <span v-if="activity.payment_status === 'paid'" class="text-green-600">- Paid</span>
-                                    <span v-else-if="activity.payment_status === 'partial-paid'" class="text-yellow-600">- Partial Paid</span>
-                                    <span v-else class="text-red-600">- Due</span>
+                                    <span v-if="(activity.payment_status || activity.payment?.status) === 'paid'" class="text-green-600 font-medium">- Paid</span>
+                                    <span v-else-if="(activity.payment_status || activity.payment?.status) === 'partial-paid'" class="text-yellow-600 font-medium">- Partial Paid</span>
+                                    <span v-else class="text-red-600 font-medium">- Due</span>
                                 </p>
 
                                 <p class="text-xs text-gray-500">
