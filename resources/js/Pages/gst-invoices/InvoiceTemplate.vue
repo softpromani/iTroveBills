@@ -44,7 +44,7 @@
 
                 <!-- Invoice Metadata (Right) -->
                 <div class="col-6 no-gutters">
-                    <div class="row no-gutters h-50" :class="{'border-bottom border-dark': props.invoice.company.firm_type !== 'IT'}">
+                    <div class="row no-gutters h-50" :class="{'border-bottom border-dark': props.invoice.company.firm_type !== 'IT' && !isByCash}">
                         <div class="col-6 border-right border-dark p-2">
                             <label class="meta-label">Invoice No.</label>
                             <div class="meta-value font-weight-bold">{{ props.invoice.invoice_number }}</div>
@@ -54,7 +54,7 @@
                             <div class="meta-value font-weight-bold">{{ formatDate(props.invoice.invoice_date) }}</div>
                         </div>
                     </div>
-                    <div class="row no-gutters h-50" v-if="props.invoice.company.firm_type !== 'IT'">
+                    <div class="row no-gutters h-50" v-if="props.invoice.company.firm_type !== 'IT' && !isByCash">
                         <div class="col-6 border-right border-dark p-2">
                             <label class="meta-label">LUT</label>
                             <div class="meta-value">{{ props.invoice.lut?.lut_no || "" }}</div>
@@ -75,25 +75,29 @@
                         <label class="meta-label">Buyer (Bill & Ship to)</label>
                         <div class="font-weight-bold details-title">{{ props.invoice.customer.company_name }}</div>
                         <div class="address-box details-text">
-                            {{ props.invoice.customer.address }}<br>
-                            GST/TPIN/TIN NO: <strong>{{ props.invoice.customer.gstin ?? "No ID/TPIN/TIN NO"
-                                }}</strong><br>
-                            State Name: {{ getStateName(props.invoice.customer.gstin) }}, Code: {{
-                                props.invoice.customer.gstin?.substring(0, 2) }}<br />
-                            Phone: <strong>{{ props.invoice.customer.mobile }}</strong>
+                            <template v-if="props.invoice.customer.address">
+                                {{ props.invoice.customer.address }}<br v-if="!isByCash" />
+                            </template>
+                            <template v-if="!isByCash">
+                                GST/TPIN/TIN NO: <strong>{{ props.invoice.customer.gstin ?? "No ID/TPIN/TIN NO"
+                                    }}</strong><br>
+                                State Name: {{ getStateName(props.invoice.customer.gstin) }}, Code: {{
+                                    props.invoice.customer.gstin?.substring(0, 2) }}<br />
+                                Phone: <strong>{{ props.invoice.customer.mobile }}</strong>
+                            </template>
                         </div>
                     </div>
                 </div>
 
                 <!-- Dispatch Details (Right) -->
                 <div class="col-6 no-gutters h-100">
-                    <div class="row no-gutters border-bottom border-dark h-25" v-if="props.invoice.company.firm_type !== 'IT'">
+                    <div class="row no-gutters border-bottom border-dark h-25" v-if="props.invoice.company.firm_type !== 'IT' && !isByCash">
                         <div class="col-12 p-2">
                             <label class="meta-label">IEC Code</label>
                             <div class="meta-value">{{ props.invoice.company.iec }}</div>
                         </div>
                     </div>
-                    <div class="row no-gutters border-bottom border-dark h-25" v-if="props.invoice.company.firm_type !== 'IT'">
+                    <div class="row no-gutters border-bottom border-dark h-25" v-if="props.invoice.company.firm_type !== 'IT' && !isByCash">
                         <div class="col-6 border-right border-dark p-2">
                             <label class="meta-label">Total Weight</label>
                             <div class="meta-value">{{ props.invoice.total_weight ?? "" }}</div>
@@ -103,12 +107,12 @@
                             <div class="meta-value">{{ props.invoice.no_packets ?? "No Packs" }}</div>
                         </div>
                     </div>
-                    <div class="row no-gutters border-dark h-25" v-if="props.invoice.company.firm_type !== 'IT'">
-                        <div class="col-6 border-right border-dark p-2" v-if="props.invoice.company.firm_type !== 'IT'">
+                    <div class="row no-gutters border-dark h-25" v-if="props.invoice.company.firm_type !== 'IT' && !isByCash">
+                        <div class="col-6 border-right border-dark p-2">
                             <label class="meta-label">Dispatched through</label>
                             <div class="meta-value">{{ props.invoice.dispatched_through || "-" }}</div>
                         </div>
-                        <div class="col-6 p-2" v-if="props.invoice.company.firm_type !== 'IT'">
+                        <div class="col-6 p-2">
                             <label class="meta-label">Vehicle No.</label>
                             <div class="meta-value">{{ props.invoice.vehicle_no }}</div>
                         </div>
@@ -121,17 +125,20 @@
                 <table class="table border-0 mb-0 item-table">
                     <thead>
                         <tr class="bg-light text-center small font-weight-bold row-border-bottom">
-                            <th width="40" class="border-right border-dark">Sl No.</th>
-                            <th class="border-right border-dark text-left">Description of Goods</th>
-                            <th width="80" class="border-right border-dark">HSN/SAC</th>
-                            <th width="60" class="border-right border-dark">Quantity</th>
-                            <th width="60" class="border-right border-dark">Unit</th>
-                            <th width="70" class="border-right border-dark" v-if="props.invoice.company.firm_type !== 'IT'">Weight</th>
-                            <th width="80" class="border-right border-dark">Rate</th>
-                            <th width="90" class="border-right border-dark">Taxable</th>
-                            <th width="50" class="border-right border-dark">GST %</th>
-                            <th width="80" class="border-right border-dark">GST Amt</th>
-                            <th width="100">Total</th>
+                            <th rowspan="2" width="40" class="border-right border-dark align-middle">Sl. No.</th>
+                            <th rowspan="2" class="border-right border-dark text-left align-middle">Description Of Goods</th>
+                            <th rowspan="2" width="90" class="border-right border-dark align-middle">HSN Code</th>
+                            <th rowspan="2" width="60" class="border-right border-dark align-middle">Qnty</th>
+                            <th rowspan="2" width="80" class="border-right border-dark align-middle">Rate</th>
+                            <th rowspan="2" width="100" class="border-right border-dark align-middle">Taxable Value</th>
+                            <th colspan="2" class="border-right border-dark border-bottom align-middle">CGST</th>
+                            <th colspan="2" class="border-dark align-middle">SGST</th>
+                        </tr>
+                        <tr class="bg-light text-center small font-weight-bold row-border-bottom">
+                            <th width="55" class="border-right border-dark">Rate</th>
+                            <th width="85" class="border-right border-dark">AMOUNT</th>
+                            <th width="55" class="border-right border-dark">Rate</th>
+                            <th width="85" class="border-dark">AMOUNT</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -144,17 +151,14 @@
                             <td class="text-right border-right border-dark">
                                 <strong>{{ item.quantity }}</strong>
                             </td>
-                            <td class="text-center border-right border-dark">{{ item.unit || 'PCS' }}</td>
-                            <td class="text-center border-right border-dark" v-if="props.invoice.company.firm_type !== 'IT'">{{ item.weight }}</td>
                             <td class="text-right border-right border-dark">{{ formatCurrency(item.rate) }}</td>
                             <td class="text-right border-right border-dark">
                                 {{ formatCurrency(item.rate * item.quantity) }}
                             </td>
-                            <td class="text-center border-right border-dark">{{ item.gst_percentage || 0 }}%</td>
-                            <td class="text-right border-right border-dark">{{ formatCurrency(item.gst_amount) }}</td>
-                            <td class="text-right font-weight-bold">
-                                {{ formatCurrency(item.subtotal_amount) }}
-                            </td>
+                            <td class="text-center border-right border-dark">{{ formatGstRate(item.gst_percentage / 2) }}%</td>
+                            <td class="text-right border-right border-dark">{{ formatCurrency(item.gst_amount / 2) }}</td>
+                            <td class="text-center border-right border-dark">{{ formatGstRate(item.gst_percentage / 2) }}%</td>
+                            <td class="text-right border-dark">{{ formatCurrency(item.gst_amount / 2) }}</td>
                         </tr>
                     </tbody>
                     <tfoot class="row-border-top">
@@ -162,19 +166,26 @@
                             <td class="text-right border-right border-dark" colspan="3">TOTALS</td>
                             <td class="text-right border-right border-dark">{{ calculateTotalQty() }}</td>
                             <td class="border-right border-dark"></td>
-                            <td class="text-right border-right border-dark" v-if="props.invoice.company.firm_type !== 'IT'">{{ props.invoice.total_weight ?? "" }}</td>
+                            <td class="text-right border-right border-dark" style="white-space: nowrap;">₹{{ formatAmount(calculateTotalTaxable()) }}</td>
                             <td class="border-right border-dark"></td>
-                            <td class="text-right border-right border-dark" style="white-space: nowrap;">₹{{ formatAmount(props.invoice.total_ammount) }}</td>
+                            <td class="text-right border-right border-dark" style="white-space: nowrap;">₹{{ formatAmount(calculateTotalTax() / 2) }}</td>
                             <td class="border-right border-dark"></td>
-                            <td class="text-right border-right border-dark" style="white-space: nowrap;">₹{{ formatAmount(props.invoice.tax_amount) }}</td>
-                            <td class="text-right font-weight-bold" style="white-space: nowrap;">₹{{ formatAmount(props.invoice.subtotal_amount) }}</td>
+                            <td class="text-right border-dark" style="white-space: nowrap;">₹{{ formatAmount(calculateTotalTax() / 2) }}</td>
                         </tr>
                         <tr class="font-weight-bold total-bold border-top border-dark">
-                            <td class="text-right border-right border-dark" :colspan="props.invoice.company.firm_type === 'IT' ? 9 : 10">Grand Total (Incl. GST)</td>
-                            <td class="text-right font-weight-bold" style="white-space: nowrap;">₹{{ formatAmount(props.invoice.subtotal_amount) }}</td>
+                            <td class="text-right border-right border-dark" colspan="9">Total ( Taxable Value+CGST+SGST+IGST)</td>
+                            <td class="text-right font-weight-bold" style="white-space: nowrap;">₹{{ formatAmount(getRawTotal()) }}</td>
+                        </tr>
+                        <tr class="font-weight-bold total-bold border-top border-dark">
+                            <td class="text-right border-right border-dark" colspan="9">R/Off</td>
+                            <td class="text-right font-weight-bold" style="white-space: nowrap;">{{ formatRoundOff(getRoundOffAmount()) }}</td>
+                        </tr>
+                        <tr class="font-weight-bold total-bold border-top border-dark">
+                            <td class="text-right border-right border-dark" colspan="9">Invoice Total</td>
+                            <td class="text-right font-weight-bold" style="white-space: nowrap;">₹{{ formatAmount(getGrandTotal()) }}</td>
                         </tr>
                         <tr v-if="amountInWords">
-                            <td :colspan="props.invoice.company.firm_type === 'IT' ? 10 : 11" class="text-right x-small font-weight-bold border-top border-dark">
+                            <td colspan="10" class="text-right x-small font-weight-bold border-top border-dark">
                                 Total Rupees: {{ amountInWords }} Only
                             </td>
                         </tr>
@@ -202,10 +213,13 @@
                         <tr class="bg-light text-center font-weight-bold">
                             <th rowspan="2" class="border-dark align-middle">HSN/SAC</th>
                             <th rowspan="2" class="border-dark align-middle">Taxable Value</th>
-                            <th colspan="2" class="border-dark">Integrated Tax</th>
+                            <th colspan="2" class="border-dark">Central Tax</th>
+                            <th colspan="2" class="border-dark">State Tax</th>
                             <th rowspan="2" class="border-dark align-middle">Total Tax Amount</th>
                         </tr>
                         <tr class="bg-light text-center font-weight-bold">
+                            <th class="border-dark">Rate</th>
+                            <th class="border-dark">Amount</th>
                             <th class="border-dark">Rate</th>
                             <th class="border-dark">Amount</th>
                         </tr>
@@ -214,19 +228,20 @@
                         <tr v-for="hsn in getHsnSummary()" :key="hsn.hsn" class="text-center">
                             <td class="border-dark">{{ hsn.hsn }}</td>
                             <td class="border-dark text-right font-weight-bold">{{ formatAmount(hsn.taxable) }}</td>
-                            <td class="border-dark">{{ hsn.rate }}%</td>
-                            <td class="border-dark text-right">{{ formatAmount(hsn.tax) }}</td>
+                            <td class="border-dark">{{ formatGstRate(hsn.rate / 2) }}%</td>
+                            <td class="border-dark text-right">{{ formatAmount(hsn.tax / 2) }}</td>
+                            <td class="border-dark">{{ formatGstRate(hsn.rate / 2) }}%</td>
+                            <td class="border-dark text-right">{{ formatAmount(hsn.tax / 2) }}</td>
                             <td class="border-dark text-right font-weight-bold">{{ formatAmount(hsn.tax) }}</td>
                         </tr>
                         <tr class="font-weight-bold text-center bg-light">
                             <td class="border-dark text-right">Total</td>
-                            <td class="border-dark text-right font-weight-bold">{{ formatAmount(calculateTotalTaxable())
-                                }}</td>
+                            <td class="border-dark text-right font-weight-bold">{{ formatAmount(calculateTotalTaxable()) }}</td>
                             <td class="border-dark"></td>
-                            <td class="border-dark text-right font-weight-bold">{{ formatAmount(calculateTotalTax()) }}
-                            </td>
-                            <td class="border-dark text-right font-weight-bold">{{ formatAmount(calculateTotalTax()) }}
-                            </td>
+                            <td class="border-dark text-right font-weight-bold">{{ formatAmount(calculateTotalTax() / 2) }}</td>
+                            <td class="border-dark"></td>
+                            <td class="border-dark text-right font-weight-bold">{{ formatAmount(calculateTotalTax() / 2) }}</td>
+                            <td class="border-dark text-right font-weight-bold">{{ formatAmount(calculateTotalTax()) }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -282,10 +297,16 @@
 
 <script setup>
 import { Head, Link, useForm } from "@inertiajs/vue3";
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 
 const props = defineProps({
     invoice: Object,
+});
+
+const isByCash = computed(() => {
+    const companyName = props.invoice.customer?.company_name || '';
+    const name = props.invoice.customer?.name || '';
+    return companyName.trim().toUpperCase().includes('BY CASH') || name.trim().toUpperCase().includes('BY CASH');
 });
 
 const printInvoice = () => { window.print(); };
@@ -326,6 +347,56 @@ const getHsnSummary = () => {
 
 const calculateTotalTaxable = () => getHsnSummary().reduce((sum, hsn) => sum + hsn.taxable, 0);
 const calculateTotalTax = () => getHsnSummary().reduce((sum, hsn) => sum + hsn.tax, 0);
+
+// Round Off logic (Rule: <= 0.50 rounds down, > 0.50 rounds up)
+const calculateRoundOff = (val) => {
+    const rawVal = parseFloat(val || 0);
+    const integerPart = Math.floor(rawVal);
+    const decimalPart = Math.round((rawVal - integerPart) * 100) / 100;
+
+    let roundedTotal = integerPart;
+    let roundOffAmt = 0;
+
+    if (decimalPart === 0) {
+        roundedTotal = integerPart;
+        roundOffAmt = 0;
+    } else if (decimalPart <= 0.50) {
+        roundedTotal = integerPart;
+        roundOffAmt = -decimalPart;
+    } else {
+        roundedTotal = integerPart + 1;
+        roundOffAmt = Math.round((1 - decimalPart) * 100) / 100;
+    }
+
+    return {
+        roundedTotal,
+        roundOffAmt
+    };
+};
+
+const getRawTotal = () => {
+    return parseFloat(props.invoice.subtotal_amount || (calculateTotalTaxable() + calculateTotalTax()));
+};
+
+const getGrandTotal = () => {
+    return calculateRoundOff(getRawTotal()).roundedTotal;
+};
+
+const getRoundOffAmount = () => {
+    return calculateRoundOff(getRawTotal()).roundOffAmt;
+};
+
+const formatRoundOff = (amt) => {
+    const val = parseFloat(amt || 0);
+    if (val === 0) return "0.00";
+    if (val > 0) return "+" + val.toFixed(2);
+    return val.toFixed(2);
+};
+
+const formatGstRate = (rate) => {
+    const val = parseFloat(rate || 0);
+    return (val % 1 === 0) ? val.toString() : val.toFixed(2);
+};
 
 const states = {
     "01": "Jammu & Kashmir", "02": "Himachal Pradesh", "03": "Punjab", "04": "Chandigarh", "05": "Uttarakhand",
@@ -375,7 +446,7 @@ const getWords = (total) => {
 
 onMounted(() => {
     taxAmountInWords.value = getWords(props.invoice.tax_amount || calculateTotalTax());
-    amountInWords.value = getWords(props.invoice.subtotal_amount);
+    amountInWords.value = getWords(getGrandTotal());
 });
 </script>
 
