@@ -128,17 +128,17 @@
                             <th rowspan="2" width="40" class="border-right border-dark align-middle">Sl. No.</th>
                             <th rowspan="2" class="border-right border-dark text-left align-middle">Description Of Goods</th>
                             <th rowspan="2" width="90" class="border-right border-dark align-middle">HSN Code</th>
-                            <th rowspan="2" width="60" class="border-right border-dark align-middle">Qnty</th>
+                            <th rowspan="2" width="75" class="border-right border-dark align-middle">Qnty</th>
                             <th rowspan="2" width="80" class="border-right border-dark align-middle">Rate</th>
-                            <th rowspan="2" width="100" class="border-right border-dark align-middle">Taxable Value</th>
+                            <th rowspan="2" width="95" class="border-right border-dark align-middle">Taxable Value</th>
                             <th colspan="2" class="border-right border-dark border-bottom align-middle">CGST</th>
                             <th colspan="2" class="border-dark align-middle">SGST</th>
                         </tr>
                         <tr class="bg-light text-center small font-weight-bold row-border-bottom">
-                            <th width="55" class="border-right border-dark">Rate</th>
-                            <th width="85" class="border-right border-dark">AMOUNT</th>
-                            <th width="55" class="border-right border-dark">Rate</th>
-                            <th width="85" class="border-dark">AMOUNT</th>
+                            <th width="50" class="border-right border-dark">Rate</th>
+                            <th width="80" class="border-right border-dark">AMOUNT</th>
+                            <th width="50" class="border-right border-dark">Rate</th>
+                            <th width="80" class="border-dark">AMOUNT</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -148,8 +148,8 @@
                                 <strong>{{ item.desc_product }}</strong>
                             </td>
                             <td class="text-center border-right border-dark">{{ item.hsn_code }}</td>
-                            <td class="text-right border-right border-dark">
-                                <strong>{{ item.quantity }}</strong>
+                            <td class="text-right border-right border-dark" style="white-space: nowrap;">
+                                <strong>{{ item.quantity }} {{ item.unit || 'PCS' }}</strong>
                             </td>
                             <td class="text-right border-right border-dark">{{ formatCurrency(item.rate) }}</td>
                             <td class="text-right border-right border-dark">
