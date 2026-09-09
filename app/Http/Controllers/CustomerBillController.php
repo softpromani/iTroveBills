@@ -772,14 +772,80 @@ class CustomerBillController extends Controller
         }
     }
 
-    public function performa_invoice_list()
+    public function performa_invoice_list(Request $request)
     {
-        $invoices = auth()->user()->performa_invoices()->orderBy('created_at', 'desc')->get();
-        // $invoices->load('paymentStatus');
-        $invoices->load('Customer');
-        $invoices->load('Company');
-        // $invoices->load('payment');
-        return inertia('Performa-invoices/invoice_list', compact('invoices'));
+        $invoicesQuery = auth()->user()->performa_invoices();
+
+        // Financial Year filter (default to current FY if not provided)
+        if ($request->filled('financial_year')) {
+            $financialYear = (int)$request->financial_year;
+        } else {
+            $currentMonth = now()->month;
+            $currentYear  = now()->year;
+            $financialYear = $currentMonth < 4 ? $currentYear - 1 : $currentYear;
+        }
+
+        $startDate = Carbon::createFromDate($financialYear, 4, 1)->startOfDay();
+        $endDate   = Carbon::createFromDate($financialYear + 1, 3, 31)->endOfDay();
+
+        $invoicesQuery->whereBetween('invoice_date', [$startDate, $endDate]);
+
+        if ($request->filled('customer_id')) {
+            $companyId = SellerCustomers::where('id', $request->customer_id)
+                ->value('customer_company_id');
+
+            if ($companyId) {
+                $invoicesQuery->where('customer_company_id', $companyId);
+            }
+        }
+
+        if ($request->filled('customer_name')) {
+            $customerIds = Company::where('company_name', 'like', '%' . $request->customer_name . '%')
+                ->pluck('id');
+
+            $invoicesQuery->whereIn('customer_company_id', $customerIds);
+        }
+
+        $invoices = $invoicesQuery->orderBy('created_at', 'desc')->get();
+        $invoices->load('Customer', 'Company');
+
+        $customers = SellerCustomers::select('id', 'customer_company_data')
+            ->where('seller_id', Auth::id())
+            ->get()
+            ->map(function($customer) {
+                $detail = json_decode($customer->customer_company_data, true);
+                return [
+                    'id' => $customer->id,
+                    'name' => $detail['name'] ?? 'Unknown',
+                    'email' => $detail['email'] ?? '',
+                    'mobile' => $detail['mobile'] ?? ''
+                ];
+            });
+
+        $currentYear = Carbon::now()->year;
+        $currentMonth = Carbon::now()->month;
+        $financialYears = [];
+
+        for ($i = 0; $i < 5; $i++) {
+            $year = $currentMonth >= 4 ? $currentYear - $i : $currentYear - $i - 1;
+            $financialYears[] = [
+                'value' => $year,
+                'label' => $year . '-' . ($year + 1)
+            ];
+        }
+
+        $filters = [
+            'customer_id' => $request->customer_id ?? '',
+            'customer_name' => $request->customer_name ?? '',
+            'financial_year' => (string)$financialYear,
+        ];
+
+        return inertia('Performa-invoices/invoice_list', compact(
+            'invoices',
+            'customers',
+            'financialYears',
+            'filters'
+        ));
     }
     public function performa_template(Request $request)
     {

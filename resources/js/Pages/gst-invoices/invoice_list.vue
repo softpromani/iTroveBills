@@ -24,6 +24,71 @@
                 </div>
             </div>
         </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-lg shadow mb-4 p-4">
+            <h3 class="text-lg font-semibold mb-4">Filters</h3>
+
+            <form @submit.prevent="applyFilters" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Customer Filter -->
+                <div class="form-group">
+                    <label for="customer_id" class="block text-sm font-medium text-gray-700 mb-1">Customer</label>
+                    <select v-model="filterState.customer_id" id="customer_id" class="form-control w-full">
+                        <option value="">All Customers</option>
+                        <option v-for="customer in (customers || [])" :key="customer.id" :value="customer.id">
+                            {{ customer.name }} ({{ customer.mobile }})
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Customer Name Search -->
+                <div class="form-group">
+                    <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-1">Search Customer</label>
+                    <input
+                        v-model="filterState.customer_name"
+                        type="text"
+                        id="customer_name"
+                        class="form-control w-full"
+                        placeholder="Enter customer name"
+                    >
+                </div>
+
+                <!-- Financial Year Filter -->
+                <div class="form-group">
+                    <label for="financial_year" class="block text-sm font-medium text-gray-700 mb-1">Financial Year</label>
+                    <select v-model="filterState.financial_year" id="financial_year" class="form-control w-full">
+                        <option value="">All Years</option>
+                        <option v-for="year in (financialYears || [])" :key="year.value" :value="year.value">
+                            {{ year.label }}
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Payment Status Filter -->
+                <div class="form-group">
+                    <label for="payment_status" class="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
+                    <select v-model="filterState.payment_status" id="payment_status" class="form-control w-full">
+                        <option value="">All Status</option>
+                        <option v-for="status in (paymentStatuses || [])" :key="status" :value="status">
+                            {{ status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ') }}
+                        </option>
+                    </select>
+                </div>
+            </form>
+
+            <!-- Filter Buttons -->
+            <div class="flex gap-2 mt-4">
+                <button @click="applyFilters" class="btn btn-primary">
+                    <i class="fa fa-filter mr-1"></i>
+                    Apply Filters
+                </button>
+                <button @click="clearFilters" class="btn btn-secondary">
+                    <i class="fa fa-times mr-1"></i>
+                    Clear Filters
+                </button>
+            </div>
+        </div>
+
         <div class="bg-white rounded-lg shadow">
             <div class="rounded-lg table-responsive">
                 <table class="table" style="min-height: 200px">
@@ -323,25 +388,59 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Pagination from "@/Components/Pagination.vue";
-import { Head, Link } from "@inertiajs/vue3";
+import { Head, Link, router } from "@inertiajs/vue3";
 import { ref, computed } from "vue";
 import Modal from "@/Components/Modal.vue";
 import DangerButton from "@/Components/DangerButton.vue";
 import PrimaryButton from "@/Components/DangerButton.vue";
 import SecondaryButton from "@/Components/SecondaryButton.vue";
-import ResetInvoiceDataModal from "@/Components/ResetInvoiceDataModal.vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
 const props = defineProps({
   invoices: Object,
+  customers: Array,
+  paymentStatuses: Array,
+  financialYears: Array,
+  filters: Object,
 });
 const linkType = 'gst';
 const form = useForm({});
 
+const filterState = ref({
+    customer_id: props.filters?.customer_id || '',
+    customer_name: props.filters?.customer_name || '',
+    financial_year: props.filters?.financial_year || '',
+    payment_status: props.filters?.payment_status || '',
+});
+
+const applyFilters = () => {
+    const queryParams = {};
+    Object.keys(filterState.value).forEach(key => {
+        if (filterState.value[key] !== '') {
+            queryParams[key] = filterState.value[key];
+        }
+    });
+    router.get(route('gst.invoice.list'), queryParams, {
+        preserveState: true,
+        replace: false
+    });
+};
+
+const clearFilters = () => {
+    filterState.value = {
+        customer_id: '',
+        customer_name: '',
+        financial_year: '',
+        payment_status: '',
+    };
+    router.get(route('gst.invoice.list'), {}, {
+        preserveState: true
+    });
+};
+
 // Reactive variables for modal and form fields
-const showResetModal = ref(false);
 const showModal = ref(false);
 const PayBillModal = ref(false);
 const no_packets = ref('');
