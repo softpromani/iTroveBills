@@ -46,65 +46,141 @@
             </div>
         </template>
 
-        <!-- Quick Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-blue-100 text-sm font-medium">Total Revenue</p>
-                        <p class="text-3xl font-bold">₹{{ formatCurrency(stats.totalRevenue) }}</p>
-                        <p class="text-blue-100 text-xs mt-1">From all invoices</p>
+        <!-- Export Invoices Quick Stats -->
+        <div class="mb-6">
+            <h2 class="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
+                <span class="w-3 h-3 bg-blue-600 rounded-full inline-block"></span>
+                Export Invoices
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-blue-100 text-sm font-medium">Total Revenue</p>
+                            <p class="text-3xl font-bold">₹{{ formatCurrency(stats?.exportRevenue) }}</p>
+                            <p class="text-blue-100 text-xs mt-1">From export invoices</p>
+                        </div>
+                        <div class="bg-blue-400 rounded-full p-3">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8s.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582s-.07.34-.433.582c-.155.103-.346.196-.567.267z"></path>
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8s.602 1.766 1.324 2.246.8.396 1.676.662V13a2 2 0 001.706.932 1 1 0 100-2A2 2 0 0110 10V9.908c.877-.266 1.524-.8 1.676-.662C12.398 8.766 13 7.991 13 7s-.602-1.766-1.324-2.246A4.535 4.535 0 0011 4.092V4z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
                     </div>
-                    <div class="bg-blue-400 rounded-full p-3">
-                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8s.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582s-.07.34-.433.582c-.155.103-.346.196-.567.267z"></path>
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8s.602 1.766 1.324 2.246.8.396 1.676.662V13a2 2 0 001.706.932 1 1 0 100-2A2 2 0 0110 10V9.908c.877-.266 1.524-.8 1.676-.662C12.398 8.766 13 7.991 13 7s-.602-1.766-1.324-2.246A4.535 4.535 0 0011 4.092V4z" clip-rule="evenodd"></path>
-                        </svg>
+                </div>
+
+                <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-green-100 text-sm font-medium">Total Paid Amount</p>
+                            <p class="text-3xl font-bold">₹{{ formatCurrency(stats?.exportPaid) }}</p>
+                            <p class="text-green-100 text-xs mt-1">Collected payments</p>
+                        </div>
+                        <div class="bg-green-400 rounded-full p-3">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-purple-100 text-sm font-medium">Total Due Amount</p>
+                            <p class="text-3xl font-bold">₹{{ formatCurrency(stats?.exportDue) }}</p>
+                            <p class="text-purple-100 text-xs mt-1">Pending payments</p>
+                        </div>
+                        <div class="bg-purple-400 rounded-full p-3">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg shadow-lg p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-orange-100 text-sm font-medium">Total Customers</p>
+                            <p class="text-3xl font-bold">{{ stats?.totalCustomers ?? 0 }}</p>
+                            <p class="text-orange-100 text-xs mt-1">All unique customers</p>
+                        </div>
+                        <div class="bg-orange-400 rounded-full p-3">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-green-100 text-sm font-medium">Total Paid Amount</p>
-                        <p class="text-3xl font-bold">₹{{ formatCurrency(stats?.totalPaid) ?? 0 }}</p>
-                        <p class="text-green-100 text-xs mt-1">Collected payments</p>
-                    </div>
-                    <div class="bg-green-400 rounded-full p-3">
-                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
-                        </svg>
+        <!-- GST Invoices Quick Stats -->
+        <div class="mb-8">
+            <h2 class="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
+                <span class="w-3 h-3 bg-teal-600 rounded-full inline-block"></span>
+                GST Invoices
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-gradient-to-r from-teal-500 to-teal-600 rounded-lg shadow-lg p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-teal-100 text-sm font-medium">Total Revenue</p>
+                            <p class="text-3xl font-bold">₹{{ formatCurrency(stats?.gstRevenue) }}</p>
+                            <p class="text-teal-100 text-xs mt-1">From GST invoices</p>
+                        </div>
+                        <div class="bg-teal-400 rounded-full p-3">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8s.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582s-.07.34-.433.582c-.155.103-.346.196-.567.267z"></path>
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8s.602 1.766 1.324 2.246.8.396 1.676.662V13a2 2 0 001.706.932 1 1 0 100-2A2 2 0 0110 10V9.908c.877-.266 1.524-.8 1.676-.662C12.398 8.766 13 7.991 13 7s-.602-1.766-1.324-2.246A4.535 4.535 0 0011 4.092V4z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-purple-100 text-sm font-medium">Total Due Amount</p>
-                        <p class="text-3xl font-bold">₹{{ formatCurrency(stats?.totalDue) ?? 0 }}</p>
-                        <p class="text-purple-100 text-xs mt-1">Pending payments</p>
-                    </div>
-                    <div class="bg-purple-400 rounded-full p-3">
-                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
-                        </svg>
+                <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg shadow-lg p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-emerald-100 text-sm font-medium">Total Paid Amount</p>
+                            <p class="text-3xl font-bold">₹{{ formatCurrency(stats?.gstPaid) }}</p>
+                            <p class="text-emerald-100 text-xs mt-1">Collected payments</p>
+                        </div>
+                        <div class="bg-emerald-400 rounded-full p-3">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg shadow-lg p-6 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-orange-100 text-sm font-medium">Total Customers</p>
-                        <p class="text-3xl font-bold">{{ stats?.totalCustomers ?? 0 }}</p>
-                        <p class="text-orange-100 text-xs mt-1">Unique customers</p>
+                <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg shadow-lg p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-indigo-100 text-sm font-medium">Total Due Amount</p>
+                            <p class="text-3xl font-bold">₹{{ formatCurrency(stats?.gstDue) }}</p>
+                            <p class="text-indigo-100 text-xs mt-1">Pending payments</p>
+                        </div>
+                        <div class="bg-indigo-400 rounded-full p-3">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
+                            </svg>
+                        </div>
                     </div>
-                    <div class="bg-orange-400 rounded-full p-3">
-                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                        </svg>
+                </div>
+
+                <div class="bg-gradient-to-r from-amber-500 to-amber-600 rounded-lg shadow-lg p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-amber-100 text-sm font-medium">Total Customers</p>
+                            <p class="text-3xl font-bold">{{ stats?.totalCustomers ?? 0 }}</p>
+                            <p class="text-amber-100 text-xs mt-1">All unique customers</p>
+                        </div>
+                        <div class="bg-amber-400 rounded-full p-3">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
                     </div>
                 </div>
             </div>

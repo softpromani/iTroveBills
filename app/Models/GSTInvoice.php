@@ -27,7 +27,7 @@ class GSTInvoice extends Model
         static::created(function($invoice) {
             // Create a payment record associated with the invoice
             Log::info('created event -'.json_encode($invoice));
-            $invoice->payment()->create(['total_amount' => $invoice->subtotal_amount]);
+            $invoice->payment()->create(['total_amount' => static::calculateRoundedTotal($invoice->subtotal_amount)]);
         });
 
 
@@ -36,12 +36,27 @@ class GSTInvoice extends Model
             $attributes = ['paymentable_id' => $invoice->id, 'paymentable_type' => get_class($invoice)];
 
             // Define the values to update or create
-            $values = ['total_amount' => $invoice->subtotal_amount];
+            $values = ['total_amount' => static::calculateRoundedTotal($invoice->subtotal_amount)];
 
             // Use updateOrCreate
             $invoice->payment()->updateOrCreate($attributes, $values);
         });
 
+    }
+
+    public static function calculateRoundedTotal($val)
+    {
+        $rawVal = floatval($val ?? 0);
+        $integerPart = floor($rawVal);
+        $decimalPart = round(($rawVal - $integerPart) * 100) / 100;
+
+        if ($decimalPart === 0.0) {
+            return $integerPart;
+        } else if ($decimalPart <= 0.50) {
+            return $integerPart;
+        } else {
+            return $integerPart + 1;
+        }
     }
     public function Company()
     {

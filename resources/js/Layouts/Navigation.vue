@@ -362,7 +362,7 @@
                         stroke-width="2"
                         viewBox="0 0 24 24"
                         aria-hidden="true">
-                    <title>Invoices</title>
+                    <title>Export Invoice</title>
                     <!-- Document outline -->
                     <path d="M4 4h16v16H4V4z" />
                     <!-- Horizontal lines for text -->
@@ -371,7 +371,7 @@
                     <path d="M8 16h5" />
                     </svg>
 
-                <span class="mx-3">Invoices</span>
+                <span class="mx-3">Export Invoice</span>
             </a>
             <transition
                 enter-to-class="transition-all duration-300 ease-in-out"

@@ -44,7 +44,7 @@
 
                 <!-- Invoice Metadata (Right) -->
                 <div class="col-6 no-gutters">
-                    <div class="row no-gutters h-50" :class="{'border-bottom border-dark': props.invoice.company.firm_type !== 'IT' && !isByCash}">
+                    <div class="row no-gutters h-100">
                         <div class="col-6 border-right border-dark p-2">
                             <label class="meta-label">Invoice No.</label>
                             <div class="meta-value font-weight-bold">{{ props.invoice.invoice_number }}</div>
@@ -52,16 +52,6 @@
                         <div class="col-6 p-2">
                             <label class="meta-label">Dated</label>
                             <div class="meta-value font-weight-bold">{{ formatDate(props.invoice.invoice_date) }}</div>
-                        </div>
-                    </div>
-                    <div class="row no-gutters h-50" v-if="props.invoice.company.firm_type !== 'IT' && !isByCash">
-                        <div class="col-6 border-right border-dark p-2">
-                            <label class="meta-label">LUT</label>
-                            <div class="meta-value">{{ props.invoice.lut?.lut_no || "" }}</div>
-                        </div>
-                        <div class="col-6 p-2">
-                            <label class="meta-label">LUT Date</label>
-                            <div class="meta-value">{{ props.invoice.lut?.formatted_expiry_date || "" }}</div>
                         </div>
                     </div>
                 </div>

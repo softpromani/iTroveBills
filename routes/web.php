@@ -98,17 +98,12 @@ Route::get('/dashboard', function (Illuminate\Http\Request $request) {
     }
 
     // 4. Calculate Stats
-    $invoicesRevenue = \App\Models\Invoice::whereIn('company_id', $companyIds)
+    // Export Invoices
+    $exportRevenue = \App\Models\Invoice::whereIn('company_id', $companyIds)
         ->whereBetween('invoice_date', [$startDate, $endDate])
         ->sum('total_ammount');
 
-    $gstRevenue = \App\Models\GSTInvoice::whereIn('company_id', $companyIds)
-        ->whereBetween('invoice_date', [$startDate, $endDate])
-        ->sum('subtotal_amount');
-
-    $totalRevenue = $invoicesRevenue + $gstRevenue;
-
-    $invoicesPaid = Payment::where('paymentable_type', \App\Models\Invoice::class)
+    $exportPaid = Payment::where('paymentable_type', \App\Models\Invoice::class)
         ->whereIn('paymentable_id', function($q) use ($companyIds, $startDate, $endDate) {
             $q->select('id')->from('invoices')
               ->whereIn('company_id', $companyIds)
@@ -116,6 +111,21 @@ Route::get('/dashboard', function (Illuminate\Http\Request $request) {
         })
         ->selectRaw('SUM(CASE WHEN paid_amount > total_amount THEN total_amount ELSE paid_amount END) as paid')
         ->value('paid') ?? 0;
+
+    $exportDue = max(0, $exportRevenue - $exportPaid);
+
+    $exportCustomers = \App\Models\Invoice::whereIn('company_id', $companyIds)
+        ->distinct('customer_company_id')
+        ->count('customer_company_id');
+
+    // GST Invoices
+    $gstInvoicesList = \App\Models\GSTInvoice::whereIn('company_id', $companyIds)
+        ->whereBetween('invoice_date', [$startDate, $endDate])
+        ->get();
+
+    $gstRevenue = $gstInvoicesList->sum(function($inv) {
+        return \App\Models\GSTInvoice::calculateRoundedTotal($inv->subtotal_amount);
+    });
 
     $gstPaid = Payment::where('paymentable_type', \App\Models\GSTInvoice::class)
         ->whereIn('paymentable_id', function($q) use ($companyIds, $startDate, $endDate) {
@@ -126,16 +136,37 @@ Route::get('/dashboard', function (Illuminate\Http\Request $request) {
         ->selectRaw('SUM(CASE WHEN paid_amount > total_amount THEN total_amount ELSE paid_amount END) as paid')
         ->value('paid') ?? 0;
 
-    $totalPaid = $invoicesPaid + $gstPaid;
+    $gstDue = max(0, $gstRevenue - $gstPaid);
+
+    $gstCustomers = \App\Models\GSTInvoice::whereIn('company_id', $companyIds)
+        ->distinct('customer_company_id')
+        ->count('customer_company_id');
+
+    // Total unique customers without any session or year filter
+    $exportCustIds = \App\Models\Invoice::whereIn('company_id', $companyIds)->pluck('customer_company_id');
+    $gstCustIds = \App\Models\GSTInvoice::whereIn('company_id', $companyIds)->pluck('customer_company_id');
+    $sellerCustIds = \App\Models\SellerCustomers::where('seller_id', $user->id)->pluck('customer_company_id');
+    $totalCustomersCount = $exportCustIds->concat($gstCustIds)->concat($sellerCustIds)->filter()->unique()->count();
+
+    $totalRevenue = $exportRevenue + $gstRevenue;
+    $totalPaid = $exportPaid + $gstPaid;
     $totalDue = $totalRevenue - $totalPaid;
 
     $stats = [
+        'exportRevenue' => $exportRevenue,
+        'exportPaid' => $exportPaid,
+        'exportDue' => $exportDue,
+        'exportCustomers' => $exportCustomers,
+
+        'gstRevenue' => $gstRevenue,
+        'gstPaid' => $gstPaid,
+        'gstDue' => $gstDue,
+        'gstCustomers' => $gstCustomers,
+
         'totalRevenue' => $totalRevenue,
         'totalPaid' => $totalPaid,
         'totalDue' => $totalDue,
-        'totalCustomers' => \App\Models\Invoice::whereIn('company_id', $companyIds)
-                                    ->distinct('customer_company_id')
-                                    ->count('customer_company_id'),
+        'totalCustomers' => $totalCustomersCount,
     ];
 
     $recentActivity = \App\Models\Invoice::with(['company', 'payment'])

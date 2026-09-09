@@ -480,7 +480,7 @@ class CustomerBillController extends Controller
         if ($invoice) {
             $correct_total = $invoice->total_ammount;
             if (get_class($invoice) === \App\Models\GSTInvoice::class && isset($invoice->subtotal_amount)) {
-                $correct_total = $invoice->subtotal_amount;
+                $correct_total = \App\Models\GSTInvoice::calculateRoundedTotal($invoice->subtotal_amount);
             }
             if (abs($payment->total_amount - $correct_total) > 0.01) {
                 $payment->total_amount = $correct_total;
@@ -824,7 +824,7 @@ class CustomerBillController extends Controller
             // 1. Correct the total_amount
             $correctTotal = $invoice->total_ammount;
             if (get_class($invoice) === \App\Models\GSTInvoice::class) {
-                $correctTotal = $invoice->subtotal_amount;
+                $correctTotal = \App\Models\GSTInvoice::calculateRoundedTotal($invoice->subtotal_amount);
             }
 
             // 2. Recalculate paid_amount from history

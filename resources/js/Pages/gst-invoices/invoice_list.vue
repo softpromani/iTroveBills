@@ -53,7 +53,7 @@
                             <td>{{ invoice.invoice_date ?? "" }}</td>
                             <td>{{ invoice.total_ammount ?? "0.00" }}</td>
                             <td>{{ invoice.tax_amount ?? "0.00" }}</td>
-                            <td>{{ invoice.subtotal_amount ?? "0.00" }}</td>
+                            <td>{{ getGrandTotal(invoice.subtotal_amount) }}</td>
                             <td>₹{{ formatAmount(invoice.payment?.paid_amount) }}</td>
                             <td>
                                 <span
@@ -370,6 +370,24 @@ const showVehicleAndPackets = computed(() => {
   return invoices.value.some(inv => inv.company?.firm_type !== 'IT');
 });
 
+const calculateRoundOff = (val) => {
+    const rawVal = parseFloat(val || 0);
+    const integerPart = Math.floor(rawVal);
+    const decimalPart = Math.round((rawVal - integerPart) * 100) / 100;
+
+    if (decimalPart === 0) {
+        return integerPart;
+    } else if (decimalPart <= 0.50) {
+        return integerPart;
+    } else {
+        return integerPart + 1;
+    }
+};
+
+const getGrandTotal = (subtotal) => {
+    return calculateRoundOff(subtotal).toFixed(2);
+};
+
 const formatAmount = (amount) => {
     if (!amount) return '0.00';
     try {
@@ -464,7 +482,7 @@ const openPayBillModal = (id) => {
                 amount.value = remainingBalance.value; // Pre-fill with remaining
             } else {
                 // If no payment record, use invoice total
-                const total = type === 'gst' ? response.data.subtotal_amount : response.data.total_ammount;
+                const total = type === 'gst' ? parseFloat(getGrandTotal(response.data.subtotal_amount)) : response.data.total_ammount;
                 remainingBalance.value = total;
                 amount.value = total;
             }
