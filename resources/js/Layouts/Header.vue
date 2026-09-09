@@ -21,16 +21,30 @@
                         Profile
                     </dropdown-link>
 
+                    <button @click.prevent="showResetModal = true" class="block w-full px-4 py-2 text-sm leading-5 text-red-600 hover:bg-gray-100 focus:outline-none transition duration-150 ease-in-out text-left font-semibold">
+                        Reset DB Data
+                    </button>
+
                     <dropdown-link class="w-full text-left" :href="route('logout')" method="post" as="button">
                         Log out
                     </dropdown-link>
                 </template>
             </dropdown>
         </div>
+
+        <ResetInvoiceDataModal
+            :show="showResetModal"
+            defaultType="gst"
+            @close="showResetModal = false"
+        />
     </header>
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
+import ResetInvoiceDataModal from '@/Components/ResetInvoiceDataModal.vue';
+
+const showResetModal = ref(false);
 </script>

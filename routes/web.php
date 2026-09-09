@@ -274,6 +274,10 @@ Route::middleware('auth')->group(function () {
     Route::get('ledger-report', [LedgerReportController::class, 'index'])->name('ledger.report.index');
     Route::get('ledger-report/generate', [LedgerReportController::class, 'generate'])->name('ledger.report.generate');
 
+    // Data Reset Routes
+    Route::get('/api/reset-data-options', [\App\Http\Controllers\ResetDataController::class, 'getOptions'])->name('reset.data.options');
+    Route::post('/reset-invoice-data', [\App\Http\Controllers\ResetDataController::class, 'resetInvoiceData'])->name('reset.invoice.data');
+
     // routes/web.php
     Route::get('/hsn/search', [HsnSacMasterController::class, 'search'])->name('hsn.search');
     

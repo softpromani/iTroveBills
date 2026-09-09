@@ -430,13 +430,13 @@
         </div>
     </div>
     <div v-if="PaymentHistoryModal" class="modal-backdrop fade show"></div>
-
     </AuthenticatedLayout>
 </template>
 
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Pagination from "@/Components/Pagination.vue";
+import ResetInvoiceDataModal from "@/Components/ResetInvoiceDataModal.vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import { ref, computed, onMounted, watch } from "vue";
 import { useForm } from "@inertiajs/vue3";
@@ -477,6 +477,7 @@ const filters = ref({
 
 // Existing modal variables
 const showModal = ref(false);
+const showResetModal = ref(false);
 const PayBillModal = ref(false);
 const no_packets = ref('');
 const vehicle_no = ref('');

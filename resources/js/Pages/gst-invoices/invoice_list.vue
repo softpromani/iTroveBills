@@ -329,6 +329,7 @@ import Modal from "@/Components/Modal.vue";
 import DangerButton from "@/Components/DangerButton.vue";
 import PrimaryButton from "@/Components/DangerButton.vue";
 import SecondaryButton from "@/Components/SecondaryButton.vue";
+import ResetInvoiceDataModal from "@/Components/ResetInvoiceDataModal.vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -340,6 +341,7 @@ const linkType = 'gst';
 const form = useForm({});
 
 // Reactive variables for modal and form fields
+const showResetModal = ref(false);
 const showModal = ref(false);
 const PayBillModal = ref(false);
 const no_packets = ref('');
