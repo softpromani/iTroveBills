@@ -81,13 +81,7 @@
 
                 <!-- Dispatch Details (Right) -->
                 <div class="col-6 no-gutters h-100">
-                    <div class="row no-gutters border-bottom border-dark h-25" v-if="props.invoice.company.firm_type !== 'IT' && !isByCash">
-                        <div class="col-12 p-2">
-                            <label class="meta-label">IEC Code</label>
-                            <div class="meta-value">{{ props.invoice.company.iec }}</div>
-                        </div>
-                    </div>
-                    <div class="row no-gutters border-bottom border-dark h-25" v-if="props.invoice.company.firm_type !== 'IT' && !isByCash">
+                    <div class="row no-gutters border-bottom border-dark h-50" v-if="props.invoice.company.firm_type !== 'IT' && !isByCash">
                         <div class="col-6 border-right border-dark p-2">
                             <label class="meta-label">Total Weight</label>
                             <div class="meta-value">{{ props.invoice.total_weight ?? "" }}</div>
@@ -97,7 +91,7 @@
                             <div class="meta-value">{{ props.invoice.no_packets ?? "No Packs" }}</div>
                         </div>
                     </div>
-                    <div class="row no-gutters border-dark h-25" v-if="props.invoice.company.firm_type !== 'IT' && !isByCash">
+                    <div class="row no-gutters border-dark h-50" v-if="props.invoice.company.firm_type !== 'IT' && !isByCash">
                         <div class="col-6 border-right border-dark p-2">
                             <label class="meta-label">Dispatched through</label>
                             <div class="meta-value">{{ props.invoice.dispatched_through || "-" }}</div>
