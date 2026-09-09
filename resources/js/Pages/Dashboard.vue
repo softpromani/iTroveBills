@@ -102,9 +102,9 @@
                 <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg shadow-lg p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-orange-100 text-sm font-medium">Total Customers</p>
-                            <p class="text-3xl font-bold">{{ stats?.totalCustomers ?? 0 }}</p>
-                            <p class="text-orange-100 text-xs mt-1">All unique customers</p>
+                            <p class="text-orange-100 text-sm font-medium">Session Customers</p>
+                            <p class="text-3xl font-bold">{{ stats?.exportCustomers ?? 0 }}</p>
+                            <p class="text-orange-100 text-xs mt-1">In current session</p>
                         </div>
                         <div class="bg-orange-400 rounded-full p-3">
                             <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">

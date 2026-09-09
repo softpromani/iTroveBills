@@ -115,6 +115,7 @@ Route::get('/dashboard', function (Illuminate\Http\Request $request) {
     $exportDue = max(0, $exportRevenue - $exportPaid);
 
     $exportCustomers = \App\Models\Invoice::whereIn('company_id', $companyIds)
+        ->whereBetween('invoice_date', [$startDate, $endDate])
         ->distinct('customer_company_id')
         ->count('customer_company_id');
 
@@ -139,6 +140,7 @@ Route::get('/dashboard', function (Illuminate\Http\Request $request) {
     $gstDue = max(0, $gstRevenue - $gstPaid);
 
     $gstCustomers = \App\Models\GSTInvoice::whereIn('company_id', $companyIds)
+        ->whereBetween('invoice_date', [$startDate, $endDate])
         ->distinct('customer_company_id')
         ->count('customer_company_id');
 
