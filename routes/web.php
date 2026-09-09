@@ -142,11 +142,16 @@ Route::get('/dashboard', function (Illuminate\Http\Request $request) {
         ->distinct('customer_company_id')
         ->count('customer_company_id');
 
-    // Total unique customers without any session or year filter
-    $exportCustIds = \App\Models\Invoice::whereIn('company_id', $companyIds)->pluck('customer_company_id');
-    $gstCustIds = \App\Models\GSTInvoice::whereIn('company_id', $companyIds)->pluck('customer_company_id');
-    $sellerCustIds = \App\Models\SellerCustomers::where('seller_id', $user->id)->pluck('customer_company_id');
-    $totalCustomersCount = $exportCustIds->concat($gstCustIds)->concat($sellerCustIds)->filter()->unique()->count();
+    // Total unique customers count across all records (irrespective of session, year, or firm filter)
+    $allUserCompanyIds = $user->companies()->pluck('id');
+    $sellerCustomersTotal = \App\Models\SellerCustomers::where('seller_id', $user->id)->count();
+
+    $exportCustIds = \App\Models\Invoice::whereIn('company_id', $allUserCompanyIds)->pluck('customer_company_id');
+    $gstCustIds = \App\Models\GSTInvoice::whereIn('company_id', $allUserCompanyIds)->pluck('customer_company_id');
+    $sellerCustCompanyIds = \App\Models\SellerCustomers::where('seller_id', $user->id)->pluck('customer_company_id');
+
+    $allUniqueCustCompanyIds = $exportCustIds->concat($gstCustIds)->concat($sellerCustCompanyIds)->filter()->unique()->count();
+    $totalCustomersCount = max($sellerCustomersTotal, $allUniqueCustCompanyIds);
 
     $totalRevenue = $exportRevenue + $gstRevenue;
     $totalPaid = $exportPaid + $gstPaid;
