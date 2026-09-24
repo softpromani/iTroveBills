@@ -176,10 +176,10 @@
                                             >
                                         </li>
                                         <li>
-                                            <Link class="dropdown-item" :href="route('gst.bill.sendmail')" method="post" :data="{ invoice_id: invoice.id }">
+                                            <a @click.prevent="sendMail('gst.bill.sendmail', invoice.id)" class="dropdown-item" href="#">
                                                 <i class="fa fa-envelope-square" aria-hidden="true" style="color: rgb(245, 180, 0);"></i>
                                                 Mail
-                                            </Link>
+                                            </a>
                                         </li>
                                         <li>
                                             <a @click.prevent="openModal(invoice.id)" class="dropdown-item" href="#">
@@ -405,6 +405,27 @@ const props = defineProps({
   financialYears: Array,
   filters: Object,
 });
+
+const sendMail = (routeName, invoiceId) => {
+  Swal.fire({
+    title: 'Sending Mail...',
+    text: 'Please wait while the invoice is being sent.',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
+  router.post(route(routeName), { invoice_id: invoiceId }, {
+    onFinish: () => {
+      Swal.close();
+    },
+    onError: () => {
+      Swal.close();
+    }
+  });
+};
 const linkType = 'gst';
 const form = useForm({});
 

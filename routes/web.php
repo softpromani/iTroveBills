@@ -297,6 +297,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/edit/{id}', [PlainBillController::class, 'edit'])->name('edit');
         Route::post('/update/{id}', [PlainBillController::class, 'update'])->name('update');
         Route::get('/view-invoice', [PlainBillController::class, 'template'])->name('view.invoice');
+        Route::post('/bill-mail', [MailController::class, 'plain_billmail'])->name('bill.sendmail');
     });
 
     // Plain Ledger Specific Routes

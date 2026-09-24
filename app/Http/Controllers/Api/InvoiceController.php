@@ -20,12 +20,15 @@ class InvoiceController extends Controller
             $data = Invoice::with('payment')->find($invoice_id);
         }
 
-        if ($data && $data->payment) {
+        if ($data) {
             $correct_total = $data->total_ammount;
             if ($type === 'gst' && isset($data->subtotal_amount)) {
                 $correct_total = $data->subtotal_amount;
             }
-            if (abs($data->payment->total_amount - $correct_total) > 0.01) {
+            if (!$data->payment) {
+                $data->payment()->create(['total_amount' => $correct_total]);
+                $data->refresh();
+            } elseif (abs($data->payment->total_amount - $correct_total) > 0.01) {
                 $data->payment->total_amount = $correct_total;
                 $data->payment->save();
                 $data->refresh();

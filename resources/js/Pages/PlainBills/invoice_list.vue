@@ -95,12 +95,12 @@
                                     <span
                                       class="px-3 py-1 mr-2 text-xs font-medium rounded-full"
                                       :class="{
-                                        'bg-red-100 text-red-800': invoice.payment?.status === 'due',
+                                        'bg-red-100 text-red-800': (invoice.payment?.status || 'due') === 'due',
                                         'bg-blue-100 text-blue-800': invoice.payment?.status === 'partial-paid',
                                         'bg-green-100 text-green-800': invoice.payment?.status === 'paid'
                                       }"
                                     >
-                                      {{ invoice.paymentStatus?.status || 'unpaid' }}
+                                      {{ invoice.payment?.status || invoice.paymentStatus?.status || 'unpaid' }}
                                     </span>
                                 </td>
                                 <td>{{ invoice.vehicle_no || "N/A" }}</td>
@@ -126,10 +126,10 @@
                                                 </Link>
                                             </li>
                                             <li>
-                                                <Link class="dropdown-item" :href="route('bill.sendmail')" method="post" :data="{ invoice_id: invoice.id }">
+                                                <a @click.prevent="sendMail('book.bill.sendmail', invoice.id)" class="dropdown-item" href="#">
                                                     <i class="fa fa-envelope-square" aria-hidden="true" style="color: rgb(245, 180, 0);"></i>
                                                     Mail (Buyer)
-                                                </Link>
+                                                </a>
                                             </li>
                                             <li>
                                                 <Link class="dropdown-item" :href="route('create.eway.bill')" method="get" :data="{ invoice_id: invoice.id, type: 'plain' }">
@@ -141,6 +141,18 @@
                                                 <a @click.prevent="openModal(invoice.id)" class="dropdown-item" href="#">
                                                     <i class="fa fa-car" aria-hidden="true" style="color: rgb(245, 180, 0);"></i>
                                                     Package Update
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a @click.prevent="openPayBillModal(invoice.id)" class="dropdown-item" href="#">
+                                                    <i class="fa fa-inr" aria-hidden="true" style="color: rgb(245, 180, 0);"></i>
+                                                    Pay Bill
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a @click.prevent="openPaymentHistoryModal(invoice.id)" class="dropdown-item" href="#">
+                                                    <i class="fa fa-history" aria-hidden="true" style="color: rgb(0, 123, 255);"></i>
+                                                    Payment History
                                                 </a>
                                             </li>
                                         </ul>
@@ -189,6 +201,139 @@
 
         <!-- Modal Backdrop -->
         <div v-if="showModal" class="modal-backdrop fade show"></div>
+
+        <!-- Pay Bill Modal -->
+        <div v-if="PayBillModal" class="modal fade show" style="display: block;" aria-modal="true" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Pay Bill - {{ invoiceNumber }}</h5>
+                        <button type="button" class="close" @click="closePayBillModal">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form @submit.prevent="submitPayBillForm">
+                            <fieldset class="mb-3">
+                                <legend class="col-form-label pt-0">Payment Method</legend>
+                                <div v-for="(type, index) in paymentTypes" :key="index" class="form-check form-check-inline">
+                                    <input
+                                      class="form-check-input"
+                                      type="radio"
+                                      :id="type.name"
+                                      :value="type.id"
+                                      v-model="payment_method_id"
+                                    >
+                                    <label class="form-check-label" :for="type.name">{{ type.name }}</label>
+                                </div>
+                            </fieldset>
+
+                            <div class="form-group mb-3">
+                                <label for="reference_no">Reference Number</label>
+                                <input type="text" class="form-control" id="reference_no" v-model="reference_no" required>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="amount">Amount (Remaining: ₹{{ formatAmount(remainingBalance) }})</label>
+                                <input type="number" step="0.01" class="form-control" id="amount" v-model="amount" :max="remainingBalance" required>
+                                <small v-if="amount > remainingBalance" class="text-danger">Amount exceeds remaining balance!</small>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="remark">Remark (if any)</label>
+                                <textarea class="form-control" id="remark" v-model="remark"></textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" @click="closePayBillModal">Close</button>
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div v-if="PayBillModal" class="modal-backdrop fade show"></div>
+
+        <!-- Payment History Modal -->
+        <div v-if="PaymentHistoryModal" class="modal fade show" style="display: block;" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Payment History - {{ invoiceNumber }}</h5>
+                        <button type="button" class="close" @click="closePaymentHistoryModal">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Method</th>
+                                        <th>Ref No</th>
+                                        <th>Amount</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="history in paymentHistories" :key="history.id">
+                                        <td>{{ new Date(history.created_at).toLocaleDateString() }}</td>
+                                        <td>{{ history.payment_type?.name }}</td>
+                                        <td>{{ history.reference_no }}</td>
+                                        <td>₹{{ formatAmount(history.amount) }}</td>
+                                        <td>
+                                            <button @click="editHistory(history)" class="btn btn-sm btn-info mr-1">
+                                                <i class="fa fa-edit"></i>
+                                            </button>
+                                            <button @click="deleteHistory(history.id)" class="btn btn-sm btn-danger">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr v-if="paymentHistories.length === 0">
+                                        <td colspan="5" class="text-center">No payment records found.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Edit Section -->
+                        <div v-if="editingHistory" class="border-top mt-3 pt-3">
+                            <h6>Edit Payment Record</h6>
+                            <form @submit.prevent="submitUpdateHistoryForm">
+                                <div class="row">
+                                    <div class="col-md-6 form-group mb-2">
+                                        <label>Method</label>
+                                        <select class="form-control" v-model="editForm.payment_method_id" required>
+                                            <option v-for="type in paymentTypes" :key="type.id" :value="type.id">{{ type.name }}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 form-group mb-2">
+                                        <label>Reference Number</label>
+                                        <input type="text" class="form-control" v-model="editForm.reference_no" required>
+                                    </div>
+                                    <div class="col-md-6 form-group mb-2">
+                                        <label>Amount (Remaining: ₹{{ formatAmount(remainingBalance + (editingHistory ? editingHistory.amount : 0)) }})</label>
+                                        <input type="number" step="0.01" class="form-control" v-model="editForm.amount" required>
+                                    </div>
+                                    <div class="col-md-6 form-group mb-2">
+                                        <label>Remark</label>
+                                        <input type="text" class="form-control" v-model="editForm.remark">
+                                    </div>
+                                </div>
+                                <div class="mt-2 text-right">
+                                    <button type="button" class="btn btn-secondary mr-2" @click="editingHistory = null">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Update</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @click="closePaymentHistoryModal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div v-if="PaymentHistoryModal" class="modal-backdrop fade show"></div>
 
         <!-- Password Modal -->
         <Dialog 
@@ -239,6 +384,27 @@ const props = defineProps({
     needs_auth: Boolean,
 });
 
+const sendMail = (routeName, invoiceId) => {
+  Swal.fire({
+    title: 'Sending Mail...',
+    text: 'Please wait while the invoice is being sent.',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
+  router.post(route(routeName), { invoice_id: invoiceId }, {
+    onFinish: () => {
+      Swal.close();
+    },
+    onError: () => {
+      Swal.close();
+    }
+  });
+};
+
 const showAuthModal = ref(props.needs_auth);
 const authForm = useForm({
     password: '',
@@ -263,6 +429,26 @@ const no_packets = ref('');
 const vehicle_no = ref('');
 const dispatched_through = ref('');
 const invoiceId = ref(null);
+
+// Reactive variables for Pay Bill modal
+const PayBillModal = ref(false);
+const PaymentHistoryModal = ref(false);
+const invoiceNumber = ref('');
+const reference_no = ref('');
+const payment_method_id = ref('');
+const amount = ref('');
+const remark = ref('');
+const remainingBalance = ref(0);
+const paymentTypes = ref([]);
+const paymentHistories = ref([]);
+const editingHistory = ref(null);
+const editForm = ref({
+    id: null,
+    payment_method_id: '',
+    reference_no: '',
+    amount: '',
+    remark: ''
+});
 
 // Method to open the modal and fetch invoice data
 const openModal = (id) => {
@@ -321,6 +507,207 @@ const submitForm = () => {
             icon: 'error',
             confirmButtonText: 'OK'
         });
+    });
+};
+
+const openPayBillModal = (id) => {
+    PayBillModal.value = true;
+    invoiceId.value = id;
+    const type = 'plain';
+
+    axios.get(`/api/fetch-invoice/${id}/${type}`)
+        .then(response => {
+            invoiceNumber.value = response.data.invoice_number;
+            const payment = response.data.payment;
+            if (payment) {
+                remainingBalance.value = Math.max(0, payment.total_amount - payment.paid_amount);
+                amount.value = remainingBalance.value;
+            } else {
+                const total = response.data.total_ammount;
+                remainingBalance.value = total;
+                amount.value = total;
+            }
+        });
+
+    axios.get(`/api/fetch-payment-types`)
+        .then(response => {
+            paymentTypes.value = response.data;
+        })
+        .catch(error => {
+            console.error('Error fetching payment types:', error);
+        });
+};
+
+const closePayBillModal = () => {
+    PayBillModal.value = false;
+    invoiceNumber.value = '';
+    payment_method_id.value = '';
+    reference_no.value = '';
+    amount.value = '';
+    remark.value = '';
+    invoiceId.value = null;
+};
+
+const submitPayBillForm = () => {
+    if (amount.value > remainingBalance.value) {
+        Swal.fire({
+            title: 'Overpayment Warning',
+            text: `The amount ₹${formatAmount(amount.value)} exceeds the remaining balance ₹${formatAmount(remainingBalance.value)}. Please adjust.`,
+            icon: 'warning',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+
+    axios.post(`/api/pay-bill`, {
+        payment_method_id: payment_method_id.value,
+        reference_no: reference_no.value,
+        amount: amount.value,
+        remark: remark.value,
+        invoice_id: invoiceId.value,
+        type: 'plain'
+    })
+    .then(response => {
+        if(response.data.status == 1) {
+            Swal.fire({
+                title: 'Success!',
+                text: response.data.message,
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire({
+                title: 'Info!',
+                text: response.data.message,
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
+        }
+        closePayBillModal();
+    })
+    .catch(error => {
+        console.error('Error paying bill:', error);
+        Swal.fire({
+            title: 'Error!',
+            text: 'There was an error paying the bill.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+    });
+};
+
+const openPaymentHistoryModal = (id) => {
+    PaymentHistoryModal.value = true;
+    invoiceId.value = id;
+    const type = 'plain';
+
+    axios.get(`/api/fetch-invoice/${id}/${type}`)
+        .then(response => {
+            invoiceNumber.value = response.data.invoice_number;
+            const payment = response.data.payment;
+            remainingBalance.value = payment ? Math.max(0, payment.total_amount - payment.paid_amount) : 0;
+        });
+
+    fetchHistories(id);
+    
+    if (paymentTypes.value.length === 0) {
+        axios.get(`/api/fetch-payment-types`)
+            .then(response => {
+                paymentTypes.value = response.data;
+            });
+    }
+};
+
+const fetchHistories = (id) => {
+    axios.get(`/api/fetch-payment-history/${id}/plain`)
+        .then(response => {
+            paymentHistories.value = response.data;
+        });
+};
+
+const closePaymentHistoryModal = () => {
+    PaymentHistoryModal.value = false;
+    paymentHistories.value = [];
+    editingHistory.value = null;
+    invoiceId.value = null;
+};
+
+const editHistory = (history) => {
+    editingHistory.value = history;
+    editForm.value = {
+        id: history.id,
+        payment_method_id: history.payment_type_id,
+        reference_no: history.reference_no,
+        amount: history.amount,
+        remark: history.remark
+    };
+};
+
+const submitUpdateHistoryForm = () => {
+    const currentRemainingPlusThis = remainingBalance.value + editingHistory.value.amount;
+    if (editForm.value.amount > currentRemainingPlusThis) {
+        Swal.fire({
+            title: 'Overpayment Warning',
+            text: `The amount ₹${formatAmount(editForm.value.amount)} exceeds the allowed balance ₹${formatAmount(currentRemainingPlusThis)}.`,
+            icon: 'warning',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+
+    axios.post(`/api/update-payment-history`, editForm.value)
+        .then(response => {
+            if (response.data.status == 1) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: response.data.message,
+                    icon: 'success'
+                });
+                fetchHistories(invoiceId.value);
+                editingHistory.value = null;
+                // Refresh remaining balance
+                axios.get(`/api/fetch-invoice/${invoiceId.value}/plain`).then(res => {
+                    const payment = res.data.payment;
+                    remainingBalance.value = payment ? Math.max(0, payment.total_amount - payment.paid_amount) : 0;
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error!',
+                    text: response.data.message,
+                    icon: 'error'
+                });
+            }
+        });
+};
+
+const deleteHistory = (id) => {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            axios.delete(`/api/delete-payment-history/${id}`)
+                .then(response => {
+                    Swal.fire(
+                        'Deleted!',
+                        response.data.message,
+                        'success'
+                    );
+                    fetchHistories(invoiceId.value);
+                    // Refresh remaining balance
+                    axios.get(`/api/fetch-invoice/${invoiceId.value}/plain`).then(res => {
+                        const payment = res.data.payment;
+                        remainingBalance.value = payment ? Math.max(0, payment.total_amount - payment.paid_amount) : 0;
+                    });
+                });
+        }
     });
 };
 

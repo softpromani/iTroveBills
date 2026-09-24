@@ -456,7 +456,16 @@ class CustomerBillController extends Controller
 
     public function fetchPaymentHistory($id, $type = 'regular')
     {
-        $model = $type === 'gst' ? \App\Models\GSTInvoice::class : \App\Models\Invoice::class;
+        if ($type === 'gst') {
+            $model = \App\Models\GSTInvoice::class;
+        } elseif ($type === 'proforma') {
+            $model = \App\Models\PerformaInvoice::class;
+        } elseif ($type === 'plain') {
+            $model = \App\Models\PlainBill::class;
+        } else {
+            $model = \App\Models\Invoice::class;
+        }
+
         $payment = \App\Models\Payment::where('paymentable_id', $id)
             ->where('paymentable_type', $model)
             ->first();
