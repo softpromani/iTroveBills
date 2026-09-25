@@ -34,8 +34,6 @@
                             <th class="col-1">Invoice Number</th>
                             <th class="col-1">Invoice Date</th>
                             <th class="col-1">Total Amount</th>
-                            <th v-if="showVehicleAndPackets" class="col-1">Vehicle No</th>
-                            <th v-if="showVehicleAndPackets" class="col-1">No. Packets</th>
                             <th class="col-1">Customer</th>
                             <th class="col-1">Action</th>
                         </tr>
@@ -49,8 +47,6 @@
                             <td>{{ invoice.invoice_number ?? "" }}</td>
                             <td>{{ invoice.invoice_date ?? "" }}</td>
                             <td>{{ invoice.total_ammount ?? "" }}</td>
-                            <td v-if="showVehicleAndPackets">{{ invoice.vehicle_no ?? "" }}</td>
-                            <td v-if="showVehicleAndPackets">{{ invoice.no_packets ?? "NO PACK" }}</td>
                             <td>{{ invoice.customer.company_name ?? "" }}</td>
 
                             <td>
