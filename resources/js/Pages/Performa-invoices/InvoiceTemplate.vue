@@ -112,7 +112,6 @@
                             <th width="90" class="border-right border-dark">HSN/SAC</th>
                             <th width="70" class="border-right border-dark">Quantity</th>
                             <th width="60" class="border-right border-dark">Unit</th>
-                            <th width="80" class="border-right border-dark" v-if="props.invoice.company.firm_type !== 'IT'">Weight</th>
                             <th width="90" class="border-right border-dark">Rate</th>
                             <th width="110">Amount</th>
                         </tr>
@@ -128,7 +127,6 @@
                                 <strong>{{ item.quantity }}</strong>
                             </td>
                              <td class="text-center border-right border-dark">{{ item.unit || 'PCS' }}</td>
-                            <td class="text-center border-right border-dark" v-if="props.invoice.company.firm_type !== 'IT'">{{ item.weight }}</td>
                             <td class="text-right border-right border-dark">{{ formatCurrency(item.rate) }}</td>
                             <td class="text-right font-weight-bold">
                                 {{ formatCurrency(item.rate * item.quantity) }}
@@ -140,12 +138,11 @@
                             <td class="text-right border-right border-dark" colspan="3">Total</td>
                             <td class="text-right border-right border-dark">{{ calculateTotalQty() }}</td>
                             <td class="border-right border-dark"></td>
-                            <td class="text-right border-right border-dark" v-if="props.invoice.company.firm_type !== 'IT'">{{ props.invoice.total_weight ?? "" }}</td>
                             <td class="border-right border-dark"></td>
                             <td class="text-right font-weight-bold">₹ {{ formatAmount(props.invoice.total_ammount) }}</td>
                         </tr>
                         <tr v-if="amountInWords">
-                            <td :colspan="props.invoice.company.firm_type !== 'IT' ? 8 : 7" class="text-right x-small font-weight-bold border-top border-dark">
+                            <td colspan="7" class="text-right x-small font-weight-bold border-top border-dark">
                                 Total Rupees: {{ amountInWords }} Only
                             </td>
                         </tr>
