@@ -22,7 +22,6 @@
                             <th>HSN Code</th>
                             <th>Quantity</th>
                             <th>Unit</th>
-                            <th v-if="props.company?.firm_type !== 'IT'">Weight</th>
                             <th>Rate</th>
                             <th>Taxable Value</th>
                             <th>Action</th>
@@ -87,13 +86,6 @@
                                 @blur="updateCell(rowIndex, 3, $event)">
                             </td>
 
-                            <td contenteditable="true" v-if="props.company?.firm_type !== 'IT'"
-                                :data-row="rowIndex"
-                                :data-cell="4"
-                                v-html="row[4]"
-                                @blur="updateCell(rowIndex, 4, $event)">
-                            </td>
-
                             <!-- Rate - contenteditable -->
                             <td contenteditable="true"
                                 :data-row="rowIndex"
@@ -128,8 +120,6 @@
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td class="font-bold" v-if="props.company?.firm_type !== 'IT'">Total Weight:</td>
-                            <td class="font-bold" v-if="props.company?.firm_type !== 'IT'">{{ calculateTotalWeight() }}</td>
                             <td class="font-bold">Total:</td>
                             <td class="font-bold">{{ calculateTotalTaxableValue() }}</td>
                             <td></td>

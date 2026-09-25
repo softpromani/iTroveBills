@@ -138,25 +138,6 @@
                                         class="mt-2"
                                     />
                                 </div>
-                                <div class="mt-2 col-md-6" v-if="edit_data.company?.firm_type !== 'IT'">
-                                    <InputLabel
-                                        for="vehical_no"
-                                        :value="edit_data.company?.firm_type !== 'IT' ? 'Vehicle No*' : 'Vehicle No'"
-                                    />
-                                    <TextInput
-                                        id="vehical_no"
-                                        type="text"
-                                        class="block w-full mt-1"
-                                        :required="edit_data.company?.firm_type !== 'IT'"
-                                        v-model="form.vehical_no"
-                                        autofocus
-                                        autocomplete="vehical_no"
-                                    />
-
-                                    <InputError
-                                        class="mt-2"
-                                    />
-                                </div>
                                 <div class="mt-2 col-md-6">
                                     <InputLabel
                                         for="delivery_in_days"
