@@ -57,10 +57,10 @@
                 </div>
             </div>
 
-            <!-- Middle Section: Buyer / Consignee / Dispatch -->
+            <!-- Middle Section: Buyer / Consignee Details -->
             <div class="row no-gutters border-bottom border-dark">
-                <!-- Consignee / Buyer Details (Left) -->
-                <div class="col-6 border-right border-dark">
+                <!-- Consignee / Buyer Details -->
+                <div class="col-12 border-dark">
                     <div class="p-2 min-vh-12">
                         <label class="meta-label">Buyer (Bill & Ship to)</label>
                         <div class="font-weight-bold details-title">{{ props.invoice.customer.company_name }}</div>
@@ -71,32 +71,6 @@
                             State Name: {{ getStateName(props.invoice.customer.gstin) }}, Code: {{
                                 props.invoice.customer.gstin?.substring(0, 2) }}<br />
                             Phone: <strong>{{ props.invoice.customer.mobile }}</strong>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Dispatch Details (Right) -->
-                <div class="col-6 no-gutters h-100">
-                    <div class="row no-gutters border-bottom border-dark h-25" v-if="props.invoice.company.firm_type !== 'IT'">
-                        <div class="col-12 p-2">
-                            <label class="meta-label">IEC Code</label>
-                            <div class="meta-value">{{ props.invoice.company.iec }}</div>
-                        </div>
-                    </div>
-                    <div class="row no-gutters border-bottom border-dark h-25" v-if="props.invoice.company.firm_type !== 'IT'">
-                        <div class="col-12 p-2">
-                            <label class="meta-label">No. OF PACKAGES</label>
-                            <div class="meta-value">{{ props.invoice.no_packets ?? "No Packs" }}</div>
-                        </div>
-                    </div>
-                    <div class="row no-gutters border-dark h-25" v-if="props.invoice.company.firm_type !== 'IT'">
-                        <div class="col-6 border-right border-dark p-2" v-if="props.invoice.company.firm_type !== 'IT'">
-                            <label class="meta-label">Dispatched through</label>
-                            <div class="meta-value">Yes</div>
-                        </div>
-                        <div class="col-6 p-2" v-if="props.invoice.company.firm_type !== 'IT'">
-                            <label class="meta-label">Vehicle No.</label>
-                            <div class="meta-value">{{ props.invoice.vehicle_no }}</div>
                         </div>
                     </div>
                 </div>
