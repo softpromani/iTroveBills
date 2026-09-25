@@ -549,8 +549,12 @@ class GSTInvoiceController extends Controller
             $inv_id = $request->invoice_id; // fallback if already plain ID
         }
 
-        $invoice = GSTInvoice::with(['invoiceitems', 'Customer', 'Company', 'lut'])
+        $invoice = GSTInvoice::with(['invoiceitems', 'Customer', 'Company.CompanyLut', 'lut'])
             ->findOrFail($inv_id);
+
+        if ($invoice && !$invoice->lut && $invoice->Company) {
+            $invoice->setRelation('lut', $invoice->Company->CompanyLut()->latest()->first());
+        }
 
         return inertia('gst-invoices/InvoiceTemplate', compact('invoice'));
     }

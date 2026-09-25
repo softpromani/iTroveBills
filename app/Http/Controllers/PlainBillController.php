@@ -236,7 +236,12 @@ class PlainBillController extends Controller
             $id = $request->invoice_id;
         }
 
-        $invoice = PlainBill::with(['items', 'Customer', 'lut', 'Company'])->findOrFail($id);
+        $invoice = PlainBill::with(['items', 'Customer', 'lut', 'Company.CompanyLut'])->findOrFail($id);
+
+        if ($invoice && !$invoice->lut && $invoice->Company) {
+            $invoice->setRelation('lut', $invoice->Company->CompanyLut()->latest()->first());
+        }
+
         return Inertia::render('PlainBills/InvoiceTemplate', ['invoice' => $invoice]);
     }
 

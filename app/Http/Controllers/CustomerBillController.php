@@ -325,7 +325,7 @@ class CustomerBillController extends Controller
             $invoice->load('invoiceitems');
             $invoice->load('Customer');
             $invoice->load('lut');
-            $invoice->load('Company');
+            $invoice->load('Company.CompanyLut');
 
         } catch (DecryptException $e) {
             $inv_id = $request->invoice_id;
@@ -333,8 +333,13 @@ class CustomerBillController extends Controller
             $invoice->load('invoiceitems');
             $invoice->load('Customer');
             $invoice->load('lut');
-            $invoice->load('Company');
+            $invoice->load('Company.CompanyLut');
         }
+
+        if ($invoice && !$invoice->lut && $invoice->Company) {
+            $invoice->setRelation('lut', $invoice->Company->CompanyLut()->latest()->first());
+        }
+
         return inertia('invoices/InvoiceTemplate', compact('invoice'));
     }
 
@@ -864,14 +869,20 @@ class CustomerBillController extends Controller
             $invoice->load('invoiceitems');
             $invoice->load('Customer');
             $invoice->load('lut');
-            $invoice->load('Company');
+            $invoice->load('Company.CompanyLut');
         } catch (DecryptException $e) {
             $inv_id = $request->invoice_id;
             $invoice = PerformaInvoice::find($inv_id);
             $invoice->load('invoiceitems');
             $invoice->load('Customer');
-            $invoice->load('Company');
+            $invoice->load('lut');
+            $invoice->load('Company.CompanyLut');
         }
+
+        if ($invoice && !$invoice->lut && $invoice->Company) {
+            $invoice->setRelation('lut', $invoice->Company->CompanyLut()->latest()->first());
+        }
+
         return inertia('Performa-invoices/InvoiceTemplate', compact('invoice'));
     }
     public function myBill()
