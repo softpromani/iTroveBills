@@ -170,9 +170,14 @@
         </table>
 
         <!-- Buyer Details Section -->
+        @php
+            $hasDispatchDetails = !in_array($invoice_type, ['proforma', 'plain'])
+                && ($invoice->Company->firm_type ?? '') !== 'IT'
+                && (!empty($invoice->no_packets) || !empty($invoice->vehicle_no) || !empty($invoice->dispatched_through) || (!empty($invoice->total_weight) && floatval($invoice->total_weight) > 0));
+        @endphp
         <table class="border-bottom">
             <tr>
-                <td width="50%" class="border-right">
+                <td width="{{ $hasDispatchDetails ? '50%' : '100%' }}" class="{{ $hasDispatchDetails ? 'border-right' : '' }}">
                     <span class="meta-label">Buyer (Bill & Ship To)</span><br>
                     <div class="bold" style="font-size: 11px;">{{ $invoice->Customer->company_name ?? ($invoice->Customer->name ?? 'Customer') }}</div>
                     <div>{{ $invoice->Customer->address ?? '' }}</div>
@@ -180,10 +185,10 @@
                     <div>State: {{ $buyerStateName }}, Code: {{ $buyerStateCode }}</div>
                     <div>Phone: <strong>{{ $invoice->Customer->mobile ?? '' }}</strong></div>
                 </td>
-                <td width="50%">
-                    @if(!empty($invoice->no_packets) || !empty($invoice->vehicle_no) || !empty($invoice->dispatched_through) || !empty($invoice->total_weight))
+                @if($hasDispatchDetails)
+                <td width="50%" style="padding: 0;">
                     <table>
-                        <tr>
+                        <tr class="border-bottom">
                             <td width="50%" class="border-right">
                                 <span class="meta-label">Total Weight</span><br>
                                 {{ $invoice->total_weight ?? '-' }}
@@ -193,7 +198,7 @@
                                 {{ $invoice->no_packets ?? '-' }}
                             </td>
                         </tr>
-                        <tr class="border-top">
+                        <tr>
                             <td width="50%" class="border-right">
                                 <span class="meta-label">Dispatched Through</span><br>
                                 {{ $invoice->dispatched_through ?? '-' }}
@@ -204,8 +209,8 @@
                             </td>
                         </tr>
                     </table>
-                    @endif
                 </td>
+                @endif
             </tr>
         </table>
 
