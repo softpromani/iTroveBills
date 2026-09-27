@@ -4,89 +4,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ITrove Bills</title>
+    <title>{{ $data['subject'] ?? 'Invoice' }}</title>
     <style>
         .container {
             max-width: 600px;
             margin: 20px auto;
             background-color: #f8f9fa;
             border-radius: 10px;
-            padding: 20px;
-            text-align: center;
+            padding: 25px;
+            font-family: Arial, sans-serif;
+            border: 1px solid #e2e8f0;
         }
 
         .header {
             margin-bottom: 20px;
+            text-align: center;
         }
 
         .logo {
-            max-width: 100px;
+            max-width: 110px;
         }
 
         .content {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            text-align: left;
+            line-height: 1.6;
         }
 
         .footer {
             background-color: #f8f9fa;
-            padding: 20px;
+            padding: 15px;
             border-radius: 10px;
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
         }
 
-        p {
-            color: green;
-        }
-
-        a{
+        .btn-view {
+            display: inline-block;
             text-decoration: none;
-            border: 1px solid purple;
-            padding: 10px;
-            background-color: purple;
-            color: white;
-            border-radius: 10px;
-            margin-bottom:20px;
+            border: 1px solid #6b21a8;
+            padding: 12px 24px;
+            background-color: #6b21a8;
+            color: #ffffff !important;
+            border-radius: 6px;
+            font-weight: bold;
+            margin: 15px 0;
+            font-size: 14px;
         }
     </style>
 </head>
 
-<body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
+<body style="margin: 0; padding: 0; background-color: #f4f5f7; font-family: Arial, sans-serif;">
 
     <div class="container">
 
         <!-- Header with Logo -->
         <div class="header">
-            <!-- Logo -->
             <div style="display: inline-block; position: relative; vertical-align: top;">
                 <img src="{{ asset('itimages/itlogo.png') }}" alt="Company Logo" class="logo">
-                <sup style="font-size: 7px; font-weight: bold; color: #6b21a8; position: absolute; top: 0; right: -14px; border: 1px solid #6b21a8; border-radius: 50%; width: 12px; height: 12px; display: inline-flex; align-items: center; justify-content: center; line-height: 1; text-align: center;">TM</sup>
             </div>
-            <h3>{{ env('APP_NAME') }}<sup style="font-size: 7px; font-weight: bold; color: #6b21a8; border: 1px solid #6b21a8; border-radius: 50%; width: 12px; height: 12px; display: inline-flex; align-items: center; justify-content: center; line-height: 1; text-align: center; margin-left: 4px; vertical-align: super;">TM</sup></h3>
+            <h3 style="margin-top: 10px; color: #333; font-size: 18px;">{{ env('APP_NAME', 'ITrove Bills') }}</h3>
         </div>
 
         <!-- Content -->
         <div class="content">
-            <h4> Hii {{ $data['name'] }}
-                <br />
-                You have receive Invoice {{ $data['invoice_number'] }} generate on {{ $data['billdate'] }} from
-                {{ $data['Seller_Company'] }}
-                Please Download your bill from here -
-            </h4>
-            <a href="{{ url('/view-invoice') }}?invoice_id={{ encrypt($data['invoice_id']) }}">
-               See Your Bill
-            </a>
-            <br />
-            <h4>
-                Thank You
-            </h4>
+            <h4 style="color: #1a202c; font-size: 16px; margin-bottom: 12px;">Hi {{ $data['name'] }},</h4>
+            <p style="color: #4a5568; font-size: 14px;">
+                You have received <strong>{{ $data['invoice_type_label'] }}</strong> <strong>#{{ $data['invoice_number'] }}</strong> generated on <strong>{{ $data['billdate'] }}</strong> from <strong>{{ $data['Seller_Company'] }}</strong>.
+            </p>
+            <p style="color: #4a5568; font-size: 14px;">
+                Please find the attached PDF invoice for your reference, or click below to view your invoice online:
+            </p>
+            <div style="text-align: center; margin: 20px 0;">
+                <a href="{{ $data['invoice_url'] }}" class="btn-view" target="_blank">
+                   See Your {{ $data['invoice_type_label'] }}
+                </a>
+            </div>
+            <p style="color: #4a5568; font-size: 14px; margin-top: 20px;">
+                Thank You,<br>
+                <strong>{{ $data['Seller_Company'] }}</strong>
+            </p>
 
-
-            <br/><br/><br/>
-            <p><a href="{{ route('register', ['company_id' => Crypt::encrypt($data['company_id']) ]) }}">Create an account on ITrove Bill</a></p>
+            <br/>
+            <div style="text-align: center;">
+                <a href="{{ route('register', ['company_id' => Crypt::encrypt($data['company_id']) ]) }}" style="color: #6b21a8; text-decoration: underline; font-size: 13px;">Create an account on ITrove Bills</a>
+            </div>
         </div>
 
         <!-- Footer -->
         <div class="footer">
-            <p>&copy; 2023 InnovationTrove. All rights reserved.</p>
+            <p style="margin: 0;">&copy; {{ date('Y') }} InnovationTrove. All rights reserved.</p>
         </div>
 
     </div>
