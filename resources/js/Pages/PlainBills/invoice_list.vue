@@ -559,6 +559,16 @@ const submitPayBillForm = () => {
         return;
     }
 
+    Swal.fire({
+        title: 'Processing Payment & Sending Mail...',
+        text: 'Please wait while your payment is recorded and email sent.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
     axios.post(`/api/pay-bill`, {
         payment_method_id: payment_method_id.value,
         reference_no: reference_no.value,
@@ -568,6 +578,7 @@ const submitPayBillForm = () => {
         type: 'plain'
     })
     .then(response => {
+        Swal.close();
         if(response.data.status == 1) {
             Swal.fire({
                 title: 'Success!',
@@ -588,6 +599,7 @@ const submitPayBillForm = () => {
         closePayBillModal();
     })
     .catch(error => {
+        Swal.close();
         console.error('Error paying bill:', error);
         Swal.fire({
             title: 'Error!',

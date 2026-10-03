@@ -9,11 +9,12 @@
         .container {
             max-width: 600px;
             margin: 20px auto;
-            background-color: #f8f9fa;
+            background-color: #ffffff;
             border-radius: 10px;
             padding: 25px;
-            font-family: Arial, sans-serif;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         .header {
@@ -29,6 +30,41 @@
             margin-bottom: 25px;
             text-align: left;
             line-height: 1.6;
+        }
+
+        .payment-card {
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 18px;
+            margin: 20px 0;
+        }
+
+        .payment-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .payment-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .payment-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .font-bold {
+            font-weight: bold;
+        }
+
+        .text-green {
+            color: #16a34a;
+        }
+
+        .text-red {
+            color: #dc2626;
         }
 
         .footer {
@@ -71,12 +107,63 @@
         <!-- Content -->
         <div class="content">
             <h4 style="color: #1a202c; font-size: 16px; margin-bottom: 12px;">Hi {{ $data['name'] }},</h4>
-            <p style="color: #4a5568; font-size: 14px;">
-                You have received <strong>{{ $data['invoice_type_label'] }}</strong> <strong>#{{ $data['invoice_number'] }}</strong> generated on <strong>{{ $data['billdate'] }}</strong> from <strong>{{ $data['Seller_Company'] }}</strong>.
-            </p>
-            <p style="color: #4a5568; font-size: 14px;">
-                Please find the attached PDF invoice for your reference, or click below to view your invoice online:
-            </p>
+
+            @if(!empty($data['is_payment_notification']))
+                <p style="color: #4a5568; font-size: 14px;">
+                    Thank you for your payment! A payment of <strong class="text-green">₹{{ $data['paid_now'] }}</strong> has been successfully received for <strong>{{ $data['invoice_type_label'] }} #{{ $data['invoice_number'] }}</strong> from <strong>{{ $data['Seller_Company'] }}</strong>.
+                </p>
+
+                <div class="payment-card">
+                    <h5 style="margin-top: 0; margin-bottom: 12px; color: #1e293b; font-size: 15px;">Payment Details</h5>
+                    <table class="payment-table">
+                        <tr>
+                            <td class="font-bold">Invoice Number:</td>
+                            <td>#{{ $data['invoice_number'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold">Payment Method:</td>
+                            <td>{{ $data['payment_mode'] ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold">Reference Number:</td>
+                            <td>{{ $data['reference_no'] ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold text-green">Amount Paid Now:</td>
+                            <td class="font-bold text-green">₹{{ $data['paid_now'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold">Total Invoice Amount:</td>
+                            <td>₹{{ $data['total_amount'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold">Total Paid So Far:</td>
+                            <td>₹{{ $data['total_paid'] }}</td>
+                        </tr>
+                        <tr style="background-color: #f1f5f9;">
+                            <td class="font-bold text-red">Remaining Balance:</td>
+                            <td class="font-bold text-red">₹{{ $data['remaining_balance'] }}</td>
+                        </tr>
+                        @if(!empty($data['remark']))
+                        <tr>
+                            <td class="font-bold">Remark:</td>
+                            <td>{{ $data['remark'] }}</td>
+                        </tr>
+                        @endif
+                    </table>
+                </div>
+                <p style="color: #4a5568; font-size: 14px;">
+                    Please find the updated invoice PDF attached for your records, or click below to view your invoice online:
+                </p>
+            @else
+                <p style="color: #4a5568; font-size: 14px;">
+                    You have received <strong>{{ $data['invoice_type_label'] }}</strong> <strong>#{{ $data['invoice_number'] }}</strong> generated on <strong>{{ $data['billdate'] }}</strong> from <strong>{{ $data['Seller_Company'] }}</strong>.
+                </p>
+                <p style="color: #4a5568; font-size: 14px;">
+                    Please find the attached PDF invoice for your reference, or click below to view your invoice online:
+                </p>
+            @endif
+
             <div style="text-align: center; margin: 20px 0;">
                 <a href="{{ $data['invoice_url'] }}" class="btn-view" target="_blank">
                    See Your {{ $data['invoice_type_label'] }}

@@ -307,6 +307,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/create', [PlainLedgerController::class, 'create'])->name('create');
         Route::post('/store', [PlainLedgerController::class, 'store'])->name('store');
         Route::get('/edit/{id}', [PlainLedgerController::class, 'edit'])->name('edit');
+        Route::post('/update/{id}', [PlainLedgerController::class, 'update'])->name('update');
+        Route::delete('/destroy/{id}', [PlainLedgerController::class, 'destroy'])->name('destroy');
         Route::get('/report', [PlainLedgerController::class, 'report'])->name('report');
         Route::get('/report/generate', [PlainLedgerController::class, 'generate_report'])->name('report.generate');
     });

@@ -68,7 +68,44 @@ class PlainLedgerController extends Controller
         ]);
 
         if (!$request->seller_customer_id && !$request->party_id) {
-            return back()->withErrors(['seller_customer_id' => 'Please select either a customer or a party.']);
+            return back()->withErrors(['seller_customer_id' => 'Please select either a customer or a party.'])->withInput();
+        }
+
+        // Check if voucher number already exists (if provided)
+        if ($request->filled('voucher_no')) {
+            $voucherExists = PlainLedger::where('user_id', Auth::id())
+                ->where('voucher_no', trim($request->voucher_no))
+                ->exists();
+
+            if ($voucherExists) {
+                return back()
+                    ->withErrors(['voucher_no' => 'A plain ledger entry with this voucher number already exists.'])
+                    ->withInput();
+            }
+        }
+
+        // Check duplicate entry with identical details
+        $duplicateQuery = PlainLedger::where('user_id', Auth::id())
+            ->where('seller_customer_id', $request->seller_customer_id ?: null)
+            ->where('party_id', $request->party_id ?: null)
+            ->where('type', $request->type)
+            ->where('payment_type', $request->payment_type)
+            ->where('particular_type', $request->particular_type)
+            ->where('amount', $request->amount)
+            ->where('date', $request->date);
+
+        if ($request->filled('voucher_no')) {
+            $duplicateQuery->where('voucher_no', trim($request->voucher_no));
+        } else {
+            $duplicateQuery->where(function ($q) {
+                $q->whereNull('voucher_no')->orWhere('voucher_no', '');
+            });
+        }
+
+        if ($duplicateQuery->exists()) {
+            return back()
+                ->withErrors(['amount' => 'A plain ledger entry with identical details already exists.'])
+                ->withInput();
         }
 
         PlainLedger::create([
@@ -126,7 +163,46 @@ class PlainLedgerController extends Controller
         ]);
 
         if (!$request->seller_customer_id && !$request->party_id) {
-            return back()->withErrors(['seller_customer_id' => 'Please select either a customer or a party.']);
+            return back()->withErrors(['seller_customer_id' => 'Please select either a customer or a party.'])->withInput();
+        }
+
+        // Check if voucher number already exists for another entry of this user
+        if ($request->filled('voucher_no')) {
+            $voucherExists = PlainLedger::where('user_id', Auth::id())
+                ->where('id', '!=', $id)
+                ->where('voucher_no', trim($request->voucher_no))
+                ->exists();
+
+            if ($voucherExists) {
+                return back()
+                    ->withErrors(['voucher_no' => 'A plain ledger entry with this voucher number already exists.'])
+                    ->withInput();
+            }
+        }
+
+        // Check duplicate entry with identical details (excluding current entry)
+        $duplicateQuery = PlainLedger::where('user_id', Auth::id())
+            ->where('id', '!=', $id)
+            ->where('seller_customer_id', $request->seller_customer_id ?: null)
+            ->where('party_id', $request->party_id ?: null)
+            ->where('type', $request->type)
+            ->where('payment_type', $request->payment_type)
+            ->where('particular_type', $request->particular_type)
+            ->where('amount', $request->amount)
+            ->where('date', $request->date);
+
+        if ($request->filled('voucher_no')) {
+            $duplicateQuery->where('voucher_no', trim($request->voucher_no));
+        } else {
+            $duplicateQuery->where(function ($q) {
+                $q->whereNull('voucher_no')->orWhere('voucher_no', '');
+            });
+        }
+
+        if ($duplicateQuery->exists()) {
+            return back()
+                ->withErrors(['amount' => 'A plain ledger entry with identical details already exists.'])
+                ->withInput();
         }
 
         $ledger->update([

@@ -325,4 +325,75 @@ class MailController extends Controller
         $result = trim(($rupees ? $rupees . 'Rupees ' : '') . $paise);
         return empty($result) ? 'Zero Rupees Only' : $result . ' Only';
     }
+
+    public static function sendInvoiceMailByModel($invoice, string $type = 'regular', array $paymentDetails = [])
+    {
+        if (!$invoice) {
+            return false;
+        }
+
+        if ($type === 'gst' || $invoice instanceof GSTInvoice) {
+            $invoiceTypeLabel = 'GST Invoice';
+            $pdfType = 'gst';
+            $invoiceUrl = route('gst.view.invoice', ['invoice_id' => Crypt::encrypt($invoice->id)]);
+            $itemsRelation = 'invoiceitems';
+        } elseif ($type === 'proforma' || $invoice instanceof PerformaInvoice) {
+            $invoiceTypeLabel = 'Proforma Invoice';
+            $pdfType = 'proforma';
+            $invoiceUrl = route('performa.view.invoice', ['invoice_id' => Crypt::encrypt($invoice->id)]);
+            $itemsRelation = 'invoiceitems';
+        } elseif ($type === 'plain' || $invoice instanceof PlainBill) {
+            $invoiceTypeLabel = 'Plain Bill';
+            $pdfType = 'plain';
+            $invoiceUrl = route('book.view.invoice', ['invoice_id' => Crypt::encrypt($invoice->id)]);
+            $itemsRelation = 'items';
+        } else {
+            $invoiceTypeLabel = 'Export Invoice';
+            $pdfType = 'export';
+            $invoiceUrl = route('view.invoice', ['invoice_id' => Crypt::encrypt($invoice->id)]);
+            $itemsRelation = 'invoiceitems';
+        }
+
+        $invoice->loadMissing(['Customer', 'Company.CompanyLut', $itemsRelation, 'lut']);
+
+        $customer = $invoice->Customer;
+        if (!$customer || empty($customer->email)) {
+            Log::warning("Customer email address missing for invoice ID: {$invoice->id}");
+            return false;
+        }
+
+        $isPayment = !empty($paymentDetails['is_payment_notification']);
+        if ($isPayment) {
+            $subject = "Payment Receipt for {$invoiceTypeLabel} #{$invoice->invoice_number} - Amount Paid: ₹" . ($paymentDetails['paid_now'] ?? '0.00');
+        } else {
+            $subject = "{$invoiceTypeLabel} #{$invoice->invoice_number} from " . ($invoice->Company->company_name ?? 'ITrove Bills');
+        }
+
+        $data = array_merge([
+            "email" => $invoice->Company->email ?? config('mail.from.address'),
+            "invoice_id" => $invoice->id,
+            "invoice_url" => $invoiceUrl,
+            "invoice_type_label" => $invoiceTypeLabel,
+            "subject" => $subject,
+            "name" => $customer->company_name ?? $customer->name ?? 'Customer',
+            "billdate" => !empty($invoice->invoice_date) ? date('d-M-Y', strtotime($invoice->invoice_date)) : '-',
+            "Seller_Company" => $invoice->Company->company_name ?? 'Company',
+            "company_id" => $customer->id,
+            "invoice_number" => $invoice->invoice_number,
+            "is_payment_notification" => $isPayment,
+        ], $paymentDetails);
+
+        $controller = new self();
+        $pdfContent = $controller->generateInvoicePdf($invoice, $invoiceTypeLabel, $pdfType);
+        $pdfFilename = str_replace(' ', '_', $invoiceTypeLabel) . "_{$invoice->invoice_number}.pdf";
+        $companyEmails = $controller->getCompanyCcEmails($invoice->Company);
+
+        $mailable = Mail::to($customer->email);
+        if (!empty($companyEmails)) {
+            $mailable->cc($companyEmails);
+        }
+        $mailable->send(new BillMail($data, $pdfContent, $pdfFilename));
+
+        return true;
+    }
 }

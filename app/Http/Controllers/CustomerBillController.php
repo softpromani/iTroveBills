@@ -451,7 +451,37 @@ class CustomerBillController extends Controller
                 'status' => 'paid'
             ]);
 
-            return response()->json([ 'status'=> 1, 'message' => 'Bill paid successfully']);
+            // Calculate updated payment figures for email notification
+            $payment = $invoice->payment->fresh();
+            $paidNow = (float)$request->amount;
+            $totalAmount = (float)($payment->total_amount ?? $correct_total);
+            $totalPaid = (float)($payment->paid_amount ?? $paidNow);
+            $remainingBalance = max(0, $totalAmount - $totalPaid);
+
+            $paymentTypeName = \App\Models\PaymentType::where('id', $request->payment_method_id)->value('name') ?? 'Payment';
+
+            $paymentDetails = [
+                'is_payment_notification' => true,
+                'paid_now' => number_format($paidNow, 2),
+                'total_amount' => number_format($totalAmount, 2),
+                'total_paid' => number_format($totalPaid, 2),
+                'remaining_balance' => number_format($remainingBalance, 2),
+                'payment_mode' => $paymentTypeName,
+                'reference_no' => $request->reference_no ?: '-',
+                'remark' => $request->remark ?: '',
+            ];
+
+            // Send email to customer email and keeping company email in CC
+            $mailSent = false;
+            try {
+                $mailSent = \App\Http\Controllers\MailController::sendInvoiceMailByModel($invoice, $type ?: 'regular', $paymentDetails);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Error sending mail in payBill: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            }
+
+            $message = 'Bill paid successfully' . ($mailSent ? ' and payment receipt emailed to customer.' : '.');
+
+            return response()->json([ 'status'=> 1, 'message' => $message]);
         }
         else{
             return response()->json([ 'status' => 0, 'message' => 'Something went wrong!']);

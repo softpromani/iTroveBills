@@ -228,6 +228,16 @@ const openPayBillModal = (id) => {
 
 // Method to submit the form and update the invoice
 const submitPayBillForm = () => {
+  Swal.fire({
+    title: 'Processing Payment & Sending Mail...',
+    text: 'Please wait while your payment is recorded and email sent.',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
   axios.post(`/api/pay-bill`, {
     payment_method_id: payment_method_id.value,
     reference_no: reference_no.value,
@@ -236,6 +246,7 @@ const submitPayBillForm = () => {
     invoice_id: invoiceId.value
   })
   .then(response => {
+    Swal.close();
     console.log('Bill paid successfully:', response);
     if(response.data.status == 1)
     {
@@ -245,9 +256,7 @@ const submitPayBillForm = () => {
         icon: 'success',
         confirmButtonText: 'OK'
         }).then(() => {
-        setTimeout(() => {
             location.reload();
-        }, 5000);
         });
     }
     else{
@@ -257,9 +266,7 @@ const submitPayBillForm = () => {
         icon: 'warning',
         confirmButtonText: 'OK'
         }).then(() => {
-        setTimeout(() => {
             location.reload();
-        }, 5000);
         });
     }
 
@@ -267,6 +274,7 @@ const submitPayBillForm = () => {
 
   })
   .catch(error => {
+    Swal.close();
     console.error('Error paying bill:', error);
 
     // Show error message using SweetAlert
