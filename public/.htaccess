@@ -5,6 +5,9 @@
 
     RewriteEngine On
 
+    # SECURITY: Block direct execution and web access of any PHP, script or executable in upload and storage directories
+    RewriteRule ^(uploads|storage|company_file)/.*\.(php[0-9]?|phtml|phar|phps|inc|pl|py|cgi|asp|aspx|sh|bash|exe|bat|cmd|dll|htaccess|htpasswd)$ - [F,L,NC]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

@@ -4,6 +4,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
 import { Link, useForm, usePage } from "@inertiajs/vue3";
+import { validateUploadedFile } from "@/Utils/fileValidation";
 
 defineProps({
     mustVerifyEmail: {
@@ -23,6 +24,32 @@ const form = useForm({
     appname: user.app_name,
     avatar: user.app_logo,
 });
+
+function onAvatarChange(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const result = validateUploadedFile(file, { allowImages: true, allowPdf: false });
+    if (!result.valid) {
+        form.errors.avatar = result.error;
+        event.target.value = '';
+        return;
+    }
+
+    delete form.errors.avatar;
+    form.avatar = file;
+}
+
+function submitForm() {
+    if (form.avatar instanceof File) {
+        const result = validateUploadedFile(form.avatar, { allowImages: true, allowPdf: false });
+        if (!result.valid) {
+            form.errors.avatar = result.error;
+            return;
+        }
+    }
+    form.post(route('profile.update'));
+}
 </script>
 
 <template>
@@ -38,7 +65,7 @@ const form = useForm({
         </header>
 
         <form
-            @submit.prevent="form.post(route('profile.update'))"
+            @submit.prevent="submitForm"
             class="mt-6 space-y-6"
         >
             <div class="row">
@@ -102,8 +129,14 @@ const form = useForm({
                     <InputError class="mt-2" :message="form.errors.email" />
                 </div>
                 <div class="mt-3">
-                    <InputLabel for="formFile" value="Profile Image" />
-                    <input class="form-control" id="formFile" type="file" @input="form.avatar = $event.target.files[0]" />
+                    <InputLabel for="formFile" value="Profile Image (JPG, PNG, WebP - Max 5MB)" />
+                    <input
+                        class="form-control"
+                        id="formFile"
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                        @change="onAvatarChange"
+                    />
                     <InputError class="mt-2" :message="form.errors.avatar" />
                     <progress v-if="form.progress" :value="form.progress.percentage" max="100">
                     {{ form.progress.percentage }}%

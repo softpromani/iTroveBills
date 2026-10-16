@@ -18,11 +18,16 @@
   </template>
 
   <script>
+  import { validateUploadedFile } from "@/Utils/fileValidation";
+
   export default {
     props: {
       modelValue: File,
       label: String,
-      accept: String,
+      accept: {
+        type: String,
+        default: '.jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf',
+      },
       errors: {
         type: Array,
         default: () => [],
@@ -45,7 +50,21 @@
         this.$refs.file.click()
       },
       change(e) {
-        this.$emit('update:modelValue', e.target.files[0])
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const result = validateUploadedFile(file, {
+          allowImages: true,
+          allowPdf: true,
+        });
+
+        if (!result.valid) {
+          alert(result.error);
+          this.$refs.file.value = '';
+          return;
+        }
+
+        this.$emit('update:modelValue', file);
       },
       remove() {
         this.$emit('update:modelValue', null)

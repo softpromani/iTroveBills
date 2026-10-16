@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Rules\SecureFileUpload;
+use App\Services\FileSecurityService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -36,18 +38,23 @@ class ProfileController extends Controller
             'email' => ['required', 'email', 'string', 'max:255', Rule::unique('users')->ignore(Auth::user())],
             'mobile' => 'required|numeric|digits:10', // Example mobile validation rules
             'appname' => 'required|string|max:255', // Example appname validation rules
-            'avatar' => 'nullable|image|mimes:jpg,png,jpeg',
+            'avatar' => $request->hasFile('avatar') ? ['required', new SecureFileUpload(isImageOnly: true)] : ['nullable'],
         ]);
 
         if ($request->hasFile('avatar')) {
+            $file = $request->file('avatar');
+            [$isValid, $error, $safeExt] = FileSecurityService::validate($file, allowImages: true, allowPdf: false);
+            if (!$isValid) {
+                return redirect()->back()->withErrors(['avatar' => $error])->withInput();
+            }
+
             if (auth()->user()->app_logo) {
                 $oldImagePath = public_path(auth()->user()->app_logo);
-                if (File::exists($oldImagePath)) {
+                if (File::exists($oldImagePath) && !is_dir($oldImagePath)) {
                     File::delete($oldImagePath);
                 }
             }
-            $file = $request->avatar;
-            $fileName = time() . '.' . $file->getClientOriginalExtension();
+            $fileName = FileSecurityService::generateSafeFilename($safeExt, 'avatar');
             $file->move(public_path('uploads'), $fileName);
             $upload_file ='uploads/'.$fileName;
             User::find(Auth::id())->update([

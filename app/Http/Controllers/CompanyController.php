@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use App\Models\CompanyLUT;
 use App\Models\Status;
+use App\Rules\SecureFileUpload;
+use App\Services\FileSecurityService;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
@@ -45,17 +47,22 @@ class CompanyController extends Controller
             'bank_ifsc'         => 'required',
             'bank_account_no'   => 'required',
             'adcode'            => 'required',
-            'logo'              => 'required|image|mimes:jpg,png,jpeg',
-            'sign'              => 'required|image|mimes:jpg,png,jpeg',
-            'bank_qr'           => 'nullable',
-            'brand_banner.*'    => 'nullable',
+            'logo'              => ['required', new SecureFileUpload(isImageOnly: true)],
+            'sign'              => ['required', new SecureFileUpload(isImageOnly: true)],
+            'bank_qr'           => ['nullable', new SecureFileUpload(allowPdf: true)],
+            'brand_banner'      => ['nullable', 'array'],
+            'brand_banner.*'    => ['nullable', new SecureFileUpload(isImageOnly: true)],
         ]);
 
         // Logo upload
         $upload_logo = null;
         if ($request->hasFile('logo')) {
             $logo = $request->file('logo');
-            $logoName = time() . '.' . $logo->getClientOriginalExtension();
+            [$isValid, $error, $safeExt] = FileSecurityService::validate($logo, allowImages: true, allowPdf: false);
+            if (!$isValid) {
+                return redirect()->back()->withErrors(['logo' => $error])->withInput();
+            }
+            $logoName = FileSecurityService::generateSafeFilename($safeExt, 'logo');
             $path = $logo->storeAs('company_file/logo', $logoName, 'public');
             $upload_logo = 'storage/' . $path;
         }
@@ -64,7 +71,11 @@ class CompanyController extends Controller
         $upload_sign = null;
         if ($request->hasFile('sign')) {
             $sign = $request->file('sign');
-            $signName = time() . '.' . $sign->getClientOriginalExtension();
+            [$isValid, $error, $safeExt] = FileSecurityService::validate($sign, allowImages: true, allowPdf: false);
+            if (!$isValid) {
+                return redirect()->back()->withErrors(['sign' => $error])->withInput();
+            }
+            $signName = FileSecurityService::generateSafeFilename($safeExt, 'sign');
             $path = $sign->storeAs('company_file/sign', $signName, 'public');
             $upload_sign = 'storage/' . $path;
         }
@@ -73,7 +84,11 @@ class CompanyController extends Controller
         $upload_bank_qr = null;
         if ($request->hasFile('bank_qr')) {
             $bank_qr = $request->file('bank_qr');
-            $bankQRName = time() . '.' . $bank_qr->getClientOriginalExtension();
+            [$isValid, $error, $safeExt] = FileSecurityService::validate($bank_qr, allowImages: true, allowPdf: true);
+            if (!$isValid) {
+                return redirect()->back()->withErrors(['bank_qr' => $error])->withInput();
+            }
+            $bankQRName = FileSecurityService::generateSafeFilename($safeExt, 'bank_qr');
             // Save to storage/app/public/company_file/bank_qr/
             $path = $bank_qr->storeAs('company_file/bank_qr', $bankQRName, 'public');
             // Store web-accessible path (after running php artisan storage:link)
@@ -87,7 +102,11 @@ class CompanyController extends Controller
             // Upload new banners
             foreach ($request->brand_banner as $bannerFile) {
                 if ($bannerFile instanceof \Illuminate\Http\UploadedFile) {
-                    $bannerName = time() . '-' . rand(1000, 9999) . '.' . $bannerFile->getClientOriginalExtension();
+                    [$isValid, $error, $safeExt] = FileSecurityService::validate($bannerFile, allowImages: true, allowPdf: false);
+                    if (!$isValid) {
+                        return redirect()->back()->withErrors(['brand_banner' => $error])->withInput();
+                    }
+                    $bannerName = FileSecurityService::generateSafeFilename($safeExt, 'banner');
                     $path = $bannerFile->storeAs('company_file/inv_banner', $bannerName, 'public');
                     $newBanners[] = 'storage/' . $path;
                 }
@@ -181,17 +200,17 @@ class CompanyController extends Controller
             'bank_ifsc'         => 'required',
             'bank_account_no'   => 'required',
             'adcode'            => 'required',
-            'logo'              => $request->hasFile('logo') ? 'image|mimes:jpg,png,jpeg' : 'nullable',
-            'sign'              => $request->hasFile('sign') ? 'image|mimes:jpg,png,jpeg' : 'nullable',
-            'bank_qr'           => $request->hasFile('bank_qr') ? 'image|mimes:jpg,png,jpeg' : 'nullable',
-            'brand_banner.*'    => 'nullable', // validate each file
+            'logo'              => $request->hasFile('logo') ? ['required', new SecureFileUpload(isImageOnly: true)] : ['nullable'],
+            'sign'              => $request->hasFile('sign') ? ['required', new SecureFileUpload(isImageOnly: true)] : ['nullable'],
+            'bank_qr'           => $request->hasFile('bank_qr') ? ['required', new SecureFileUpload(allowPdf: true)] : ['nullable'],
+            'brand_banner'      => ['nullable', 'array'],
+            'brand_banner.*'    => ['nullable', new SecureFileUpload(isImageOnly: true)],
         ]);
 
         $company = Company::findOrFail($id);
 
         // Existing banners are automatically cast to array by the model
         $existingBanners = $company->brand_banner ?? [];
-
 
         // New banners array
         $newBanners = [];
@@ -206,7 +225,7 @@ class CompanyController extends Controller
                         if (Storage::disk('public')->exists($relativePath)) {
                             Storage::disk('public')->delete($relativePath);
                         }
-                    } elseif (File::exists(public_path($oldBanner))) {
+                    } elseif (File::exists(public_path($oldBanner)) && !is_dir(public_path($oldBanner))) {
                          File::delete(public_path($oldBanner));
                     }
                 }
@@ -215,7 +234,11 @@ class CompanyController extends Controller
             // Upload new banners
             foreach ($request->brand_banner as $bannerFile) {
                 if ($bannerFile instanceof \Illuminate\Http\UploadedFile) {
-                    $bannerName = time() . '-' . rand(1000, 9999) . '.' . $bannerFile->getClientOriginalExtension();
+                    [$isValid, $error, $safeExt] = FileSecurityService::validate($bannerFile, allowImages: true, allowPdf: false);
+                    if (!$isValid) {
+                        return redirect()->back()->withErrors(['brand_banner' => $error])->withInput();
+                    }
+                    $bannerName = FileSecurityService::generateSafeFilename($safeExt, 'banner');
                     $path = $bannerFile->storeAs('company_file/inv_banner', $bannerName, 'public');
                     $newBanners[] = 'storage/' . $path;
                 }
@@ -232,12 +255,16 @@ class CompanyController extends Controller
                     if(Storage::disk('public')->exists(str_replace('storage/', '', $company->logo))) {
                         Storage::disk('public')->delete(str_replace('storage/', '', $company->logo));
                     }
-                } elseif (File::exists(public_path($company->logo))) {
+                } elseif (File::exists(public_path($company->logo)) && !is_dir(public_path($company->logo))) {
                     File::delete(public_path($company->logo));
                 }
             }
             $logo = $request->file('logo');
-            $logoName = time() . '.' . $logo->getClientOriginalExtension();
+            [$isValid, $error, $safeExt] = FileSecurityService::validate($logo, allowImages: true, allowPdf: false);
+            if (!$isValid) {
+                return redirect()->back()->withErrors(['logo' => $error])->withInput();
+            }
+            $logoName = FileSecurityService::generateSafeFilename($safeExt, 'logo');
             $path = $logo->storeAs('company_file/logo', $logoName, 'public');
             $company->logo = 'storage/' . $path;
         }
@@ -249,12 +276,16 @@ class CompanyController extends Controller
                      if (Storage::disk('public')->exists(str_replace('storage/', '', $company->sign))) {
                         Storage::disk('public')->delete(str_replace('storage/', '', $company->sign));
                      }
-                } elseif (File::exists(public_path($company->sign))) {
+                } elseif (File::exists(public_path($company->sign)) && !is_dir(public_path($company->sign))) {
                     File::delete(public_path($company->sign));
                 }
             }
             $sign = $request->file('sign');
-            $signName = time() . '.' . $sign->getClientOriginalExtension();
+            [$isValid, $error, $safeExt] = FileSecurityService::validate($sign, allowImages: true, allowPdf: false);
+            if (!$isValid) {
+                return redirect()->back()->withErrors(['sign' => $error])->withInput();
+            }
+            $signName = FileSecurityService::generateSafeFilename($safeExt, 'sign');
             $path = $sign->storeAs('company_file/sign', $signName, 'public');
             $company->sign = 'storage/' . $path;
         }
@@ -264,10 +295,16 @@ class CompanyController extends Controller
             // Delete old file if exists
             if ($company->bank_qr && Storage::disk('public')->exists(str_replace('storage/', '', $company->bank_qr))) {
                 Storage::disk('public')->delete(str_replace('storage/', '', $company->bank_qr));
+            } elseif ($company->bank_qr && File::exists(public_path($company->bank_qr)) && !is_dir(public_path($company->bank_qr))) {
+                File::delete(public_path($company->bank_qr));
             }
 
             $bank_qr = $request->file('bank_qr');
-            $bankQRName = time() . '.' . $bank_qr->getClientOriginalExtension();
+            [$isValid, $error, $safeExt] = FileSecurityService::validate($bank_qr, allowImages: true, allowPdf: true);
+            if (!$isValid) {
+                return redirect()->back()->withErrors(['bank_qr' => $error])->withInput();
+            }
+            $bankQRName = FileSecurityService::generateSafeFilename($safeExt, 'bank_qr');
 
             // Save in storage/app/public/company_file/bank_qr/
             $path = $bank_qr->storeAs('company_file/bank_qr', $bankQRName, 'public');

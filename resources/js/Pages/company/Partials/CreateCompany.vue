@@ -4,6 +4,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import TextInput from "@/Components/TextInput.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import { Link, useForm, usePage } from "@inertiajs/vue3";
+import { validateUploadedFile } from "@/Utils/fileValidation";
 
 const user = usePage().props.auth.user;
 const props = defineProps({
@@ -37,12 +38,81 @@ const form = useForm({
 // handle file input for multiple images
 function handleFileInput(event) {
     const files = Array.from(event.target.files);
-    form.brand_banner.push(...files);
+    let hasError = false;
+    const validFiles = [];
+
+    for (const file of files) {
+        const result = validateUploadedFile(file, { allowImages: true, allowPdf: false });
+        if (!result.valid) {
+            form.errors.brand_banner = result.error;
+            hasError = true;
+            break;
+        }
+        validFiles.push(file);
+    }
+
+    if (hasError) {
+        event.target.value = '';
+        return;
+    }
+
+    delete form.errors.brand_banner;
+    form.brand_banner.push(...validFiles);
+}
+
+function onLogoChange(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const result = validateUploadedFile(file, { allowImages: true, allowPdf: false });
+    if (!result.valid) {
+        form.errors.logo = result.error;
+        event.target.value = '';
+        return;
+    }
+    delete form.errors.logo;
+    form.logo = file;
+}
+
+function onSignChange(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const result = validateUploadedFile(file, { allowImages: true, allowPdf: false });
+    if (!result.valid) {
+        form.errors.sign = result.error;
+        event.target.value = '';
+        return;
+    }
+    delete form.errors.sign;
+    form.sign = file;
+}
+
+function onBankQrChange(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const result = validateUploadedFile(file, { allowImages: true, allowPdf: true });
+    if (!result.valid) {
+        form.errors.bank_qr = result.error;
+        event.target.value = '';
+        return;
+    }
+    delete form.errors.bank_qr;
+    form.bank_qr = file;
 }
 
 function removeBanner(index) {
     form.brand_banner.splice(index, 1);
 }
+
+const isPdf = (fileOrPath) => {
+    if (!fileOrPath) return false;
+    if (fileOrPath instanceof File) {
+        return fileOrPath.type === 'application/pdf' || fileOrPath.name.toLowerCase().endsWith('.pdf');
+    }
+    if (typeof fileOrPath === 'string') {
+        return fileOrPath.toLowerCase().endsWith('.pdf');
+    }
+    return false;
+};
 
 const getImageUrl = (fileOrPath) => {
     if (!fileOrPath) return '';
@@ -60,6 +130,28 @@ const getImageUrl = (fileOrPath) => {
 };
 
 function submit() {
+    // Client-side pre-validation
+    if (form.logo instanceof File) {
+        const check = validateUploadedFile(form.logo, { allowImages: true, allowPdf: false });
+        if (!check.valid) { form.errors.logo = check.error; return; }
+    }
+    if (form.sign instanceof File) {
+        const check = validateUploadedFile(form.sign, { allowImages: true, allowPdf: false });
+        if (!check.valid) { form.errors.sign = check.error; return; }
+    }
+    if (form.bank_qr instanceof File) {
+        const check = validateUploadedFile(form.bank_qr, { allowImages: true, allowPdf: true });
+        if (!check.valid) { form.errors.bank_qr = check.error; return; }
+    }
+    if (Array.isArray(form.brand_banner)) {
+        for (const f of form.brand_banner) {
+            if (f instanceof File) {
+                const check = validateUploadedFile(f, { allowImages: true, allowPdf: false });
+                if (!check.valid) { form.errors.brand_banner = check.error; return; }
+            }
+        }
+    }
+
     const isUpdate = props.editdata && props.editdata.id;
     const routeName = isUpdate ? "company.update" : "company.store";
     const routeParams = isUpdate ? props.editdata.id : undefined;
@@ -223,14 +315,26 @@ function submit() {
                     <InputError class="mt-2" :message="form.errors.adcode" />
                 </div>
                 <div class="mt-3 col-md-6">
-                    <InputLabel for="formFile" value="Company Logo" />
-                    <input class="form-control" id="formFile" type="file" @change="form.logo = $event.target.files[0]" />
+                    <InputLabel for="formFile" value="Company Logo (JPG, PNG, WebP - Max 5MB)" />
+                    <input
+                        class="form-control"
+                        id="formFile"
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                        @change="onLogoChange"
+                    />
                     <InputError class="mt-2" :message="form.errors.logo" />
                     <img v-if="form.logo" :src="getImageUrl(form.logo)" alt="Logo Preview" class="mt-2 img-thumbnail" style="width: 150px;" />
                 </div>
                 <div class="mt-3 col-md-6">
-                    <InputLabel for="sign" value="Signature" />
-                    <input class="form-control" id="sign" type="file" @change="form.sign = $event.target.files[0]" />
+                    <InputLabel for="sign" value="Signature (JPG, PNG, WebP - Max 5MB)" />
+                    <input
+                        class="form-control"
+                        id="sign"
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                        @change="onSignChange"
+                    />
                     <InputError class="mt-2" :message="form.errors.sign" />
                     <progress v-if="form.progress" :value="form.progress.percentage" max="100">
                         {{ form.progress.percentage }}%
@@ -239,18 +343,37 @@ function submit() {
                 </div>
 
                 <div class="mt-3 col-md-6">
-                    <InputLabel for="bank_qr" value="Bank QR" />
-                    <input class="form-control" id="bank_qr" type="file" @change="form.bank_qr = $event.target.files[0]" />
+                    <InputLabel for="bank_qr" value="Bank QR (JPG, PNG, WebP, PDF - Max 5MB)" />
+                    <input
+                        class="form-control"
+                        id="bank_qr"
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf"
+                        @change="onBankQrChange"
+                    />
                     <InputError class="mt-2" :message="form.errors.bank_qr" />
                     <progress v-if="form.progress" :value="form.progress.percentage" max="100">
                         {{ form.progress.percentage }}%
                     </progress>
-                    <img v-if="form.bank_qr" :src="getImageUrl(form.bank_qr)" alt="Bank QR Preview" class="mt-2 img-thumbnail" style="width: 150px;" />
+                    <div v-if="form.bank_qr" class="mt-2">
+                        <div v-if="isPdf(form.bank_qr)" class="p-2 border rounded bg-light text-danger font-semibold d-flex align-items-center gap-2" style="max-width: 250px;">
+                            <span class="badge bg-danger text-white">PDF</span>
+                            <span class="text-xs text-truncate">{{ form.bank_qr.name || 'Bank QR Document' }}</span>
+                        </div>
+                        <img v-else :src="getImageUrl(form.bank_qr)" alt="Bank QR Preview" class="img-thumbnail" style="width: 150px;" />
+                    </div>
                 </div>
 
                 <div class="mt-3 col-md-6">
-                    <InputLabel for="brand_banner" value="Brand Banner" />
-                    <input class="form-control" id="brand_banner" type="file" multiple @change="handleFileInput" />
+                    <InputLabel for="brand_banner" value="Brand Banner (JPG, PNG, WebP - Max 5MB per file)" />
+                    <input
+                        class="form-control"
+                        id="brand_banner"
+                        type="file"
+                        multiple
+                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                        @change="handleFileInput"
+                    />
                     <InputError class="mt-2" :message="form.errors.brand_banner" />
 
                     <!-- Existing Banners (if editing) -->
