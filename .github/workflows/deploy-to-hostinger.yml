@@ -63,7 +63,14 @@ jobs:
             -o BatchMode=yes \
             "${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}" \
             "whoami && pwd"
-
+      - name: Prepare remote build directory
+        run: |
+          ssh -p "${{ secrets.SSH_PORT }}" \
+            -i ~/.ssh/hostinger_deploy_rsa \
+            -o IdentitiesOnly=yes \
+            -o BatchMode=yes \
+            "${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}" \
+            "mkdir -p '${{ secrets.PROJECT_PATH }}/public/build' && ls -ld '${{ secrets.PROJECT_PATH }}/public/build'"
       # Upload only Vite build folder
       - name: Upload built assets (Vite)
         run: |
