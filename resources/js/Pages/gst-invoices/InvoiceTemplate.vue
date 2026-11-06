@@ -33,7 +33,6 @@
                             <div class="address-box details-text">
                                 {{ props.invoice.company.address }}<br>
                                 GSTIN/UIN: <strong>{{ props.invoice.company.gstin }}</strong><br>
-                                Code: {{ props.invoice.company.gstin?.substring(0, 2) }}<br>
                                 E-Mail: {{ props.invoice.company.email }}<br>
                                 Phone: {{ props.invoice.company.mobile }}
                             </div>
@@ -70,7 +69,6 @@
                             <template v-if="!isByCash">
                                 GST/TPIN/TIN NO: <strong>{{ props.invoice.customer.gstin ?? "No ID/TPIN/TIN NO"
                                     }}</strong><br>
-                                Code: {{ props.invoice.customer.gstin?.substring(0, 2) }}<br />
                                 Phone: <strong>{{ props.invoice.customer.mobile }}</strong>
                             </template>
                         </div>
