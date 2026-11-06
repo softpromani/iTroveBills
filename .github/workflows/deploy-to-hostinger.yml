@@ -1,3 +1,4 @@
+
 name: Deploy to Hostinger
 
 on:
@@ -13,7 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # 🔹 Setup PHP & Composer (Required for Ziggy)
+      # Setup PHP & Composer
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -24,7 +25,7 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      # 🔹 Build frontend (Vite)
+      # Build frontend (Vite)
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -35,27 +36,54 @@ jobs:
           npm ci
           npm run build
 
+      # Setup SSH using Hostinger RSA key
       - name: Set up SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
         run: |
           mkdir -p ~/.ssh
-          cat << 'EOF' > ~/.ssh/id_rsa
-          ${{ secrets.SSH_PRIVATE_KEY }}
-          EOF
-          chmod 600 ~/.ssh/id_rsa
-          # Ensure no Windows line endings and a clean file
-          sed -i 's/\r$//' ~/.ssh/id_rsa
-          ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          chmod 700 ~/.ssh
 
-      # 🔹 Upload only Vite build folder
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/hostinger_deploy_rsa
+          chmod 600 ~/.ssh/hostinger_deploy_rsa
+
+          # Remove Windows line endings if present
+          sed -i 's/\r$//' ~/.ssh/hostinger_deploy_rsa
+
+          ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" >> ~/.ssh/known_hosts
+
+      # Verify SSH authentication before deployment
+      - name: Test Hostinger SSH
+        run: |
+          ssh -p "${{ secrets.SSH_PORT }}" \
+            -i ~/.ssh/hostinger_deploy_rsa \
+            -o IdentitiesOnly=yes \
+            -o BatchMode=yes \
+            "${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}" \
+            "whoami && pwd"
+
+      # Upload only Vite build folder
       - name: Upload built assets (Vite)
         run: |
-          rsync -avz -e "ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" public/build/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.PROJECT_PATH }}/public/build/
+          rsync -avz \
+            -e "ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/hostinger_deploy_rsa -o IdentitiesOnly=yes -o BatchMode=yes" \
+            public/build/ \
+            "${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.PROJECT_PATH }}/public/build/"
 
+      # Deploy via SSH
       - name: Deploy via SSH
         run: |
-          ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -p "${{ secrets.SSH_PORT }}" \
+            -i ~/.ssh/hostinger_deploy_rsa \
+            -o IdentitiesOnly=yes \
+            -o BatchMode=yes \
+            "${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}" << 'EOF'
+
             set -e
-            cd ${{ secrets.PROJECT_PATH }}
+
+            cd "${{ secrets.PROJECT_PATH }}"
 
             echo "🛠 Putting app in maintenance mode..."
             php artisan down || true
@@ -65,26 +93,28 @@ jobs:
 
             echo "📦 Checking if composer install is needed..."
             CHANGED=false
+
             if [ ! -d "vendor" ]; then
-              CHANGED=true
+                CHANGED=true
             elif [ composer.lock -nt vendor ]; then
-              CHANGED=true
+                CHANGED=true
             fi
 
             if [ "$CHANGED" = true ]; then
-              echo "📦 Installing composer dependencies..."
-              composer2 install --no-interaction --prefer-dist --optimize-autoloader
+                echo "📦 Installing composer dependencies..."
+                composer2 install --no-interaction --prefer-dist --optimize-autoloader
             else
-              echo "✅ Skipping composer install - no changes."
+                echo "✅ Skipping composer install - no changes."
             fi
 
             echo "🗄 Checking if migrations are pending..."
             OUTDATED=$(php artisan migrate:status | grep 'No' | wc -l)
+
             if [ "$OUTDATED" -gt 0 ]; then
-              echo "🗄 Running pending migrations..."
-              php artisan migrate --force --verbose
+                echo "🗄 Running pending migrations..."
+                php artisan migrate --force --verbose
             else
-              echo "✅ No migrations needed."
+                echo "✅ No migrations needed."
             fi
 
             echo "🧹 Clearing caches..."
@@ -99,4 +129,5 @@ jobs:
             php artisan up
 
             echo "✅ Deployment completed!"
+
           EOF
